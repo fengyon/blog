@@ -1,44 +1,33 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+// import { onMounted } from 'vue'
 import SiteMap from './SiteMap.vue'
 // import NewsLetter from './NewsLetter.vue'
-import { load, data, base } from './sponsors'
-import SponsorsGroup from './SponsorsGroup.vue'
-// NOTE: hide the home video
-// https://github.com/vuejs-translations/docs-zh-cn/issues/177
-// import VueMasteryModal from './VueMasteryModal.vue'
+// import { load, data, base } from './sponsors'
+// import SponsorsGroup from './SponsorsGroup.vue'
 
-onMounted(load)
+// onMounted(load)
 </script>
 
 <template>
   <section id="hero">
-    <img id="uwu" alt="Vue.js Kawaii Logo by @icarusgkx" />
+    <img id="uwu" alt="HookAll Logo by @fengyon" />
     <h1 class="tagline">
-      <span class="accent">渐进式</span>
-      <br />JavaScript 框架
+      <span class="accent">互联网</span>
+      <br />开发文档
     </h1>
     <p class="description">
-      易学易用，性能出色，适用场景丰富的 Web 前端框架。
+      丰富，高质量，开源的 Web 开发文档。
     </p>
     <p class="actions">
       <!-- NOTE: hide the home video -->
       <!-- <VueMasteryModal /> -->
       <a class="get-started" href="/guide/introduction.html">
-        快速上手
-        <svg
-          class="icon"
-          xmlns="http://www.w3.org/2000/svg"
-          width="10"
-          height="10"
-          viewBox="0 0 24 24"
-        >
-          <path
-            d="M13.025 1l-2.847 2.828 6.176 6.176h-16.354v3.992h16.354l-6.176 6.176 2.847 2.828 10.975-11z"
-          />
+        开始御览
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24">
+          <path d="M13.025 1l-2.847 2.828 6.176 6.176h-16.354v3.992h16.354l-6.176 6.176 2.847 2.828 10.975-11z" />
         </svg>
       </a>
-      <a class="setup" href="/guide/quick-start.html">安装</a>
+      <!-- <a class="setup" href="/guide/quick-start.html">安装</a>
       <a class="security" href="https://v2.cn.vuejs.org/eol/" target="_blank">
         获取针对 Vue 2 的安全更新
         <svg
@@ -50,11 +39,11 @@ onMounted(load)
             d="M320 0c-17.7 0-32 14.3-32 32s14.3 32 32 32h82.7L201.4 265.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L448 109.3V192c0 17.7 14.3 32 32 32s32-14.3 32-32V32c0-17.7-14.3-32-32-32H320zM80 32C35.8 32 0 67.8 0 112V432c0 44.2 35.8 80 80 80H400c44.2 0 80-35.8 80-80V320c0-17.7-14.3-32-32-32s-32 14.3-32 32V432c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16V112c0-8.8 7.2-16 16-16H192c17.7 0 32-14.3 32-32s-14.3-32-32-32H80z"
           />
         </svg>
-      </a>
+      </a> -->
     </p>
   </section>
 
-  <section v-if="data && data.platinum_china" id="special-sponsor">
+  <!-- <section v-if="data && data.platinum_china" id="special-sponsor">
     <h3>中国区铂金赞助</h3>
     <div id="special-sponsor-container">
       <template v-for="{ url, url_cn, img, name, height, description } of data.platinum_china"
@@ -77,42 +66,45 @@ onMounted(load)
         </a>
         <span>{{ description }}</span>
       </template>
-    </div>
-  </section>
-  <section v-else id="special-spsr">
-    <span>
-      <a href="/sponsor/#tier-benefits">
-        中国区铂金赞助位现已空缺-立即咨询
-      </a>
-    </span>
-  </section>
+</div>
+</section>
+<section v-else id="special-spsr">
+  <span>
+    <a href="/sponsor/#tier-benefits">
+      中国区铂金赞助位现已空缺-立即咨询
+    </a>
+  </span>
+</section> -->
 
   <section id="highlights" class="vt-box-container">
     <div class="vt-box">
-      <h2>易学易用</h2>
+      <h2>丰富</h2>
       <p>
-        基于标准 HTML、CSS 和 JavaScript 构建，提供容易上手的 API
-        和一流的文档。
+        涵盖javascript、html、css等基础技术，框架、构建、工程化等应用技术，运维、测试等扩展技术。
       </p>
     </div>
     <div class="vt-box">
-      <h2>性能出色</h2>
-      <p>经过编译器优化、完全响应式的渲染系统，几乎不需要手动优化。</p>
+      <h2>高质量</h2>
+      <p>聚焦技术核心，追求通俗易懂，外链技术细节</p>
     </div>
     <div class="vt-box">
-      <h2>灵活多变</h2>
+      <h2>开源</h2>
       <p>
-        丰富的、可渐进式集成的生态系统，可以根据应用规模在库和框架间切换自如。
+        网站源于开源，所有内容采用知识共享 4.0 许可证，与维基百科相同。
+        网站的源代码托管于
+        <a href="https://github.com/fengyon/blog" target="_blank">
+          Github
+        </a>
       </p>
     </div>
   </section>
 
-  <section id="spsrs">
+  <!-- <section id="spsrs">
     <h2>Platinum Sponsors</h2>
     <SponsorsGroup tier="platinum" placement="landing" />
     <h2>Gold Sponsors</h2>
     <SponsorsGroup tier="gold" placement="landing" />
-  </section>
+  </section> -->
 
   <SiteMap />
   <!-- <NewsLetter /> -->
@@ -162,6 +154,10 @@ html:not(.dark) .accent,
   font-weight: 500;
   border-radius: 8px;
   transition: background-color 0.5s, color 0.5s;
+}
+.vt-box a {
+  color: #42d392;
+  margin-left: 4px;
 }
 
 .actions .security {
@@ -356,6 +352,7 @@ html:not(.dark) .accent,
     font-size: 64px;
     letter-spacing: -0.5px;
   }
+
   .description {
     font-size: 18px;
     margin-bottom: 48px;
@@ -367,6 +364,7 @@ html:not(.dark) .accent,
     font-size: 48px;
     letter-spacing: -0.5px;
   }
+
   .actions .security {
     margin-top: 18px;
   }
@@ -376,30 +374,38 @@ html:not(.dark) .accent,
   #hero {
     padding: 56px 32px;
   }
+
   .description {
     font-size: 16px;
     margin: 18px 0 30px;
   }
+
   #special-spsr {
     flex-direction: column;
     height: auto;
   }
+
   #special-spsr img {
     height: 36px;
     margin: 8px 0;
   }
+
   #special-spsr span {
     text-align: center !important;
   }
+
   #highlights h3 {
     margin-bottom: 0.6em;
   }
+
   #highlights .vt-box {
     padding: 20px 36px;
   }
+
   .actions a {
     margin: 18px 0;
   }
+
   .actions .security {
     margin-top: 0;
   }

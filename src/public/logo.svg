@@ -1,8 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-  <style>
-    .st0 { fill: #42B883; }
-    .st1 { fill: #35495E; }
-  </style>
-  <path class="st0" d="M78.8,10L64,35.4L49.2,10H0l64,110l64-110C128,10,78.8,10,78.8,10z" />
-  <path class="st1" d="M78.8,10L64,35.4L49.2,10H25.6L64,76l38.4-66H78.8z" />
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <line x1="20" y1="20" x2="180" y2="20" stroke="#42d392" stroke-width="20" stroke-linecap="round"/>
+  <line x1="20" y1="92" x2="96" y2="92" stroke="#2d8cff" stroke-width="5" stroke-linecap="round"/>
+  <line x1="20" y1="184" x2="143" y2="184" stroke="#2d8cff" stroke-width="5" stroke-linecap="round"/>
 </svg>

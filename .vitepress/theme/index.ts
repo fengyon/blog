@@ -1,18 +1,19 @@
 import './styles/index.css'
 import { h, App } from 'vue'
 import { VPTheme } from '@vue/theme'
-import PreferenceSwitch from './components/PreferenceSwitch.vue'
-import SecurityUpdateBtn from './components/SecurityUpdateBtn.vue'
+// import PreferenceSwitch from './components/PreferenceSwitch.vue'
+// import SecurityUpdateBtn from './components/SecurityUpdateBtn.vue'
 import {
   preferComposition,
   preferSFC,
   filterHeadersByPreference
 } from './components/preferences'
-import SponsorsAside from './components/SponsorsAside.vue'
+// import SponsorsAside from './components/SponsorsAside.vue'
 // import VueSchoolLink from './components/VueSchoolLink.vue'
+import NavbarTitle from './components/NavbarTitle.vue'
 import ScrimbaLink from './components/ScrimbaLink.vue'
-import WwAds from './components/WwAds.vue'
-import Banner from './components/Banner.vue'
+// import WwAds from './components/WwAds.vue'
+// import Banner from './components/Banner.vue'
 // import TextAd from './components/TextAd.vue'
 
 import 'vitepress/dist/client/theme-default/styles/components/vp-code-group.css'
@@ -22,11 +23,12 @@ export default Object.assign({}, VPTheme, {
   Layout: () => {
     // @ts-ignore
     return h(VPTheme.Layout, null, {
+      'navbar-title': () => h(NavbarTitle)
       // banner: () => h(Banner),
-      'sidebar-top': () => h(PreferenceSwitch),
-      'sidebar-bottom': () => h(SecurityUpdateBtn),
-      'aside-mid': () => h(SponsorsAside),
-      'aside-bottom': () => h(WwAds)
+      // 'sidebar-top': () => h(PreferenceSwitch),
+      // 'sidebar-bottom': () => h(SecurityUpdateBtn),
+      // 'aside-mid': () => h(SponsorsAside),
+      // 'aside-bottom': () => h(WwAds)
     })
   },
   enhanceApp({ app }: { app: App }) {

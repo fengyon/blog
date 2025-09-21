@@ -1,12 +1,19 @@
 import fs from 'fs'
 import path from 'path'
-import { defineConfigWithTheme, type HeadConfig, type Plugin } from 'vitepress'
+import {
+  defineConfigWithTheme,
+  type HeadConfig,
+  type Plugin
+} from 'vitepress'
 import type { Config as ThemeConfig } from '@vue/theme'
 import llmstxt from 'vitepress-plugin-llms'
 import baseConfig from '@vue/theme/config'
 import { headerPlugin } from './headerMdPlugin'
 // import { textAdPlugin } from './textAdMdPlugin'
-import { groupIconMdPlugin,groupIconVitePlugin } from 'vitepress-plugin-group-icons'
+import {
+  groupIconMdPlugin,
+  groupIconVitePlugin
+} from 'vitepress-plugin-group-icons'
 
 const nav: ThemeConfig['nav'] = [
   {
@@ -497,7 +504,7 @@ export const sidebar: ThemeConfig['sidebar'] = {
         {
           text: '带过渡动效的列表',
           link: '/examples/#list-transition'
-        },
+        }
       ]
     },
     {
@@ -613,62 +620,38 @@ export default defineConfigWithTheme<ThemeConfig>({
   extends: baseConfig,
 
   sitemap: {
-    hostname: 'https://cn.vuejs.org'
+    hostname: 'https://fengyon.github.io/'
   },
 
   lang: 'zh-CN',
-  title: 'Vue.js',
-  description: 'Vue.js - 渐进式的 JavaScript 框架',
+  title: 'HookAll',
+  description: 'HookAll - 互联网开发文档',
   srcDir: 'src',
   srcExclude: ['tutorial/**/description.md'],
 
   head: [
     ['meta', { name: 'theme-color', content: '#3c8772' }],
-    ['meta', { property: 'og:url', content: 'https://vuejs.org/' }],
+    [
+      'meta',
+      { property: 'og:url', content: 'https://fengyon.github.io/' }
+    ],
     ['meta', { property: 'og:type', content: 'website' }],
-    ['meta', { property: 'og:title', content: 'Vue.js' }],
+    ['meta', { property: 'og:title', content: 'HookAll' }],
     [
       'meta',
       {
         property: 'og:description',
-        content: 'Vue.js - 渐进式的 JavaScript 框架'
+        content: 'HookAll - 互联网开发文档'
       }
     ],
     [
       'meta',
       {
         property: 'og:image',
-        content: 'https://vuejs.org/images/logo.png'
+        content: 'https://fengyon.github.io/logo.svg'
       }
-    ],
-    ['meta', { name: 'twitter:site', content: '@vuejs' }],
-    ['meta', { name: 'twitter:card', content: 'summary' }],
-    [
-      'link',
-      {
-        rel: 'preconnect',
-        href: 'https://automation.vuejs.org'
-      }
-    ],
-    inlineScript('restorePreference.js'),
-    inlineScript('uwu.js'),
-    [
-      'script',
-      {
-        src: 'https://cdn.usefathom.com/script.js',
-        'data-site': 'ZPMMDSYA',
-        'data-spa': 'auto',
-        defer: ''
-      }
-    ],
-    [
-      'script',
-      {
-        src: 'https://vueschool.io/banner.js?affiliate=vuejs&type=top',
-        async: 'true'
-      }
-    ],
-    inlineScript('perfops.js')
+    ]
+    // inlineScript('restorePreference.js'),
   ],
 
   themeConfig: {
@@ -676,125 +659,60 @@ export default defineConfigWithTheme<ThemeConfig>({
     sidebar,
     i18n,
 
-    localeLinks: [
-      {
-        link: 'https://vuejs.org',
-        text: 'English',
-        repo: 'https://github.com/vuejs/docs'
-      },
-      {
-        link: 'https://ja.vuejs.org',
-        text: '日本語',
-        repo: 'https://github.com/vuejs-translations/docs-ja'
-      },
-      {
-        link: 'https://ua.vuejs.org',
-        text: 'Українська',
-        repo: 'https://github.com/vuejs-translations/docs-uk'
-      },
-      {
-        link: 'https://fr.vuejs.org',
-        text: 'Français',
-        repo: 'https://github.com/vuejs-translations/docs-fr'
-      },
-      {
-        link: 'https://ko.vuejs.org',
-        text: '한국어',
-        repo: 'https://github.com/vuejs-translations/docs-ko'
-      },
-      {
-        link: 'https://pt.vuejs.org',
-        text: 'Português',
-        repo: 'https://github.com/vuejs-translations/docs-pt'
-      },
-      {
-        link: 'https://bn.vuejs.org',
-        text: 'বাংলা',
-        repo: 'https://github.com/vuejs-translations/docs-bn'
-      },
-      {
-        link: 'https://it.vuejs.org',
-        text: 'Italiano',
-        repo: 'https://github.com/vuejs-translations/docs-it'
-      },
-      {
-        link: 'https://fa.vuejs.org',
-        text: 'فارسی',
-        repo: 'https://github.com/vuejs-translations/docs-fa'
-      },
-      {
-        link: 'https://ru.vuejs.org',
-        text: 'Русский',
-        repo: 'https://github.com/vuejs-translations/docs-ru'
-      },
-      {
-        link: 'https://cs.vuejs.org',
-        text: 'Čeština',
-        repo: 'https://github.com/vuejs-translations/docs-cs'
-      },
-      {
-        link: 'https://zh-hk.vuejs.org',
-        text: '繁體中文',
-        repo: 'https://github.com/vuejs-translations/docs-zh-hk'
-      },
-      {
-        link: 'https://pl.vuejs.org',
-        text: 'Polski',
-        repo: 'https://github.com/vuejs-translations/docs-pl',
-      },
-      {
-        link: '/translations/',
-        text: '帮助我们翻译！',
-        isTranslationsDesc: true
-      }
-    ],
+    // localeLinks: [
+    //   {
+    //     link: 'https://vuejs.org',
+    //     text: 'English',
+    //     repo: 'https://github.com/vuejs/docs'
+    //   },
+    // ],
 
-    algolia: {
-      indexName: 'vuejs_cn2',
-      appId: 'UURH1MHAF7',
-      apiKey: 'c23eb8e7895f42daeaf2bf6f63eb4bf6',
-      searchParameters: {
-        facetFilters: ['version:v3']
-      },
-      placeholder: '搜索文档',
-      translations: {
-        button: {
-          buttonText: '搜索'
-        },
-        modal: {
-          searchBox: {
-            resetButtonTitle: '清除查询条件',
-            resetButtonAriaLabel: '清除查询条件',
-            cancelButtonText: '取消',
-            cancelButtonAriaLabel: '取消'
-          },
-          startScreen: {
-            recentSearchesTitle: '搜索历史',
-            noRecentSearchesText: '没有搜索历史',
-            saveRecentSearchButtonTitle: '保存到搜索历史',
-            removeRecentSearchButtonTitle: '从搜索历史中移除',
-            favoriteSearchesTitle: '收藏',
-            removeFavoriteSearchButtonTitle: '从收藏中移除'
-          },
-          errorScreen: {
-            titleText: '无法获取结果',
-            helpText: '你可能需要检查你的网络连接'
-          },
-          footer: {
-            selectText: '选择',
-            navigateText: '切换',
-            closeText: '关闭',
-            searchByText: '搜索供应商'
-          },
-          noResultsScreen: {
-            noResultsText: '无法找到相关结果',
-            suggestedQueryText: '你可以尝试查询',
-            reportMissingResultsText: '你认为这个查询应该有结果？',
-            reportMissingResultsLinkText: '向我们反馈'
-          }
-        }
-      }
-    },
+    // algolia: {
+    //   indexName: 'vuejs_cn2',
+    //   appId: 'UURH1MHAF7',
+    //   apiKey: 'c23eb8e7895f42daeaf2bf6f63eb4bf6',
+    //   searchParameters: {
+    //     facetFilters: ['version:v3']
+    //   },
+    //   placeholder: '搜索文档',
+    //   translations: {
+    //     button: {
+    //       buttonText: '搜索'
+    //     },
+    //     modal: {
+    //       searchBox: {
+    //         resetButtonTitle: '清除查询条件',
+    //         resetButtonAriaLabel: '清除查询条件',
+    //         cancelButtonText: '取消',
+    //         cancelButtonAriaLabel: '取消'
+    //       },
+    //       startScreen: {
+    //         recentSearchesTitle: '搜索历史',
+    //         noRecentSearchesText: '没有搜索历史',
+    //         saveRecentSearchButtonTitle: '保存到搜索历史',
+    //         removeRecentSearchButtonTitle: '从搜索历史中移除',
+    //         favoriteSearchesTitle: '收藏',
+    //         removeFavoriteSearchButtonTitle: '从收藏中移除'
+    //       },
+    //       errorScreen: {
+    //         titleText: '无法获取结果',
+    //         helpText: '你可能需要检查你的网络连接'
+    //       },
+    //       footer: {
+    //         selectText: '选择',
+    //         navigateText: '切换',
+    //         closeText: '关闭',
+    //         searchByText: '搜索供应商'
+    //       },
+    //       noResultsScreen: {
+    //         noResultsText: '无法找到相关结果',
+    //         suggestedQueryText: '你可以尝试查询',
+    //         reportMissingResultsText: '你认为这个查询应该有结果？',
+    //         reportMissingResultsLinkText: '向我们反馈'
+    //       }
+    //     }
+    //   }
+    // },
 
     // carbonAds: {
     //   code: 'CEBDT27Y',
@@ -802,31 +720,27 @@ export default defineConfigWithTheme<ThemeConfig>({
     // },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/vuejs/' },
-      { icon: 'twitter', link: 'https://twitter.com/vuejs' },
-      { icon: 'discord', link: 'https://discord.com/invite/vue' }
+      { icon: 'github', link: 'https://github.com/fengyon/blog' }
     ],
 
     editLink: {
-      repo: 'vuejs-translations/docs-zh-cn',
+      repo: 'fengyon/blog',
       text: '在 GitHub 上编辑此页'
     },
 
     footer: {
       license: {
         text: '版权声明',
-        link: 'https://github.com/vuejs-translations/docs-zh-cn#%E7%89%88%E6%9D%83%E5%A3%B0%E6%98%8E'
+        link: 'https://github.com/fengyon/blog/LICENSE'
       },
-      copyright:
-        '本中文文档采用 知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议  (CC BY-NC-SA 4.0) 进行许可。'
+      copyright: '本文档采用 知识共享 4.0 许可证。'
     }
   },
 
   markdown: {
     theme: 'github-dark',
     config(md) {
-      md.use(headerPlugin)
-        .use(groupIconMdPlugin)
+      md.use(headerPlugin).use(groupIconMdPlugin)
       // .use(textAdPlugin)
     }
   },
@@ -871,9 +785,9 @@ export default defineConfigWithTheme<ThemeConfig>({
           'index.md'
         ],
         customLLMsTxtTemplate: `\
-# Vue.js
+# HookAll
 
-Vue.js - The Progressive JavaScript Framework
+HookAll - 互联网开发文档
 
 ## Table of Contents
 

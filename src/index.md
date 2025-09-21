@@ -1,6 +1,6 @@
 ---
 page: true
-title: Vue.js - 渐进式 JavaScript 框架
+title: HookAll - 互联网开发文档
 ---
 
 <script setup>
