@@ -3,7 +3,7 @@ import path from 'path'
 import {
   defineConfigWithTheme,
   type HeadConfig,
-  type Plugin
+  type Plugin,
 } from 'vitepress'
 import type { Config as ThemeConfig } from '@vue/theme'
 import llmstxt from 'vitepress-plugin-llms'
@@ -12,563 +12,443 @@ import { headerPlugin } from './headerMdPlugin'
 // import { textAdPlugin } from './textAdMdPlugin'
 import {
   groupIconMdPlugin,
-  groupIconVitePlugin
+  groupIconVitePlugin,
 } from 'vitepress-plugin-group-icons'
 
 const nav: ThemeConfig['nav'] = [
   {
-    text: '文档',
-    activeMatch: `^/(guide|style-guide|cookbook|examples)/`,
+    text: '基础',
+    activeMatch: `^/basic/`,
     items: [
-      { text: '深度指南', link: '/guide/introduction' },
-      { text: '互动教程', link: '/tutorial/' },
-      { text: '示例', link: '/examples/' },
-      { text: '快速上手', link: '/guide/quick-start' },
-      // { text: '风格指南', link: '/style-guide/' },
-      { text: '术语表', link: '/glossary/' },
-      { text: '错误码参照表', link: '/error-reference/' },
-      {
-        text: 'Vue 2 文档',
-        link: 'https://v2.cn.vuejs.org'
-      },
-      {
-        text: '从 Vue 2 迁移',
-        link: 'https://v3-migration.vuejs.org/'
-      }
-    ]
+      { text: 'html', link: '/basic/html/intro' },
+      { text: 'javascript', link: '/basic/javascript/basic/introduction' },
+      { text: 'es6', link: '/basic/es6/intro' },
+      { text: 'typescript', link: '/basic/typescript/intro' },
+      { text: 'webapi', link: '/basic/webapi/canvas' },
+    ],
   },
-  {
-    text: 'API',
-    activeMatch: `^/api/`,
-    link: '/api/'
-  },
-  {
-    text: '演练场',
-    link: 'https://play.vuejs.org'
-  },
-  {
-    text: '生态系统',
-    activeMatch: `^/ecosystem/`,
-    items: [
-      {
-        text: '资源',
-        items: [
-          { text: '合作伙伴', link: '/partners/' },
-          { text: '开发者', link: '/developers/' },
-          { text: '主题', link: '/ecosystem/themes' },
-          { text: 'UI 组件', link: 'https://ui-libs.vercel.app/' },
-          {
-            text: '证书',
-            link: 'https://certificates.dev/vuejs/?ref=vuejs-nav'
-          },
-          { text: '找工作', link: 'https://vuejobs.com/?ref=vuejs' },
-          { text: 'T-Shirt 商店', link: 'https://vue.threadless.com/' }
-        ]
-      },
-      {
-        text: '官方库',
-        items: [
-          { text: 'Vue Router', link: 'https://router.vuejs.org/zh/' },
-          { text: 'Pinia', link: 'https://pinia.vuejs.org/zh/' },
-          { text: '工具链指南', link: '/guide/scaling-up/tooling.html' }
-        ]
-      },
-      {
-        text: '视频课程',
-        items: [
-          {
-            text: 'Vue Mastery',
-            link: 'https://www.vuemastery.com/courses/'
-          },
-          {
-            text: 'Vue School',
-            link: 'https://vueschool.io/?friend=vuejs&utm_source=Vuejs.org&utm_medium=Link&utm_content=Navbar%20Dropdown'
-          }
-        ]
-      },
-      {
-        text: '帮助',
-        items: [
-          {
-            text: 'Discord 聊天室',
-            link: 'https://discord.com/invite/HBherRA'
-          },
-          {
-            text: 'GitHub 论坛',
-            link: 'https://github.com/vuejs/core/discussions'
-          },
-          { text: 'DEV Community', link: 'https://dev.to/t/vue' }
-        ]
-      },
-      {
-        text: '动态',
-        items: [
-          { text: '博客', link: 'https://blog.vuejs.org/' },
-          { text: 'Twitter', link: 'https://twitter.com/vuejs' },
-          { text: '活动', link: 'https://events.vuejs.org/' },
-          { text: '新闻简报', link: '/ecosystem/newsletters' }
-        ]
-      }
-    ]
-  },
-  {
-    text: '关于',
-    activeMatch: `^/about/`,
-    items: [
-      { text: '常见问题', link: '/about/faq' },
-      { text: '团队', link: '/about/team' },
-      { text: '版本发布', link: '/about/releases' },
-      {
-        text: '社区指南',
-        link: '/about/community-guide'
-      },
-      { text: '行为规范', link: '/about/coc' },
-      { text: '隐私政策', link: '/about/privacy' },
-      {
-        text: '纪录片',
-        link: 'https://www.youtube.com/watch?v=OrxmtDw4pVI'
-      }
-    ]
-  },
-  {
-    text: '赞助',
-    link: '/sponsor/'
-  },
-  {
-    text: '专家',
-    badge: { text: '新' },
-    activeMatch: `^/(partners|developers)/`,
-    items: [
-      { text: '合作伙伴', link: '/partners/' },
-      { text: '开发者', link: '/developers/', badge: { text: '新' } }
-    ]
-  }
+  // {
+  //   text: '专家',
+  //   badge: { text: '新' },
+  //   activeMatch: `^/(partners|developers)/`,
+  //   items: [
+  //     { text: '合作伙伴', link: '/partners/' },
+  //     { text: '开发者', link: '/developers/', badge: { text: '新' } }
+  //   ]
+  // }
 ]
 
 export const sidebar: ThemeConfig['sidebar'] = {
-  '/guide/': [
+  '/basic/': [
     {
-      text: '开始',
+      text: 'html',
       items: [
-        { text: '简介', link: '/guide/introduction' },
         {
-          text: '快速上手',
-          link: '/guide/quick-start'
-        }
-      ]
+          text: 'HTML 语言简介',
+          link: 'basic/html/intro',
+        },
+        {
+          text: 'URL 简介',
+          link: 'basic/html/url',
+        },
+        {
+          text: '网页元素的属性',
+          link: 'basic/html/attribute',
+        },
+        {
+          text: 'HTML 字符编码',
+          link: 'basic/html/encode',
+        },
+        {
+          text: '网页的语义结构',
+          link: 'basic/html/semantic',
+        },
+        {
+          text: '文本标签',
+          link: 'basic/html/text',
+        },
+        {
+          text: '列表标签',
+          link: 'basic/html/list',
+        },
+        {
+          text: '图像标签',
+          link: 'basic/html/image',
+        },
+        {
+          text: '<a>',
+          link: 'basic/html/a',
+        },
+        {
+          text: '<link>',
+          link: 'basic/html/link',
+        },
+        {
+          text: '<script>，<noscript>',
+          link: 'basic/html/script',
+        },
+        {
+          text: '多媒体标签',
+          link: 'basic/html/multimedia',
+        },
+        {
+          text: 'iframe',
+          link: 'basic/html/iframe',
+        },
+        {
+          text: '表格标签',
+          link: 'basic/html/table',
+        },
+        {
+          text: '表单标签',
+          link: 'basic/html/form',
+        },
+        {
+          text: '移动设备网页设计',
+          link: 'basic/html/mobile',
+        },
+        {
+          text: '其他标签',
+          link: 'basic/html/elements',
+        },
+      ],
     },
     {
-      text: '基础',
+      text: 'javascript',
       items: [
+        { text: '导论', link: 'basic/javascript/basic/introduction' },
         {
-          text: '创建一个应用',
-          link: '/guide/essentials/application'
+          text: 'JavaScript 语言的历史',
+          link: 'basic/javascript/basic/history',
         },
         {
-          text: '模板语法',
-          link: '/guide/essentials/template-syntax'
+          text: 'JavaScript 的基本语法',
+          link: 'basic/javascript/basic/grammar',
+        },
+        { text: '数据类型概述', link: 'basic/javascript/types/general' },
+        {
+          text: 'null, undefined 和布尔值',
+          link: 'basic/javascript/types/null-undefined-boolean',
+        },
+        { text: '数值', link: 'basic/javascript/types/number' },
+        { text: '字符串', link: 'basic/javascript/types/string' },
+        { text: '对象', link: 'basic/javascript/types/object' },
+        { text: '函数', link: 'basic/javascript/types/function' },
+        { text: '数组', link: 'basic/javascript/types/array' },
+        {
+          text: '算术运算符',
+          link: 'basic/javascript/operators/arithmetic',
         },
         {
-          text: '响应式基础',
-          link: '/guide/essentials/reactivity-fundamentals'
+          text: '比较运算符',
+          link: 'basic/javascript/operators/comparison',
+        },
+        { text: '布尔运算符', link: 'basic/javascript/operators/boolean' },
+        { text: '二进制位运算符', link: 'basic/javascript/operators/bit' },
+        {
+          text: '其他运算符，运算顺序',
+          link: 'basic/javascript/operators/priority',
         },
         {
-          text: '计算属性',
-          link: '/guide/essentials/computed'
+          text: '数据类型的转换',
+          link: 'basic/javascript/features/conversion',
+        },
+        { text: '错误处理机制', link: 'basic/javascript/features/error' },
+        { text: '编程风格', link: 'basic/javascript/features/style' },
+        {
+          text: 'console 对象与控制台',
+          link: 'basic/javascript/features/console',
+        },
+        { text: 'Object 对象', link: 'basic/javascript/stdlib/object' },
+        {
+          text: '属性描述对象',
+          link: 'basic/javascript/stdlib/attributes',
+        },
+        { text: 'Array 对象', link: 'basic/javascript/stdlib/array' },
+        { text: '包装对象', link: 'basic/javascript/stdlib/wrapper' },
+        { text: 'Boolean 对象', link: 'basic/javascript/stdlib/boolean' },
+        { text: 'Number 对象', link: 'basic/javascript/stdlib/number' },
+        { text: 'String 对象', link: 'basic/javascript/stdlib/string' },
+        { text: 'Math 对象', link: 'basic/javascript/stdlib/math' },
+        { text: 'Date 对象', link: 'basic/javascript/stdlib/date' },
+        { text: 'RegExp 对象', link: 'basic/javascript/stdlib/regexp' },
+        { text: 'JSON 对象', link: 'basic/javascript/stdlib/json' },
+        { text: '实例对象与 new 命令', link: 'basic/javascript/oop/new' },
+        { text: 'this 关键字', link: 'basic/javascript/oop/this' },
+        { text: '对象的继承', link: 'basic/javascript/oop/prototype' },
+        {
+          text: 'Object 对象的相关方法',
+          link: 'basic/javascript/oop/object',
+        },
+        { text: '严格模式', link: 'basic/javascript/oop/strict' },
+        { text: '异步操作概述', link: 'basic/javascript/async/general' },
+        { text: '定时器', link: 'basic/javascript/async/timer' },
+        { text: 'Promise 对象', link: 'basic/javascript/async/promise' },
+        { text: 'DOM 概述', link: 'basic/javascript/dom/general' },
+        { text: 'Node 接口', link: 'basic/javascript/dom/node' },
+        {
+          text: 'NodeList 接口，HTMLCollection 接口',
+          link: 'basic/javascript/dom/nodelist',
         },
         {
-          text: '类与样式绑定',
-          link: '/guide/essentials/class-and-style'
+          text: 'ParentNode 接口，ChildNode 接口',
+          link: 'basic/javascript/dom/parentnode',
+        },
+        { text: 'Document 节点', link: 'basic/javascript/dom/document' },
+        { text: 'Element 节点', link: 'basic/javascript/dom/element' },
+        { text: '属性的操作', link: 'basic/javascript/dom/attributes' },
+        {
+          text: 'Text 节点和 DocumentFragment 节点',
+          link: 'basic/javascript/dom/text',
+        },
+        { text: 'CSS 操作', link: 'basic/javascript/dom/css' },
+        {
+          text: 'Mutation Observer API',
+          link: 'basic/javascript/dom/mutationobserver',
         },
         {
-          text: '条件渲染',
-          link: '/guide/essentials/conditional'
+          text: 'EventTarget 接口',
+          link: 'basic/javascript/events/eventtarget',
         },
-        { text: '列表渲染', link: '/guide/essentials/list' },
+        { text: '事件模型', link: 'basic/javascript/events/model' },
+        { text: 'Event 对象', link: 'basic/javascript/events/event' },
+        { text: '鼠标事件', link: 'basic/javascript/events/mouse' },
+        { text: '键盘事件', link: 'basic/javascript/events/keyboard' },
+        { text: '进度事件', link: 'basic/javascript/events/progress' },
+        { text: '表单事件', link: 'basic/javascript/events/form' },
+        { text: '触摸事件', link: 'basic/javascript/events/touch' },
+        { text: '拖拉事件', link: 'basic/javascript/events/drag' },
+        { text: '其他常见事件', link: 'basic/javascript/events/common' },
         {
-          text: '事件处理',
-          link: '/guide/essentials/event-handling'
+          text: 'GlobalEventHandlers 接口',
+          link: 'basic/javascript/events/globaleventhandlers',
         },
-        { text: '表单输入绑定', link: '/guide/essentials/forms' },
-        { text: '侦听器', link: '/guide/essentials/watchers' },
-        { text: '模板引用', link: '/guide/essentials/template-refs' },
+        { text: '浏览器环境概述', link: 'basic/javascript/bom/engine' },
+        { text: 'window 对象', link: 'basic/javascript/bom/window' },
         {
-          text: '组件基础',
-          link: '/guide/essentials/component-basics'
+          text: 'Navigator 对象，Screen 对象。',
+          link: 'basic/javascript/bom/navigator',
+        },
+        { text: 'Cookie', link: 'basic/javascript/bom/cookie' },
+        {
+          text: 'XMLHttpRequest 对象',
+          link: 'basic/javascript/bom/xmlhttprequest',
+        },
+        { text: '同源限制', link: 'basic/javascript/bom/same-origin' },
+        { text: 'CORS 通信', link: 'basic/javascript/bom/cors' },
+        { text: 'Storage 接口', link: 'basic/javascript/bom/storage' },
+        { text: 'History 对象', link: 'basic/javascript/bom/history' },
+        {
+          text: 'Location 对象，URL 对象，URLSearchParams 对象',
+          link: 'basic/javascript/bom/location',
         },
         {
-          text: '生命周期',
-          link: '/guide/essentials/lifecycle'
-        }
-      ]
+          text: 'ArrayBuffer 对象，Blob 对象',
+          link: 'basic/javascript/bom/arraybuffer',
+        },
+        {
+          text: 'File 对象，FileList 对象，FileReader 对象',
+          link: 'basic/javascript/bom/file',
+        },
+        { text: '表单，FormData 对象', link: 'basic/javascript/bom/form' },
+        { text: 'IndexedDB API', link: 'basic/javascript/bom/indexeddb' },
+        { text: 'Web Worker', link: 'basic/javascript/bom/webworker' },
+        { text: '<a> 元素', link: 'basic/javascript/elements/a' },
+        { text: '<img> 元素', link: 'basic/javascript/elements/image' },
+        { text: '<form> 元素', link: 'basic/javascript/elements/form' },
+        { text: '<input> 元素', link: 'basic/javascript/elements/input' },
+        {
+          text: '<button> 元素',
+          link: 'basic/javascript/elements/button',
+        },
+        {
+          text: '<option> 元素',
+          link: 'basic/javascript/elements/option',
+        },
+        {
+          text: '<video>，<audio>',
+          link: 'basic/javascript/elements/video',
+        },
+      ],
     },
     {
-      text: '深入组件',
+      text: 'es6',
       items: [
+        { text: 'ECMAScript 6 简介', link: 'basic/es6/intro' },
+        { text: 'let 和 const 命令', link: 'basic/es6/let' },
+        { text: '变量的解构赋值', link: 'basic/es6/destructuring' },
+        { text: '字符串的扩展', link: 'basic/es6/string' },
+        { text: '字符串的新增方法', link: 'basic/es6/string-methods' },
+        { text: '正则的扩展', link: 'basic/es6/regex' },
+        { text: '数值的扩展', link: 'basic/es6/number' },
+        { text: '函数的扩展', link: 'basic/es6/function' },
+        { text: '数组的扩展', link: 'basic/es6/array' },
+        { text: '对象的扩展', link: 'basic/es6/object' },
+        { text: '对象的新增方法', link: 'basic/es6/object-methods' },
+        { text: '运算符的扩展', link: 'basic/es6/operator' },
+        { text: 'Symbol', link: 'basic/es6/symbol' },
+        { text: 'Set 和 Map 数据结构', link: 'basic/es6/set-map' },
+        { text: 'Proxy', link: 'basic/es6/proxy' },
+        { text: 'Reflect', link: 'basic/es6/reflect' },
+        { text: 'Promise 对象', link: 'basic/es6/promise' },
+        { text: 'Iterator 和 for...of 循环', link: 'basic/es6/iterator' },
+        { text: 'Generator 函数的语法', link: 'basic/es6/generator' },
         {
-          text: '注册',
-          link: '/guide/components/registration'
+          text: 'Generator 函数的异步应用',
+          link: 'basic/es6/generator-async',
         },
-        { text: 'Props', link: '/guide/components/props' },
-        { text: '事件', link: '/guide/components/events' },
-        { text: '组件 v-model', link: '/guide/components/v-model' },
-        {
-          text: '透传 Attributes',
-          link: '/guide/components/attrs'
-        },
-        { text: '插槽', link: '/guide/components/slots' },
-        {
-          text: '依赖注入',
-          link: '/guide/components/provide-inject'
-        },
-        {
-          text: '异步组件',
-          link: '/guide/components/async'
-        }
-      ]
+        { text: 'async 函数', link: 'basic/es6/async' },
+        { text: '函数式编程', link: 'basic/es6/fp' },
+        { text: 'Class 的基本语法', link: 'basic/es6/class' },
+        { text: 'Class 的继承', link: 'basic/es6/class-extends' },
+        { text: 'Mixin', link: 'basic/es6/mixin' },
+        { text: 'Module 的语法', link: 'basic/es6/module' },
+        { text: 'Module 的加载实现', link: 'basic/es6/module-loader' },
+        { text: '编程风格', link: 'basic/es6/style' },
+        { text: '读懂 ECMAScript 规格', link: 'basic/es6/spec' },
+        { text: '异步遍历器', link: 'basic/es6/async-iterator' },
+        { text: 'ArrayBuffer', link: 'basic/es6/arraybuffer' },
+        { text: '最新提案', link: 'basic/es6/proposals' },
+        { text: 'SIMD', link: 'basic/es6/simd' },
+        { text: '参考链接', link: 'basic/es6/reference' },
+        { text: '装饰器', link: 'basic/es6/decorator' },
+      ],
     },
     {
-      text: '逻辑复用',
+      text: 'typescript',
       items: [
+        { link: 'basic/typescript/intro', text: 'TypeScript 语言简介' },
+        { text: 'TypeScript 基本用法', link: 'basic/typescript/basic' },
         {
-          text: '组合式函数',
-          link: '/guide/reusability/composables'
+          text: 'any 类型，unknown 类型，never 类型',
+          link: 'basic/typescript/any',
+        },
+        { text: 'TypeScript 的类型系统', link: 'basic/typescript/types' },
+        { link: 'basic/typescript/array', text: 'TypeScript 的数组类型' },
+        { text: 'TypeScript 的元组类型', link: 'basic/typescript/tuple' },
+        {
+          text: 'TypeScript 的 symbol 类型',
+          link: 'basic/typescript/symbol',
         },
         {
-          text: '自定义指令',
-          link: '/guide/reusability/custom-directives'
+          link: 'basic/typescript/function',
+          text: 'TypeScript 的函数类型',
         },
-        { text: '插件', link: '/guide/reusability/plugins' }
-      ]
+        { link: 'basic/typescript/object', text: 'TypeScript 的对象类型' },
+        {
+          text: 'TypeScript 的 interface 接口',
+          link: 'basic/typescript/interface',
+        },
+        {
+          link: 'basic/typescript/class',
+          text: 'TypeScript 的 class 类型',
+        },
+        { link: 'basic/typescript/generics', text: 'TypeScript 泛型' },
+        { link: 'basic/typescript/enum', text: 'TypeScript 的 Enum 类型' },
+        { text: 'TypeScript 的类型断言', link: 'basic/typescript/assert' },
+        {
+          text: 'TypeScript 项目使用 npm 模块',
+          link: 'basic/typescript/npm',
+        },
+        {
+          link: 'basic/typescript/namespace',
+          text: 'TypeScript namespace',
+        },
+        { text: 'TypeScript 装饰器', link: 'basic/typescript/decorator' },
+        {
+          text: '装饰器（旧语法）',
+          link: 'basic/typescript/decorator-legacy',
+        },
+        { text: 'declare 关键字', link: 'basic/typescript/declare' },
+        { link: 'basic/typescript/d-ts', text: 'd.ts 类型声明文件' },
+        { text: '类型运算', link: 'basic/typescript/type-operations' },
+        {
+          link: 'basic/typescript/mapping',
+          text: 'TypeScript 的类型映射',
+        },
+        { link: 'basic/typescript/utility', text: 'TypeScript 类型工具' },
+        {
+          text: 'TypeScript 的 React 支持',
+          link: 'basic/typescript/react',
+        },
+        {
+          text: 'TypeScript 的注释指令',
+          link: 'basic/typescript/comment',
+        },
+        { link: 'basic/typescript/tsconfig-json', text: 'tsconfig.json' },
+        { link: 'basic/typescript/tsc', text: 'tsc 命令行编译器' },
+        {
+          link: 'basic/typescript/operator',
+          text: 'TypeScript 类型运算符',
+        },
+        {
+          text: 'TypeScript 类型缩小',
+          link: 'basic/typescript/narrowing',
+        },
+        { link: 'basic/typescript/module', text: 'TypeScript 模块' },
+        { text: 'TypeScript 的 ES6 类型', link: 'basic/typescript/es6' },
+      ],
     },
     {
-      text: '内置组件',
+      text: 'webapi',
       items: [
-        { text: 'Transition', link: '/guide/built-ins/transition' },
+        { text: 'Canvas API', link: 'basic/webapi/canvas' },
         {
-          text: 'TransitionGroup',
-          link: '/guide/built-ins/transition-group'
+          text: '剪贴板操作 Clipboard API 教程',
+          link: 'basic/webapi/clipboard',
         },
-        { text: 'KeepAlive', link: '/guide/built-ins/keep-alive' },
-        { text: 'Teleport', link: '/guide/built-ins/teleport' },
-        { text: 'Suspense', link: '/guide/built-ins/suspense' }
-      ]
+        { text: 'Fetch API 教程', link: 'basic/webapi/fetch' },
+        { text: 'FontFace API', link: 'basic/webapi/fontface' },
+        { text: 'FormData 对象', link: 'basic/webapi/formdata' },
+        { text: 'Geolocation API', link: 'basic/webapi/geolocation' },
+        { text: 'Headers 对象', link: 'basic/webapi/headers' },
+        {
+          text: 'IntersectionObserver',
+          link: 'basic/webapi/intersectionObserver',
+        },
+        {
+          text: 'Intl.RelativeTimeFormat',
+          link: 'basic/webapi/intl-relativetimeformat',
+        },
+        {
+          text: 'Intl segmenter API',
+          link: 'basic/webapi/intl-segmenter',
+        },
+        {
+          text: 'Page Lifecycle API',
+          link: 'basic/webapi/page-lifecycle',
+        },
+        {
+          text: 'Page Visibility API',
+          link: 'basic/webapi/page-visibility',
+        },
+        { text: 'Request API', link: 'basic/webapi/request' },
+        { text: 'Response API', link: 'basic/webapi/response' },
+        {
+          text: 'Server-Sent Events',
+          link: 'basic/webapi/server-sent-events',
+        },
+        { text: 'SVG 图像', link: 'basic/webapi/svg' },
+        { text: 'URL 对象', link: 'basic/webapi/url' },
+        { text: 'URL Pattern API', link: 'basic/webapi/urlpattern' },
+        {
+          text: 'URLSearchParams 对象',
+          link: 'basic/webapi/urlsearchparams',
+        },
+        { text: 'WebSocket', link: 'basic/webapi/websocket' },
+        { text: 'Web Share API', link: 'basic/webapi/web-share-api' },
+        {
+          text: 'window.postMessage() 方法',
+          link: 'basic/webapi/postmessage',
+        },
+        { text: 'Web Audio API', link: 'basic/webapi/webaudio' },
+        { text: 'Web Components', link: 'basic/webapi/webcomponents' },
+        { text: 'Service Worker', link: 'basic/webapi/service-worker' },
+        { text: 'Offline 应用', link: 'basic/webapi/offline' },
+        { text: 'Point lock API', link: 'basic/webapi/pointer-lock' },
+      ],
     },
-    {
-      text: '应用规模化',
-      items: [
-        { text: '单文件组件', link: '/guide/scaling-up/sfc' },
-        { text: '工具链', link: '/guide/scaling-up/tooling' },
-        { text: '路由', link: '/guide/scaling-up/routing' },
-        {
-          text: '状态管理',
-          link: '/guide/scaling-up/state-management'
-        },
-        { text: '测试', link: '/guide/scaling-up/testing' },
-        {
-          text: '服务端渲染 (SSR)',
-          link: '/guide/scaling-up/ssr'
-        }
-      ]
-    },
-    {
-      text: '最佳实践',
-      items: [
-        {
-          text: '生产部署',
-          link: '/guide/best-practices/production-deployment'
-        },
-        {
-          text: '性能优化',
-          link: '/guide/best-practices/performance'
-        },
-        {
-          text: '无障碍访问',
-          link: '/guide/best-practices/accessibility'
-        },
-        {
-          text: '安全',
-          link: '/guide/best-practices/security'
-        }
-      ]
-    },
-    {
-      text: 'TypeScript',
-      items: [
-        { text: '总览', link: '/guide/typescript/overview' },
-        {
-          text: 'TS 与组合式 API',
-          link: '/guide/typescript/composition-api'
-        },
-        {
-          text: 'TS 与选项式 API',
-          link: '/guide/typescript/options-api'
-        }
-      ]
-    },
-    {
-      text: '进阶主题',
-      items: [
-        {
-          text: '使用 Vue 的多种方式',
-          link: '/guide/extras/ways-of-using-vue'
-        },
-        {
-          text: '组合式 API 常见问答',
-          link: '/guide/extras/composition-api-faq'
-        },
-        {
-          text: '深入响应式系统',
-          link: '/guide/extras/reactivity-in-depth'
-        },
-        {
-          text: '渲染机制',
-          link: '/guide/extras/rendering-mechanism'
-        },
-        {
-          text: '渲染函数 & JSX',
-          link: '/guide/extras/render-function'
-        },
-        {
-          text: 'Vue 与 Web Components',
-          link: '/guide/extras/web-components'
-        },
-        {
-          text: '动画技巧',
-          link: '/guide/extras/animation'
-        }
-        // {
-        //   text: '为 Vue 构建一个库',
-        //   link: '/guide/extras/building-a-library'
-        // },
-        // {
-        //   text: 'Vue for React 开发者',
-        //   link: '/guide/extras/vue-for-react-devs'
-        // }
-      ]
-    }
   ],
-  '/api/': [
-    {
-      text: '全局 API',
-      items: [
-        { text: '应用实例', link: '/api/application' },
-        {
-          text: '通用',
-          link: '/api/general'
-        }
-      ]
-    },
-    {
-      text: '组合式 API',
-      items: [
-        { text: 'setup()', link: '/api/composition-api-setup' },
-        {
-          text: '响应式: 核心',
-          link: '/api/reactivity-core'
-        },
-        {
-          text: '响应式: 工具',
-          link: '/api/reactivity-utilities'
-        },
-        {
-          text: '响应式: 进阶',
-          link: '/api/reactivity-advanced'
-        },
-        {
-          text: '生命周期钩子',
-          link: '/api/composition-api-lifecycle'
-        },
-        {
-          text: '依赖注入',
-          link: '/api/composition-api-dependency-injection'
-        },
-        {
-          text: '辅助',
-          link: '/api/composition-api-helpers'
-        }
-      ]
-    },
-    {
-      text: '选项式 API',
-      items: [
-        { text: '状态选项', link: '/api/options-state' },
-        { text: '渲染选项', link: '/api/options-rendering' },
-        {
-          text: '生命周期选项',
-          link: '/api/options-lifecycle'
-        },
-        {
-          text: '组合选项',
-          link: '/api/options-composition'
-        },
-        { text: '其他杂项', link: '/api/options-misc' },
-        {
-          text: '组件实例',
-          link: '/api/component-instance'
-        }
-      ]
-    },
-    {
-      text: '内置内容',
-      items: [
-        { text: '指令', link: '/api/built-in-directives' },
-        { text: '组件', link: '/api/built-in-components' },
-        {
-          text: '特殊元素',
-          link: '/api/built-in-special-elements'
-        },
-        {
-          text: '特殊 Attributes',
-          link: '/api/built-in-special-attributes'
-        }
-      ]
-    },
-    {
-      text: '单文件组件',
-      items: [
-        { text: '语法定义', link: '/api/sfc-spec' },
-        { text: '<script setup>', link: '/api/sfc-script-setup' },
-        { text: 'CSS 功能', link: '/api/sfc-css-features' }
-      ]
-    },
-    {
-      text: '进阶 API',
-      items: [
-        { text: '自定义元素', link: '/api/custom-elements' },
-        { text: '渲染函数', link: '/api/render-function' },
-        { text: '服务端渲染', link: '/api/ssr' },
-        { text: 'TypeScript 工具类型', link: '/api/utility-types' },
-        { text: '自定义渲染', link: '/api/custom-renderer' },
-        { text: '编译时标志', link: '/api/compile-time-flags' }
-      ]
-    }
-  ],
-  '/examples/': [
-    {
-      text: '基础',
-      items: [
-        {
-          text: '你好，世界',
-          link: '/examples/#hello-world'
-        },
-        {
-          text: '处理用户输入',
-          link: '/examples/#handling-input'
-        },
-        {
-          text: 'Attribute 绑定',
-          link: '/examples/#attribute-bindings'
-        },
-        {
-          text: '条件与循环',
-          link: '/examples/#conditionals-and-loops'
-        },
-        {
-          text: '表单绑定',
-          link: '/examples/#form-bindings'
-        },
-        {
-          text: '简单组件',
-          link: '/examples/#simple-component'
-        }
-      ]
-    },
-    {
-      text: '实战',
-      items: [
-        {
-          text: 'Markdown 编辑器',
-          link: '/examples/#markdown'
-        },
-        {
-          text: '获取数据',
-          link: '/examples/#fetching-data'
-        },
-        {
-          text: '带有排序和过滤器的网格',
-          link: '/examples/#grid'
-        },
-        {
-          text: '树状视图',
-          link: '/examples/#tree'
-        },
-        {
-          text: 'SVG 图像',
-          link: '/examples/#svg'
-        },
-        {
-          text: '带过渡动效的模态框',
-          link: '/examples/#modal'
-        },
-        {
-          text: '带过渡动效的列表',
-          link: '/examples/#list-transition'
-        }
-      ]
-    },
-    {
-      // https://eugenkiss.github.io/7guis/
-      text: '7 GUIs',
-      items: [
-        {
-          text: '计数器',
-          link: '/examples/#counter'
-        },
-        {
-          text: '温度转换器',
-          link: '/examples/#temperature-converter'
-        },
-        {
-          text: '机票预订',
-          link: '/examples/#flight-booker'
-        },
-        {
-          text: '计时器',
-          link: '/examples/#timer'
-        },
-        {
-          text: 'CRUD',
-          link: '/examples/#crud'
-        },
-        {
-          text: '画圆',
-          link: '/examples/#circle-drawer'
-        },
-        {
-          text: '单元格',
-          link: '/examples/#cells'
-        }
-      ]
-    }
-  ],
-  '/style-guide/': [
-    {
-      text: 'Style Guide',
-      items: [
-        {
-          text: 'Overview',
-          link: '/style-guide/'
-        },
-        {
-          text: 'A - Essential',
-          link: '/style-guide/rules-essential'
-        },
-        {
-          text: 'B - Strongly Recommended',
-          link: '/style-guide/rules-strongly-recommended'
-        },
-        {
-          text: 'C - Recommended',
-          link: '/style-guide/rules-recommended'
-        },
-        {
-          text: 'D - Use with Caution',
-          link: '/style-guide/rules-use-with-caution'
-        }
-      ]
-    }
-  ]
 }
 
 const i18n: ThemeConfig['i18n'] = {
@@ -582,27 +462,27 @@ const i18n: ThemeConfig['i18n'] = {
   pageNotFound: '页面未找到',
   deadLink: {
     before: '你打开了一个不存在的链接：',
-    after: '。'
+    after: '。',
   },
   deadLinkReport: {
     before: '不介意的话请提交到',
     link: '这里',
-    after: '，我们会跟进修复。'
+    after: '，我们会跟进修复。',
   },
   footerLicense: {
     before: '',
-    after: ''
+    after: '',
   },
   ariaAnnouncer: {
     before: '',
-    after: '已经加载完毕'
+    after: '已经加载完毕',
   },
   ariaDarkMode: '切换深色模式',
   ariaSkipToContent: '直接跳到内容',
   ariaToC: '当前页面的目录',
   ariaMainNav: '主导航',
   ariaMobileNav: '移动版导航',
-  ariaSidebarNav: '侧边栏导航'
+  ariaSidebarNav: '侧边栏导航',
 }
 
 function inlineScript(file: string): HeadConfig {
@@ -611,8 +491,8 @@ function inlineScript(file: string): HeadConfig {
     {},
     fs.readFileSync(
       path.resolve(__dirname, `./inlined-scripts/${file}`),
-      'utf-8'
-    )
+      'utf-8',
+    ),
   ]
 }
 
@@ -620,20 +500,20 @@ export default defineConfigWithTheme<ThemeConfig>({
   extends: baseConfig,
 
   sitemap: {
-    hostname: 'https://fengyon.github.io/'
+    hostname: 'https://fengyon.github.io/',
   },
 
   lang: 'zh-CN',
   title: 'HookAll',
   description: 'HookAll - 互联网开发文档',
   srcDir: 'src',
-  srcExclude: ['tutorial/**/description.md'],
+  srcExclude: ['tutorial/**/description'],
 
   head: [
     ['meta', { name: 'theme-color', content: '#3c8772' }],
     [
       'meta',
-      { property: 'og:url', content: 'https://fengyon.github.io/' }
+      { property: 'og:url', content: 'https://fengyon.github.io/' },
     ],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:title', content: 'HookAll' }],
@@ -641,16 +521,16 @@ export default defineConfigWithTheme<ThemeConfig>({
       'meta',
       {
         property: 'og:description',
-        content: 'HookAll - 互联网开发文档'
-      }
+        content: 'HookAll - 互联网开发文档',
+      },
     ],
     [
       'meta',
       {
         property: 'og:image',
-        content: 'https://fengyon.github.io/logo.svg'
-      }
-    ]
+        content: 'https://fengyon.github.io/logo.svg',
+      },
+    ],
     // inlineScript('restorePreference.js'),
   ],
 
@@ -720,21 +600,21 @@ export default defineConfigWithTheme<ThemeConfig>({
     // },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/fengyon/blog' }
+      { icon: 'github', link: 'https://github.com/fengyon/blog' },
     ],
 
     editLink: {
-      repo: 'fengyon/blog',
-      text: '在 GitHub 上编辑此页'
+      repo: 'fengyon/blog#master',
+      text: '在 GitHub 上编辑此页',
     },
 
     footer: {
       license: {
         text: '版权声明',
-        link: 'https://github.com/fengyon/blog/LICENSE'
+        link: 'https://github.com/fengyon/blog/LICENSE',
       },
-      copyright: '本文档采用 知识共享 4.0 许可证。'
-    }
+      copyright: '本文档采用 知识共享 4.0 许可证。',
+    },
   },
 
   markdown: {
@@ -742,47 +622,47 @@ export default defineConfigWithTheme<ThemeConfig>({
     config(md) {
       md.use(headerPlugin).use(groupIconMdPlugin)
       // .use(textAdPlugin)
-    }
+    },
   },
 
   vite: {
     define: {
-      __VUE_OPTIONS_API__: false
+      __VUE_OPTIONS_API__: false,
     },
     optimizeDeps: {
       include: ['gsap', 'dynamics.js'],
-      exclude: ['@vue/repl']
+      exclude: ['@vue/repl'],
     },
     // @ts-ignore
     ssr: {
-      external: ['@vue/repl']
+      external: ['@vue/repl'],
     },
     server: {
       host: true,
       fs: {
         // for when developing with locally linked theme
-        allow: ['../..']
-      }
+        allow: ['../..'],
+      },
     },
     build: {
-      chunkSizeWarningLimit: Infinity
+      chunkSizeWarningLimit: Infinity,
     },
     json: {
-      stringify: true
+      stringify: true,
     },
     plugins: [
       llmstxt({
         ignoreFiles: [
           'about/team/**/*',
-          'about/team.md',
-          'about/privacy.md',
-          'about/coc.md',
+          'about/team',
+          'about/privacy',
+          'about/coc',
           'developers/**/*',
-          'ecosystem/themes.md',
+          'ecosystem/themes',
           'examples/**/*',
           'partners/**/*',
           'sponsor/**/*',
-          'index.md'
+          'index',
         ],
         customLLMsTxtTemplate: `\
 # HookAll
@@ -791,14 +671,14 @@ HookAll - 互联网开发文档
 
 ## Table of Contents
 
-{toc}`
+{toc}`,
       }) as Plugin,
       groupIconVitePlugin({
         customIcon: {
           cypress: 'vscode-icons:file-type-cypress',
-          'testing library': 'logos:testing-library'
-        }
-      }) as Plugin
-    ]
-  }
+          'testing library': 'logos:testing-library',
+        },
+      }) as Plugin,
+    ],
+  },
 })
