@@ -427,7 +427,7 @@ html:not(.dark) .accent,
   max-width: 720px;
   margin: -120px auto -20px;
   aspect-ratio: 192 / 108;
-  content: url(/logo-uwu.png);
+  /* content: url(/logo-uwu.png); */
 }
 
 @media (max-width: 576px) {

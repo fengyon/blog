@@ -16,7 +16,8 @@
     "preinstall": "npx only-allow pnpm",
     "type": "vue-tsc --noEmit",
     "collect": "node scripts/collect.js",
-    "transfer": "node scripts/transfer.js"
+    "transfer": "node scripts/transfer.js",
+    "sort": "node scripts/sort.js"
   },
   "dependencies": {
     "@vue/repl": "^4.7.0",
