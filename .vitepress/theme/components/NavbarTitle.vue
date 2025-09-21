@@ -4,7 +4,7 @@
         <line x1="2" y1="9" x2="9" y2="9" stroke="#2d8cff" stroke-width="0.5" stroke-linecap="round" />
         <line x1="2" y1="18" x2="14" y2="18" stroke="#2d8cff" stroke-width="0.5" stroke-linecap="round" />
     </svg>
-    <span class="text">HookAll</span>
+    <span class="text">HookAll (开发中...)</span>
 </template>
 
 <style scoped>
