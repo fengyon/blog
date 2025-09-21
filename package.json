@@ -13,9 +13,10 @@
     "preview": "vitepress preview",
     "lint": "zhlint \"src/{api,about,guide,sponsor,translations,tutorial}/**/*.md\"",
     "clean": "rm -rf .vitepress/dist",
-    "sync": "node scripts/sync.js",
     "preinstall": "npx only-allow pnpm",
-    "type": "vue-tsc --noEmit"
+    "type": "vue-tsc --noEmit",
+    "collect": "node scripts/collect.js",
+    "transfer": "node scripts/transfer.js"
   },
   "dependencies": {
     "@vue/repl": "^4.4.2",
@@ -33,6 +34,7 @@
     "@types/node": "^22.7.5",
     "chalk": "^4.1.2",
     "commander": "^9.4.0",
+    "fs-extra": "^11.3.2",
     "gray-matter": "^4.0.3",
     "husky": "^8.0.2",
     "lodash": "^4.17.21",
