@@ -259,7 +259,7 @@ for (const value of params.values()) {
 
 这个方法也可以用来将所有键值，转成一个数组。
 
-```javascritp
+```javascript
 Array.from(params.values()) // ['value1', 'value2']
 ```
 

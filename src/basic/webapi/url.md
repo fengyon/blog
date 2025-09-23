@@ -175,7 +175,7 @@ function handleFiles(files) {
 
 `URL()`构造函数解析非法网址时，会抛出错误，必须用`try...catch`代码块处理，这样终究不是非常方便。因此，URL 对象又引入了`URL.canParse()`方法，它返回一个布尔值，表示当前字符串是否为有效网址。
 
-```javascipt
+```javascript
 URL.canParse(url)
 URL.canParse(url, base)
 ```
