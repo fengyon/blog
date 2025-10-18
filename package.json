@@ -17,7 +17,8 @@
     "type": "vue-tsc --noEmit",
     "collect": "node scripts/collect.js",
     "transfer": "node scripts/transfer.js",
-    "sort": "node scripts/sort.js"
+    "sort": "node scripts/sort.js",
+    "deploy": "npm run build && node scripts/deploy.js"
   },
   "dependencies": {
     "@vue/repl": "^4.7.0",
