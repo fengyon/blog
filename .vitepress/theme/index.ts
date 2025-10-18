@@ -23,7 +23,8 @@ export default Object.assign({}, VPTheme, {
   Layout: () => {
     // @ts-ignore
     return h(VPTheme.Layout, null, {
-      'navbar-title': () => h(NavbarTitle)
+      'navbar-title': () => h(NavbarTitle),
+      // sidebar: () => h(sidebar)
       // banner: () => h(Banner),
       // 'sidebar-top': () => h(PreferenceSwitch),
       // 'sidebar-bottom': () => h(SecurityUpdateBtn),

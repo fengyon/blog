@@ -1,5 +1,5 @@
 import { join, relative } from 'node:path'
-import { readAllFile } from './utils.js'
+import { readAllFile } from './utils/read-all-file.js'
 import { fileURLToPath } from 'node:url'
 import { copyFile, readFile, writeFile } from 'node:fs/promises'
 

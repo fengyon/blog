@@ -500,7 +500,7 @@ export default defineConfigWithTheme<ThemeConfig>({
   extends: baseConfig,
 
   sitemap: {
-    hostname: 'https://fengyon.github.io/',
+    hostname: 'https://hookall.pages.dev/',
   },
 
   lang: 'zh-CN',
@@ -513,7 +513,7 @@ export default defineConfigWithTheme<ThemeConfig>({
     ['meta', { name: 'theme-color', content: '#3c8772' }],
     [
       'meta',
-      { property: 'og:url', content: 'https://fengyon.github.io/' },
+      { property: 'og:url', content: 'https://hookall.pages.dev/' },
     ],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:title', content: 'HookAll' }],
@@ -528,10 +528,18 @@ export default defineConfigWithTheme<ThemeConfig>({
       'meta',
       {
         property: 'og:image',
-        content: 'https://fengyon.github.io/logo.svg',
+        content: 'https://hookall.pages.dev/logo.svg',
       },
     ],
-    // inlineScript('restorePreference.js'),
+    [
+      'script',
+      {
+        defer: '',
+        src: 'https://static.cloudflareinsights.com/beacon.min.js',
+        'data-cf-beacon': '{"token": "e8fc654435194636b86a9910ac4e1335"}',
+      },
+    ],
+    inlineScript('clarity-analytics.js'),
   ],
 
   themeConfig: {
@@ -652,18 +660,6 @@ export default defineConfigWithTheme<ThemeConfig>({
     },
     plugins: [
       llmstxt({
-        ignoreFiles: [
-          'about/team/**/*',
-          'about/team',
-          'about/privacy',
-          'about/coc',
-          'developers/**/*',
-          'ecosystem/themes',
-          'examples/**/*',
-          'partners/**/*',
-          'sponsor/**/*',
-          'index',
-        ],
         customLLMsTxtTemplate: `\
 # HookAll
 

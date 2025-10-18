@@ -15,9 +15,8 @@ export const readAllFile = async (absolutePath, hooks = {}) => {
   const dirs = []
   const files = []
 
-  const toRead = async (paths) => {
-    if (!paths.length) return
-    return Promise.all(
+  const toRead = async (paths) =>
+    Promise.all(
       paths.map(async (firstPath) => {
         const fileType = await lstat(firstPath)
         switch (true) {
@@ -26,10 +25,11 @@ export const readAllFile = async (absolutePath, hooks = {}) => {
             if (!isShouldReadDir) break
             dirs.push({
               absolutePath: firstPath,
-              relativePath: relative(absolutePath, firstPath)
+              relativePath: relative(absolutePath, firstPath),
             })
             const newPaths = await readdir(firstPath)
-            return toRead(newPaths.map((i) => join(firstPath, i)))
+            await toRead(newPaths.map((i) => join(firstPath, i)))
+            break
           }
           case fileType.isFile(): {
             const isShouldReadFile = await shouldReadFile(firstPath)
@@ -38,25 +38,23 @@ export const readAllFile = async (absolutePath, hooks = {}) => {
             files.push({
               absolutePath: firstPath,
               relativePath: relative(absolutePath, firstPath),
-              content
+              content,
             })
             break
           }
           default:
-            throw Error(`error the file wasn't read ${absolutePath}`)
+            throw Error(`error the file wasn't read ${firstPath}`)
         }
-      })
+      }),
     )
-  }
+
   await toRead([absolutePath])
 
-  const format = (arr) =>
-    arr.sort(
-      (a, b) =>
-        a.absolutePath.match(/[/\\]/g).length -
-          b.absolutePath.match(/[/\\]/g).length || (a > b ? 1 : -1)
-    )
-  format(dirs)
-  format(files)
+  const sortByPath = () => (a, b) =>
+    a.absolutePath.match(/[/\\]/g).length -
+      b.absolutePath.match(/[/\\]/g).length || (a > b ? 1 : -1)
+  dirs.sort(sortByPath())
+  files.sort(sortByPath())
+
   return { dirs, files }
 }
