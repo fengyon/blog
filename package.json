@@ -11,7 +11,7 @@
     "dev": "vitepress",
     "build": "vitepress build && node scripts/build-post.js",
     "preview": "vitepress preview",
-    "lint": "zhlint \"src/{api,about,guide,sponsor,translations,tutorial}/**/*.md\"",
+    "lint": "zhlint \"src/**/*.md\"",
     "clean": "rm -rf .vitepress/dist",
     "preinstall": "npx only-allow pnpm",
     "type": "vue-tsc --noEmit",

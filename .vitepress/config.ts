@@ -21,6 +21,7 @@ const nav: ThemeConfig['nav'] = [
     activeMatch: `^/basic/`,
     items: [
       { text: 'html', link: '/basic/html/intro' },
+      { text: 'css', link: '/basic/css/basic' },
       { text: 'javascript', link: '/basic/javascript/basic/introduction' },
       { text: 'es6', link: '/basic/es6/intro' },
       { text: 'typescript', link: '/basic/typescript/intro' },
@@ -111,6 +112,28 @@ export const sidebar: ThemeConfig['sidebar'] = {
           text: '其他标签',
           link: 'basic/html/elements',
         },
+      ],
+    },
+    {
+      text: 'css',
+      items: [
+        { text: 'css基础', link: 'basic/css/basic' },
+        {
+          text: 'css选择器',
+          link: 'basic/css/selector',
+        },
+        {
+          text: 'css盒模型',
+          link: 'basic/css/box-model',
+        },
+        {
+          text: '布局与响应式',
+          link: 'basic/css/layout'
+        },
+        {
+          text: 'css动画',
+          link: 'basic/css/animation'
+        }
       ],
     },
     {
