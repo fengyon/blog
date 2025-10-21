@@ -117,23 +117,27 @@ export const sidebar: ThemeConfig['sidebar'] = {
     {
       text: 'css',
       items: [
-        { text: 'css基础', link: 'basic/css/basic' },
+        { text: 'css 基础', link: 'basic/css/basic' },
         {
-          text: 'css选择器',
+          text: 'css 选择器',
           link: 'basic/css/selector',
         },
         {
-          text: 'css盒模型',
+          text: 'css 盒模型',
           link: 'basic/css/box-model',
         },
         {
           text: '布局与响应式',
-          link: 'basic/css/layout'
+          link: 'basic/css/layout',
         },
         {
-          text: 'css动画',
-          link: 'basic/css/animation'
-        }
+          text: 'css 动画',
+          link: 'basic/css/animation',
+        },
+        {
+          text: 'Transform 3D',
+          link: 'basic/css/transform-3d',
+        },
       ],
     },
     {

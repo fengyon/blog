@@ -13,7 +13,7 @@
 
 在 HTML 中使用 CSS 有三种方式：
 
-### 内联样式（Inline CSS）
+### Inline CSS (内联样式)
 
 直接在标签的 `style` 属性中写样式：
 
@@ -25,7 +25,7 @@
 
 ---
 
-### 内部样式表（Internal CSS）
+### Internal CSS (内部样式表)
 
 在 HTML 文件的 `<head>` 中使用 `<style>` 标签：
 
@@ -44,7 +44,7 @@
 
 ---
 
-### 外部样式表（External CSS）
+### External CSS (外部样式表)
 
 将样式写在独立的 `.css` 文件中，并通过 `<link>` 引入：
 
@@ -133,4 +133,3 @@ div {
   line-height: 1.5; /* 倍数 */
 }
 ```
-

@@ -19,17 +19,17 @@ CSS 盒模型是网页布局的基础概念，每个元素都被表示为一个�
  └─────────────────────────────────────────┘
 ```
 
-## 标准盒模型 vs IE 盒模型
+## Border Box vs IE Content Box
 
-### 标准盒模型 (content box)
-
-- **width/height** = `content`
-- 真实占位 = `content + padding + border + margin` = `width + padding + border + margin`
-
-### IE 盒模型 (Border Box)
+### Border Box (IE 盒模型)
 
 - **width/height** = `content + padding + border`
-- 真实占位 = `content + padding + border + margin` = `width + margin`
+- 真实占位 = `content + padding + border` = `width/height`
+
+### Content Box (标准盒模型)
+
+- **width/height** = `content`
+- 真实占位 = `content + padding + border` = `width/height + padding + border`
 
 ### 对比示例
 
@@ -42,7 +42,7 @@ CSS 盒模型是网页布局的基础概念，每个元素都被表示为一个�
     width: 200px;
     padding: 20px;
     border: 5px solid red;
-    margin: 10px;
+    /* 真实占位: 200 + 20*2 + 5*2 = 250px */
   }
 
   .border-box {
@@ -50,9 +50,21 @@ CSS 盒模型是网页布局的基础概念，每个元素都被表示为一个�
     width: 200px;
     padding: 20px;
     border: 5px solid blue;
-    margin: 10px;
+    /* 真实占位: 200px */
   }
 </style>
+```
+
+### 最佳实践
+
+在布局中，首先要考虑的就是元素的真实占位，而`content box`的真实占位 = `width/height + padding + border`，需要多个变量并进行相加，复杂难用。
+
+因此在实践中，首先使用`border box`，只有浏览器不兼容或者极特殊情况才使用`content box`。
+
+```css
+* {
+  box-sizing: border-box;
+}
 ```
 
 ## 外边距合并（折叠）
