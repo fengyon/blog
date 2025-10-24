@@ -4,7 +4,7 @@ import { dirname, join, relative } from 'node:path'
 /**
  * 读取所有的文件
  * @param { string } absolutePath 绝对路径
- * @param { { shouldReadDir: (absolutePath) => Promise<boolean>, shouldReadFile: (absolutePath) => Promise<boolean>, readFileAsync: (absolutePath) => Promise<any> } } hooks
+ * @param { { shouldReadDir: (absolutePath: string) => Promise<boolean>, shouldReadFile: (absolutePath: string) => Promise<boolean>, readFileAsync: (absolutePath: string) => Promise<any> } } hooks
  * @returns { Promise<{dirs: Array<{absolutePath: string, relativePath: string}>, files: Array<{absolutePath: string, content: any, relativePath: string}>> } 返回promise，完成了resolve, 失败reject
  */
 export const readAllFile = async (absolutePath, hooks = {}) => {
