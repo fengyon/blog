@@ -17,18 +17,20 @@ const setActiveNavVisible = debounceIdle((isFirst = false) => {
   if (!container) return
   const activeNav = container.querySelector('a.link.active')
   if (!activeNav) return
-  const offset = 28
   const { top, bottom } = container.getBoundingClientRect()
-  const { top: navTop, bottom: navBottom } =
-    activeNav.getBoundingClientRect()
+  const {
+    top: navTop,
+    bottom: navBottom,
+    height,
+  } = activeNav.getBoundingClientRect()
 
-  if (isOverlap([top + offset, bottom - offset], [navTop, navBottom]))
+  if (isOverlap([top + height, bottom - height], [navTop, navBottom]))
     return
   if (
     activeNav.scrollIntoView &&
     (isFirst ||
       !isOverlap(
-        [top - 5 * offset, bottom + 5 * offset],
+        [top - 5 * height, bottom + 5 * height],
         [navTop, navBottom],
       ))
   ) {

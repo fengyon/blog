@@ -91,4 +91,87 @@ function UserList({ users }) {
 
 React API 相对简洁，新手可以快速上手基础功能，随着技能提升逐步学习高级特性。
 
+## React 快速开始
 
+### 引入 React.js (适合学习)
+
+```html
+<!DOCTYPE html>
+<html>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      // 使用 es module引入react
+      import React from 'https://esm.sh/react@19'
+      import { jsx } from 'https://esm.sh/react@19/jsx-runtime'
+
+      import ReactDOMClient from 'https://esm.sh/react-dom@19/client'
+      // 使用 jsx函数 创建元素
+      const container = jsx('div', {
+        className: 'container',
+        children: [
+          jsx('h1', {
+            className: 'title',
+            id: 'main-title',
+            children: ['Hello, React!'],
+          }),
+        ],
+      })
+      const root = ReactDOMClient.createRoot(
+        document.getElementById('root'),
+      )
+      root.render(container)
+
+      // React 18 之前使用 React.createElement 创建元素
+      //   const container = React.createElement(
+      //     'div',
+      //     { className: 'container' },
+      //     React.createElement(
+      //       'h1',
+      //       { className: 'title', id: 'main-title' },
+      //       'Hello, React!',
+      //     ),
+      //   )
+
+      // React 18 之前使用 ReactDOMClient.render 渲染
+      // ReactDOMClient.render(container, document.getElementById('root'));
+    </script>
+  </body>
+</html>
+```
+
+### 脚手架工具
+
+这些构建工具提供了打包和运行源代码的功能，提供本地开发的开发服务器，以及部署应用到生产服务器的构建命令。
+
+#### Vite
+
+[Vite](https://vite.dev/) 是一个构建工具，旨在为现代网络项目提供更快更简洁的开发体验。
+
+```bash
+npm create vite@latest my-app -- --template react
+```
+
+Vite 采用约定式设计，开箱即提供合理的默认配置。它拥有丰富的插件生态系统，能够支持快速热更新、JSX、Babel/SWC 等常见功能。你可以查看 Vite 的 [React 插件](https://vite.dev/plugins/#vitejs-plugin-react) 或 [React SWC 插件](https://vite.dev/plugins/#vitejs-plugin-react-swc) 和 [React 服务器端渲染示例项目](https://vite.dev/guide/ssr.html#example-projects) 来开始使用。
+
+#### Parcel
+
+[Parcel](https://parceljs.org/) 结合了出色的开箱即用开发体验和可扩展的架构，可以将你的项目从刚开始的阶段推向大规模的生产应用。
+
+```bash
+npm create parcel react-client my-react-app
+cd my-react-app
+npm start
+```
+
+Parcel 支持快速刷新、JSX、TypeScript、Flow 和开箱即用的样式。请查看 [Parcel 的 React 教程](https://parceljs.org/recipes/react/#getting-started) 以开始。
+
+#### Rsbuild
+
+[Rsbuild](https://rsbuild.dev/) 是一个基于 Rspack 的构建工具，旨在为 React 应用程序提供无缝的开发体验。它配备了精心调优的默认设置和现成的性能优化。
+
+```bash
+npx create-rsbuild --template react
+```
+
+Rsbuild 内置了对 React 特性的支持，如快速刷新、JSX、TypeScript 和样式。请查看 [Rsbuild 的 React 指南](https://rsbuild.dev/zh/guide/framework/react) 以开始使用。

@@ -33,7 +33,7 @@ const nav: ThemeConfig['nav'] = [
   {
     text: '框架',
     activeMatch: `^/framework/`,
-    items: [{ text: 'react', link: '/framework/react/intro' }],
+    items: [{ text: 'React', link: '/framework/react/intro' }],
   },
 ]
 
@@ -494,12 +494,69 @@ export const sidebar: ThemeConfig['sidebar'] = {
           link: 'framework/react/intro',
         },
         {
-          text: 'React 快速开始',
-          link: 'framework/react/start',
+          text: 'React JSX',
+          link: 'framework/react/jsx',
         },
         {
           text: 'React 组件',
           link: 'framework/react/component',
+        },
+        {
+          text: 'React Hooks',
+          link: 'framework/react/hooks',
+        },
+        {
+          text: 'React TSX',
+          link: 'framework/react/tsx',
+        },
+        {
+          text: 'React Fiber',
+          link: 'framework/react/fiber',
+        },
+        {
+          text: 'React Concurrent',
+          link: 'framework/react/concurrent',
+        },
+        {
+          text: 'React Compiler',
+          link: 'framework/react/compiler',
+        },
+        {
+          text: 'React Router',
+          link: 'framework/react/router',
+        },
+        {
+          text: 'React Managing State',
+          link: 'framework/react/managing-state',
+        },
+        {
+          text: 'React UI',
+          link: 'framework/react/ui',
+        },
+        {
+          text: 'React CSS',
+          link: 'framework/react/css',
+        },
+      ],
+    },
+    {
+      text: 'Vue',
+      items: [
+        {
+          text: 'Vue 简介',
+          link: 'framework/vue/intro',
+        },
+        {
+          text: 'Vue 基础',
+          link: 'framework/vue/basic',
+        },
+        {
+          text: 'Vue Component',
+          link: 'framework/vue/component',
+        },
+        {
+          text: 'Composition API',
+          link: 'framework/vue/composition-api.md',
         },
       ],
     },

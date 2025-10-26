@@ -8,7 +8,8 @@ React 组件是构建用户界面的独立、可复用的代码片段。每个�
 
 ### 函数组件
 
-这是现代 React 开发中最常用的组件形式：
+通过定义函数，返回一个`jsx`元素，这是现代 React 开发中最常用的组件形式。
+函数名的首字母通常要大写，用来跟一般函数区分开。
 
 ```jsx
 const Welcome = (props) => {
@@ -18,7 +19,7 @@ const Welcome = (props) => {
 
 ### class 组件 (已废弃)
 
-[类式组件](https://zh-hans.react.dev/reference/react/Component)仍然被 React 支持，但不建议在新代码中使用它们。
+[类式组件](https://zh-hans.react.dev/reference/react/Component)仍然被 React 支持，**但不建议在新代码中使用它们**。
 本文只介绍函数组件的使用，class 组件可以[查阅官方文档](https://zh-hans.react.dev/reference/react/Component)。
 
 ```jsx
@@ -68,7 +69,7 @@ ref 属性用于获取对 DOM 元素或组件实例的引用。
 
 #### children
 
-children 是一个特殊的 prop，它包含在组件开始和结束标签之间的内容：
+children 是一个特殊的 prop，它包含在组件开始和结束标签之间，表示组件的子内容
 
 ```jsx
 // 使用 children
@@ -90,6 +91,34 @@ function App() {
     </Card>
   )
 }
+```
+
+#### className
+
+className 是 DOM 属性`class`的别称，用来定义样式，支持字符串、数组、对象三种方式定义
+
+```jsx
+const element1 = <div className="class1 class2 class3"></div>
+const element2 = (
+  <div
+    className={[
+      'class1',
+      // false 表示此样式不被使用
+      false && 'class2',
+      'class3',
+    ]}
+  ></div>
+)
+const element3 = (
+  <div
+    className={{
+      class1: true,
+      // false 表示此样式不被使用
+      class2: false,
+      class3: true,
+    }}
+  ></div>
+)
 ```
 
 ### 数据单向流动
@@ -190,20 +219,65 @@ function App() {
 }
 ```
 
-## 组件 Ref 详解
+## Ref 详解
 
-### 获取 DOM 元素
+`Ref`对应的英文单词是 `reference`，意思是“引用”。
+
+### 定义组件 Ref
+
+- 原生组件，如`div`, `p`, `span`等的`ref`指向 DOM 元素
+- 使用 `useImperativeHandle` 自定义组件 Ref：
+
+```jsx
+import { useImperativeHandle, useRef } from 'react'
+
+// 子组件
+const CustomInput = (props) => {
+  const inputRef = useRef(null)
+
+  // 组件 ref 将有 focus, clear 方法
+  useImperativeHandle(props.ref, () => ({
+    focus: () => {
+      inputRef.current.focus()
+    },
+    clear: () => {
+      inputRef.current.value = ''
+    },
+  }))
+
+  return <input {...props} ref={inputRef} />
+}
+
+// react18及更旧版本需要使用 forwardRef
+// import { forwardRef } from 'react'
+// const CustomInput = forwardRef((props, ref) => { ... })
+```
+
+- 将 ref 指向子组件的 Ref
+
+```jsx
+// 子组件
+const CustomInput = (props) => {
+  return <input {...props} ref={props.ref} />
+}
+
+// react18及更旧版本需要使用 forwardRef
+// import { forwardRef } from 'react'
+// const CustomInput = forwardRef((props, ref) => { ... })
+```
+
+### 获取组件 Ref
+
+- useRef 获取，常用于需要缓存 ref，多次使用的场景
 
 ```jsx
 import { useRef } from 'react'
 
-function TextInput() {
+const TextInput = () => {
   const inputRef = useRef(null)
-
   const focusInput = () => {
     inputRef.current.focus()
   }
-
   return (
     <div>
       <input ref={inputRef} type="text" placeholder="点击按钮聚焦" />
@@ -213,100 +287,17 @@ function TextInput() {
 }
 ```
 
-### 获取组件实例
-
-使用 `forwardRef` 和 `useImperativeHandle` 暴露组件方法：
+- 回调函数获取，常用于只获取一次 Ref 的场景
 
 ```jsx
-import { forwardRef, useImperativeHandle, useRef } from 'react'
-
-// 子组件
-const CustomInput = forwardRef((props, ref) => {
-  const inputRef = useRef(null)
-
-  useImperativeHandle(ref, () => ({
-    focus: () => {
-      inputRef.current.focus()
-    },
-    clear: () => {
-      inputRef.current.value = ''
-    },
-    getValue: () => {
-      return inputRef.current.value
-    },
-  }))
-
-  return <input {...props} ref={inputRef} />
-})
-
-// 父组件
-function Parent() {
-  const inputRef = useRef(null)
-
-  const handleFocus = () => {
-    inputRef.current.focus()
+const TextInput = (props) => {
+  const focus = (inputElement) => {
+    inputElement.focus()
   }
-
-  const handleClear = () => {
-    inputRef.current.clear()
-  }
-
   return (
     <div>
-      <CustomInput ref={inputRef} placeholder="自定义输入框" />
-      <button onClick={handleFocus}>聚焦</button>
-      <button onClick={handleClear}>清空</button>
+      <input ref={focus} type="text" placeholder="自动聚焦" />
     </div>
   )
 }
 ```
-
-### 组件限制 Ref 的值
-
-默认情况下，函数组件不能接收 ref，需要使用 `forwardRef`：
-
-```jsx
-// 错误：函数组件默认不能接收 ref
-function MyComponent(props) {
-  return <div>Hello</div>
-}
-
-// 正确：使用 forwardRef
-const MyComponent = forwardRef((props, ref) => {
-  return <div ref={ref}>Hello</div>
-})
-
-// 限制 ref 类型
-const RestrictedComponent = forwardRef((props, ref) => {
-  // 只允许特定的 ref 类型
-  const internalRef = useRef(null)
-
-  // 将 ref 转发到内部 div
-  return <div ref={ref}>内容</div>
-})
-```
-
-### 回调 Ref
-
-另一种使用 ref 的方式：
-
-```jsx
-function MeasureExample() {
-  const [height, setHeight] = useState(0)
-
-  const measuredRef = useCallback((node) => {
-    if (node !== null) {
-      setHeight(node.getBoundingClientRect().height)
-    }
-  }, [])
-
-  return (
-    <div>
-      <h1 ref={measuredRef}>Hello, world</h1>
-      <h2>The above header is {Math.round(height)}px tall</h2>
-    </div>
-  )
-}
-```
-
-通过掌握这些 React 组件的基本概念和高级特性，你可以构建出更加健壮、可维护的 React 应用程序。记住，组件的核心思想是"单一职责"和"可组合性"，良好的组件设计是 React 应用成功的关键。
