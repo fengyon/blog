@@ -1,6 +1,12 @@
 import { readdir, readFile, lstat } from 'node:fs/promises'
 import { dirname, join, relative } from 'node:path'
 
+const forEachChildrenDeep = (arr, fn) =>
+  arr.forEach((item) => {
+    item.children && forEachChildrenDeep(item.children, fn)
+    fn(item)
+  })
+
 /**
  * 读取所有的文件
  * @param { string } absolutePath 绝对路径
@@ -12,49 +18,47 @@ export const readAllFile = async (absolutePath, hooks = {}) => {
   const shouldReadFile = hooks.shouldReadFile?.bind(hooks) || (() => true)
   const readFileAsync = hooks.readFileAsync?.bind(hooks) || readFile
 
-  const dirs = []
-  const files = []
-
-  const toRead = async (paths) =>
-    Promise.all(
+  const toRead = async (paths) => {
+    const result = await Promise.all(
       paths.map(async (firstPath) => {
         const fileType = await lstat(firstPath)
         switch (true) {
           case fileType.isDirectory(): {
             const isShouldReadDir = await shouldReadDir(firstPath)
-            if (!isShouldReadDir) break
-            dirs.push({
+            if (!isShouldReadDir) return null
+            const newPaths = await readdir(firstPath)
+            const children = await toRead(
+              newPaths.map((i) => join(firstPath, i)),
+            )
+            return {
               absolutePath: firstPath,
               relativePath: relative(absolutePath, firstPath),
-            })
-            const newPaths = await readdir(firstPath)
-            await toRead(newPaths.map((i) => join(firstPath, i)))
-            break
+              children,
+            }
           }
           case fileType.isFile(): {
             const isShouldReadFile = await shouldReadFile(firstPath)
-            if (!isShouldReadFile) break
+            if (!isShouldReadFile) return null
             const content = await readFileAsync(firstPath)
-            files.push({
+            return {
               absolutePath: firstPath,
               relativePath: relative(absolutePath, firstPath),
               content,
-            })
-            break
+            }
           }
           default:
             throw Error(`error the file wasn't read ${firstPath}`)
         }
       }),
     )
+    return result.filter(Boolean)
+  }
 
-  await toRead([absolutePath])
-
-  const sortByPath = () => (a, b) =>
-    a.absolutePath.match(/[/\\]/g).length -
-      b.absolutePath.match(/[/\\]/g).length || (a > b ? 1 : -1)
-  dirs.sort(sortByPath())
-  files.sort(sortByPath())
-
+  const result = await toRead([absolutePath])
+  const dirs = []
+  const files = []
+  forEachChildrenDeep(result, (item) =>
+    item.children ? dirs.push(item) : files.push(item),
+  )
   return { dirs, files }
 }

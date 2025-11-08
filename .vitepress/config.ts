@@ -121,36 +121,6 @@ const nav: ThemeConfig['nav'] = [
     ],
   },
   {
-    text: '移动端',
-    activeMatch: '^/mobile/',
-    items: [
-      {
-        text: '移动端基础',
-        link: '/mobile/basic',
-      },
-      {
-        text: '移动端框架',
-        link: '/mobile/framework',
-      },
-      {
-        text: '移动端Web开发',
-        link: '/mobile/web',
-      },
-      {
-        text: '小程序',
-        link: '/mobile/applet',
-      },
-      {
-        text: '移动端调试',
-        link: '/mobile/debug',
-      },
-      {
-        text: '构建与发布',
-        link: '/mobile/publish',
-      },
-    ],
-  },
-  {
     text: '全栈',
     activeMatch: '^/full-stack/',
     items: [
@@ -171,46 +141,77 @@ const nav: ThemeConfig['nav'] = [
         link: '/full-stack/express',
       },
       {
-        text: 'nextjs',
-        link: '/full-stack/nextjs',
-      },
-      {
         text: 'serverless',
         link: '/full-stack/serverless',
+      },
+      {
+        text: '运维',
+        items: [
+          {
+            text: '服务器与环境',
+            link: '/operations/linux/intro',
+          },
+          {
+            text: 'Docker',
+            link: '/operations/docker',
+          },
+          {
+            text: '编排',
+            link: '/operations/kubernetes',
+          },
+          {
+            text: 'CI/CD',
+            link: '/operations/ci-cd',
+          },
+          {
+            text: '监控与日志',
+            link: '/operations/monitor',
+          },
+          {
+            text: '安全与权限',
+            link: '/operations/security',
+          },
+          {
+            text: '云与自动化',
+            link: '/operations/automation',
+          },
+        ],
       },
     ],
   },
   {
-    text: '运维',
-    activeMatch: '^/operations/',
+    text: '专项',
+    activeMatch: '^/special/',
     items: [
       {
-        text: '服务器与环境',
-        link: '/operations/linux/intro',
-      },
-      {
-        text: 'Docker',
-        link: '/operations/docker',
-      },
-      {
-        text: '编排',
-        link: '/operations/kubernetes',
-      },
-      {
-        text: 'CI/CD',
-        link: '/operations/ci-cd',
-      },
-      {
-        text: '监控与日志',
-        link: '/operations/monitor',
-      },
-      {
-        text: '安全与权限',
-        link: '/operations/security',
-      },
-      {
-        text: '云与自动化',
-        link: '/operations/automation',
+        text: '移动端',
+        activeMatch: '^/mobile/',
+        items: [
+          {
+            text: '移动端基础',
+            link: '/mobile/basic',
+          },
+          {
+            text: '移动端框架',
+            link: '/mobile/framework',
+          },
+          {
+            text: '移动端Web开发',
+            link: '/mobile/web',
+          },
+          {
+            text: '小程序',
+            link: '/mobile/applet',
+          },
+          {
+            text: '移动端调试',
+            link: '/mobile/debug',
+          },
+          {
+            text: '构建与发布',
+            link: '/mobile/publish',
+          },
+        ],
       },
     ],
   },
@@ -545,14 +546,12 @@ export const sidebar: ThemeConfig['sidebar'] = {
       text: 'git',
       items: [
         { text: 'Git 简介', link: '/basic/git/intro' },
-        { text: 'Git 安装与配置', link: '/basic/git/installation' },
-        { text: 'Git 基础命令', link: '/basic/git/basic-commands' },
-        { text: '分支管理', link: '/basic/git/branching' },
-        { text: '远程仓库', link: '/basic/git/remote' },
-        { text: '标签管理', link: '/basic/git/tags' },
+        { text: 'Git 安装与配置', link: '/basic/git/install' },
+        { text: 'Git 仓库管理', link: '/basic/git/repository' },
+        { text: 'Git 分支管理', link: '/basic/git/branch' },
+        { text: 'Git 标签管理', link: '/basic/git/tag' },
         { text: 'Git 工作流', link: '/basic/git/workflow' },
         { text: 'Git 高级技巧', link: '/basic/git/advanced' },
-        { text: 'Git 问题排查', link: '/basic/git/troubleshooting' },
       ],
     },
     {
@@ -709,14 +708,9 @@ export const sidebar: ThemeConfig['sidebar'] = {
       text: 'node',
       items: [
         { text: 'node 简介', link: '/basic/node/intro' },
-        { text: 'Node.js 安装与配置', link: '/basic/node/installation' },
-        { text: '模块系统', link: '/basic/node/modules' },
-        { text: '文件系统', link: '/basic/node/fs' },
-        { text: 'HTTP 模块', link: '/basic/node/http' },
-        { text: 'Express 框架', link: '/basic/node/express' },
-        { text: '数据库操作', link: '/basic/node/database' },
-        { text: '中间件', link: '/basic/node/middleware' },
-        { text: '部署与运维', link: '/basic/node/deployment' },
+        { text: 'node 安装与配置', link: '/basic/node/installation' },
+        { text: 'node 事件循环', link: '/basic/node/event-loop' },
+        { text: 'node 常用模块', link: '/basic/node/modules' },
       ],
     },
   ],
@@ -835,32 +829,32 @@ export const sidebar: ThemeConfig['sidebar'] = {
       text: 'nextjs',
       items: [
         {
-          text: 'Next.js 简介',
-          link: '/framework/nextjs/intro',
+          text: 'nextjs 入门',
+          link: '/framework/nextjs/start',
         },
         {
-          text: '项目结构',
-          link: '/framework/nextjs/structure',
+          text: 'nextjs 路由系统',
+          link: '/framework/nextjs/router',
         },
         {
-          text: '路由系统',
-          link: '/framework/nextjs/routing',
-        },
-        {
-          text: '数据获取',
-          link: '/framework/nextjs/data-fetching',
-        },
-        {
-          text: '渲染模式',
+          text: 'nextjs 渲染模式',
           link: '/framework/nextjs/rendering',
         },
         {
-          text: 'API 路由',
-          link: '/framework/nextjs/api-routes',
+          text: 'nextjs 状态管理',
+          link: '/framework/nextjs/status'
         },
         {
-          text: '部署与优化',
-          link: '/framework/nextjs/deployment',
+          text: 'nextjs 数据获取',
+          link: '/framework/nextjs/data-fetching',
+        },
+        {
+          text: 'nextjs 中间件',
+          link: '/framework/nextjs/middleware',
+        },
+        {
+          text: 'nextjs 生态',
+          link: '/framework/nextjs/ecosystem',
         },
       ],
     },
@@ -890,6 +884,15 @@ export const sidebar: ThemeConfig['sidebar'] = {
         {
           text: '部署',
           link: '/framework/umijs/deployment',
+        },
+      ],
+    },
+    {
+      text: 'nuxtjs',
+      items: [
+        {
+          text: 'nextjs 简介',
+          link: '/framework/nextjs/intro',
         },
       ],
     },
@@ -963,8 +966,8 @@ export const sidebar: ThemeConfig['sidebar'] = {
         {
           text: '简介',
           link: '/engineering/intro',
-        }
-      ]
+        },
+      ],
     },
     {
       text: '包管理',
@@ -989,7 +992,7 @@ export const sidebar: ThemeConfig['sidebar'] = {
           text: '微前端',
           link: '/engineering/architecture/micro-frontend',
         },
-        { text: 'monorep', link: '/engineering/architecture/monorep' },
+        { text: 'monorepo', link: '/engineering/architecture/monorep' },
         { text: '组件化', link: '/engineering/architecture/component' },
       ],
     },
