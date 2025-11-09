@@ -57,33 +57,18 @@ const nav: ThemeConfig['nav'] = [
         link: '/engineering/package-manager/npm',
       },
       {
-        text: '构建工具',
-        link: '/engineering/build/vite',
-      },
-      {
         text: '架构',
         link: '/engineering/architecture',
       },
       {
-        text: '代码规范',
+        text: '构建工具',
+        link: '/engineering/build/vite',
+      },
+      {
+        text: '代码质量',
         link: '/engineering/coding-rule',
       },
-      {
-        text: '代码测试',
-        link: '/engineering/coding-test',
-      },
-      {
-        text: '前端监控与埋点',
-        link: '/engineering/monitor',
-      },
-      {
-        text: '性能优化',
-        link: '/engineering/performance',
-      },
-      {
-        text: 'Web安全',
-        link: '/engineering/security',
-      },
+      { text: '性能与安全', link: '/engineering/performance' },
       {
         text: 'SEO',
         link: '/engineering/seo',
@@ -842,7 +827,7 @@ export const sidebar: ThemeConfig['sidebar'] = {
         },
         {
           text: 'nextjs 状态管理',
-          link: '/framework/nextjs/status'
+          link: '/framework/nextjs/status',
         },
         {
           text: 'nextjs 数据获取',
@@ -856,34 +841,38 @@ export const sidebar: ThemeConfig['sidebar'] = {
           text: 'nextjs 生态',
           link: '/framework/nextjs/ecosystem',
         },
+        {
+          text: 'nextjs 服务端API',
+          link: '/framework/nextjs/api',
+        },
       ],
     },
     {
       text: 'umijs',
       items: [
         {
-          text: 'UmiJS 简介',
-          link: '/framework/umijs/intro',
+          text: 'umijs 入门',
+          link: '/framework/umijs/start',
         },
         {
-          text: '基础配置',
-          link: '/framework/umijs/config',
+          text: 'umijs 路由',
+          link: '/framework/umijs/router',
         },
         {
-          text: '路由系统',
-          link: '/framework/umijs/routing',
+          text: 'umijs 状态管理',
+          link: '/framework/umijs/status',
         },
         {
-          text: '插件系统',
-          link: '/framework/umijs/plugins',
-        },
-        {
-          text: 'Mock 数据',
+          text: 'umijs Mock与代理',
           link: '/framework/umijs/mock',
         },
         {
-          text: '部署',
-          link: '/framework/umijs/deployment',
+          text: 'umijs 构建与部署',
+          link: '/framework/umijs/build',
+        },
+        {
+          text: 'umijs 插件系统',
+          link: '/framework/umijs/plugins',
         },
       ],
     },
@@ -891,8 +880,36 @@ export const sidebar: ThemeConfig['sidebar'] = {
       text: 'nuxtjs',
       items: [
         {
-          text: 'nextjs 简介',
-          link: '/framework/nextjs/intro',
+          text: 'nuxtjs 入门',
+          link: '/framework/nuxtjs/start',
+        },
+        {
+          text: 'nuxtjs 路由系统',
+          link: '/framework/nuxtjs/router',
+        },
+        {
+          text: 'nuxtjs 渲染模式',
+          link: '/framework/nuxtjs/rendering',
+        },
+        {
+          text: 'nuxtjs 状态管理',
+          link: '/framework/nuxtjs/status',
+        },
+        {
+          text: 'nuxtjs 数据获取',
+          link: '/framework/nuxtjs/data-fetching',
+        },
+        {
+          text: 'nuxtjs 中间件',
+          link: '/framework/nuxtjs/middleware',
+        },
+        {
+          text: 'nuxtjs 服务端API',
+          link: '/framework/nuxtjs/api',
+        },
+        {
+          text: 'nuxtjs 插件',
+          link: '/framework/nuxtjs/plugins',
         },
       ],
     },
@@ -900,24 +917,44 @@ export const sidebar: ThemeConfig['sidebar'] = {
       text: 'Vue 2 (EOL)',
       items: [
         {
-          text: 'Vue 2 简介',
+          text: 'Vue2 简介',
           link: '/framework/vue2/intro',
         },
         {
-          text: 'Vue 2 基础',
+          text: 'Vue2 基础',
           link: '/framework/vue2/basic',
         },
         {
-          text: 'Options API',
-          link: '/framework/vue2/options-api',
+          text: 'Vue2 Component',
+          link: '/framework/vue2/component',
         },
         {
-          text: 'Vue 2 与 Vue 3 区别',
-          link: '/framework/vue2/differences',
+          text: 'Vue2 Directive',
+          link: '/framework/vue2/directives',
         },
         {
-          text: '迁移指南',
-          link: '/framework/vue2/migration',
+          text: 'Vue2 Slot',
+          link: '/framework/vue2/slots',
+        },
+        {
+          text: 'Vue2 Option API',
+          link: '/framework/vue2/option-api',
+        },
+        {
+          text: 'Vue2 生命周期',
+          link: '/framework/vue2/lifecycle',
+        },
+        {
+          text: 'Vue2 响应式原理',
+          link: '/framework/vue2/reactive',
+        },
+        {
+          text: 'Vue2 状态管理',
+          link: '/framework/vue2/state',
+        },
+        {
+          text: 'Vue2 内置组件',
+          link: '/framework/vue2/internal-component',
         },
       ],
     },
@@ -925,36 +962,48 @@ export const sidebar: ThemeConfig['sidebar'] = {
       text: 'Angular',
       items: [
         {
-          text: 'Angular 简介',
-          link: '/framework/angular/intro',
+          text: 'Angular 入门',
+          link: '/framework/angular/start',
         },
         {
-          text: 'TypeScript 基础',
-          link: '/framework/angular/typescript',
+          text: 'Angular 架构',
+          link: '/framework/angular/framework',
         },
         {
-          text: '组件与模板',
-          link: '/framework/angular/components',
+          text: 'Angular 模板',
+          link: '/framework/angular/tempalte',
         },
         {
-          text: '服务与依赖注入',
+          text: 'Angular 服务与依赖注入',
           link: '/framework/angular/services',
         },
         {
-          text: '路由与导航',
-          link: '/framework/angular/routing',
+          text: 'Angular 管道',
+          link: '/framework/angular/pipe',
         },
         {
-          text: '表单处理',
-          link: '/framework/angular/forms',
+          text: 'Angular 状态管理',
+          link: '/framework/angular/status',
         },
         {
-          text: 'HTTP 客户端',
+          text: 'Angular Router',
+          link: '/framework/angular/router',
+        },
+        {
+          text: 'Angular HTTP',
           link: '/framework/angular/http',
         },
         {
-          text: '状态管理',
-          link: '/framework/angular/state',
+          text: 'Angular 表单',
+          link: '/framework/angular/form',
+        },
+        {
+          text: 'Angualr Rxjs',
+          link: '/framework/angular/rxjs',
+        },
+        {
+          text: 'Angualr signal',
+          link: '/framework/angular/signal',
         },
       ],
     },
@@ -978,30 +1027,36 @@ export const sidebar: ThemeConfig['sidebar'] = {
       ],
     },
     {
-      text: '构建工具',
-      items: [
-        { text: 'Vite', link: '/engineering/build/vite' },
-        { text: 'Webpack', link: '/engineering/build/webpack' },
-        { text: 'Rollup', link: '/engineering/build/rollup' },
-      ],
-    },
-    {
       text: '架构设计',
       items: [
+        { text: '模块化', link: '/engineering/architecture/module' },
+        {
+          text: '常用目录结构',
+          link: '/engineering/architecture/diretory',
+        },
         {
           text: '微前端',
           link: '/engineering/architecture/micro-frontend',
         },
         { text: 'monorepo', link: '/engineering/architecture/monorep' },
-        { text: '组件化', link: '/engineering/architecture/component' },
+      ],
+    },
+    {
+      text: '构建工具',
+      items: [
+        { text: 'Vite', link: '/engineering/build/vite' },
+        { text: 'Webpack', link: '/engineering/build/webpack' },
+        { text: 'Rollup', link: '/engineering/build/rollup' },
+        { text: 'esbuild', link: '/engineering/build/esbuild' },
       ],
     },
     {
       text: '代码质量',
       items: [
-        { text: '代码规范', link: '/engineering/coding-rule' },
+        { text: '代码编译检查', link: '/engineering/coding-rule' },
+        { text: '代码规范', link: '/engineering/coding-style' },
         { text: '代码测试', link: '/engineering/coding-test' },
-        { text: '代码审查', link: '/engineering/code-review' },
+        { text: 'git hooks', link: '/engineering/git-hooks' },
       ],
     },
     {
