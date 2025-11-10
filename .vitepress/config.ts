@@ -96,12 +96,20 @@ const nav: ThemeConfig['nav'] = [
         link: '/web-3d/threejs',
       },
       {
-        text: 'WebXR',
-        link: '/web-3d/webxr',
+        text: '交互',
+        link: '/web-3d/interaction',
       },
       {
         text: '性能优化',
         link: '/web-3d/performance',
+      },
+      {
+        text: 'WebXR',
+        link: '/web-3d/webxr',
+      },
+      {
+        text: 'WebGPU',
+        link: '/web-3d/web-gpu',
       },
     ],
   },
