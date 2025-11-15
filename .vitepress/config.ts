@@ -20,6 +20,7 @@ const nav: ThemeConfig['nav'] = [
     text: '基础',
     activeMatch: `^/basic/`,
     items: [
+      { text: '必备', link: '/basic/necessary/internet' },
       { text: 'html', link: '/basic/html/intro' },
       { text: 'css', link: '/basic/css/basic' },
       { text: 'javascript', link: '/basic/javascript/basic/introduction' },
@@ -71,7 +72,11 @@ const nav: ThemeConfig['nav'] = [
       { text: '性能与安全', link: '/engineering/performance' },
       {
         text: 'SEO',
-        link: '/engineering/seo',
+        link: '/engineering/seo/basic',
+      },
+      {
+        text: '无障碍',
+        link: '/engineering/accessible/into',
       },
     ],
   },
@@ -110,57 +115,24 @@ const nav: ThemeConfig['nav'] = [
     activeMatch: '^/full-stack/',
     items: [
       {
-        text: '网络',
-        link: '/full-stack/network',
+        text: '网络基础',
+        link: '/full-stack/network/http',
+      },
+      {
+        text: '后端框架',
+        link: '/full-stack/framework/node',
+      },
+      {
+        text: 'Serverless',
+        link: '/full-stack/serverless/intro',
       },
       {
         text: '数据库',
-        link: '/full-stack/database',
-      },
-      {
-        text: 'koa',
-        link: '/full-stack/koa',
-      },
-      {
-        text: 'express',
-        link: '/full-stack/express',
-      },
-      {
-        text: 'serverless',
-        link: '/full-stack/serverless',
+        link: '/full-stack/database/mysql',
       },
       {
         text: '运维',
-        items: [
-          {
-            text: '服务器与环境',
-            link: '/operations/linux/intro',
-          },
-          {
-            text: 'Docker',
-            link: '/operations/docker',
-          },
-          {
-            text: '编排',
-            link: '/operations/kubernetes',
-          },
-          {
-            text: 'CI/CD',
-            link: '/operations/ci-cd',
-          },
-          {
-            text: '监控与日志',
-            link: '/operations/monitor',
-          },
-          {
-            text: '安全与权限',
-            link: '/operations/security',
-          },
-          {
-            text: '云与自动化',
-            link: '/operations/automation',
-          },
-        ],
+        link: '/full-stack/linux',
       },
     ],
   },
@@ -222,6 +194,20 @@ const nav: ThemeConfig['nav'] = [
 
 export const sidebar: ThemeConfig['sidebar'] = {
   '/basic/': [
+    {
+      text: '必备',
+      items: [
+        { text: '科学上网', link: '/basic/necessary/internet' },
+        {
+          text: '搜索',
+          link: '/basic/necessary/searching',
+        },
+        {
+          text: 'AI',
+          link: '/basic/necessary/ai',
+        },
+      ],
+    },
     {
       text: 'html',
       items: [
@@ -536,6 +522,7 @@ export const sidebar: ThemeConfig['sidebar'] = {
         { text: 'Git 分支管理', link: '/basic/git/branch' },
         { text: 'Git 标签管理', link: '/basic/git/tag' },
         { text: 'Git 工作流', link: '/basic/git/workflow' },
+        { text: 'Git Hooks', link: '/basic/git/hooks' },
         { text: 'Git 高级技巧', link: '/basic/git/advanced' },
       ],
     },
@@ -696,6 +683,7 @@ export const sidebar: ThemeConfig['sidebar'] = {
         { text: 'node 安装与配置', link: '/basic/node/installation' },
         { text: 'node 事件循环', link: '/basic/node/event-loop' },
         { text: 'node 常用模块', link: '/basic/node/modules' },
+        { text: 'npm 包管理器', link: '/basic/node/npm' },
       ],
     },
   ],
@@ -1053,10 +1041,10 @@ export const sidebar: ThemeConfig['sidebar'] = {
     {
       text: '代码质量',
       items: [
-        { text: '代码编译检查', link: '/engineering/coding-rule' },
-        { text: '代码规范', link: '/engineering/coding-style' },
-        { text: '代码测试', link: '/engineering/coding-test' },
-        { text: 'git hooks', link: '/engineering/git-hooks' },
+        { text: '代码编译检查', link: '/engineering/coding/rule' },
+        { text: '代码规范', link: '/engineering/coding/style' },
+        { text: '代码测试', link: '/engineering/coding/test' },
+        { text: '代码提交检查', link: '/engineering/coding/push' },
       ],
     },
     {
@@ -1070,9 +1058,46 @@ export const sidebar: ThemeConfig['sidebar'] = {
     {
       text: 'SEO',
       items: [
-        { text: 'SEO基础', link: '/engineering/seo' },
+        { text: 'SEO基础', link: '/engineering/seo/basic' },
         { text: '服务端渲染', link: '/engineering/seo/ssr' },
         { text: '预渲染', link: '/engineering/seo/prerender' },
+      ],
+    },
+    {
+      text: '无障碍',
+      items: [
+        {
+          text: '无障碍简介',
+          link: '/engineering/accessible/intro',
+        },
+        {
+          text: 'html无障碍',
+          link: '/engineering/accessible/html',
+        },
+        {
+          text: '键盘无障碍',
+          link: '/engineering/accessible/keyboard',
+        },
+        {
+          text: '色彩与对比度',
+          link: '/engineering/accessible/keyboard',
+        },
+        {
+          text: 'aria',
+          link: '/engineering/accessible/aria',
+        },
+        {
+          text: '无障碍框架',
+          link: '/engineering/accessible/framework',
+        },
+        {
+          text: '手动测试无障碍',
+          link: '/engineering/accessible/test',
+        },
+        {
+          text: '自动测试无障碍',
+          link: '/engineering/accessible/test',
+        },
       ],
     },
   ],
@@ -1130,55 +1155,36 @@ export const sidebar: ThemeConfig['sidebar'] = {
       ],
     },
   ],
-  '/mobile/': [
-    {
-      text: '移动端基础',
-      items: [
-        { text: '移动端开发概述', link: '/mobile/basic' },
-        { text: '视口与分辨率', link: '/mobile/basic/viewport' },
-        { text: '触摸事件', link: '/mobile/basic/touch-events' },
-      ],
-    },
-    {
-      text: '移动端框架',
-      items: [
-        { text: 'React Native', link: '/mobile/framework/react-native' },
-        { text: 'Flutter', link: '/mobile/framework/flutter' },
-        { text: 'Weex', link: '/mobile/framework/weex' },
-      ],
-    },
-    {
-      text: '移动端Web',
-      items: [
-        { text: '响应式设计', link: '/mobile/web/responsive' },
-        { text: 'PWA', link: '/mobile/web/pwa' },
-        { text: '混合开发', link: '/mobile/web/hybrid' },
-      ],
-    },
-    {
-      text: '小程序',
-      items: [
-        { text: '微信小程序', link: '/mobile/applet/wechat' },
-        { text: '支付宝小程序', link: '/mobile/applet/alipay' },
-        { text: '跨端开发', link: '/mobile/applet/cross-platform' },
-      ],
-    },
-    {
-      text: '调试与发布',
-      items: [
-        { text: '移动端调试', link: '/mobile/debug' },
-        { text: '应用商店发布', link: '/mobile/publish' },
-        { text: '热更新', link: '/mobile/publish/hot-update' },
-      ],
-    },
-  ],
   '/full-stack/': [
     {
       text: '网络基础',
       items: [
-        { text: 'HTTP 协议', link: '/full-stack/network/http' },
+        { text: 'HTTP', link: '/full-stack/network/http' },
         { text: 'TCP/IP', link: '/full-stack/network/tcp-ip' },
+        { text: 'UPD', link: '/full-stack/network/tcp-ip' },
+        { text: 'HTTPS', link: '/full-stack/network/https' },
         { text: 'WebSocket', link: '/full-stack/network/websocket' },
+        { text: 'wireshark', link: '/full-stack/network/wireshark' },
+      ],
+    },
+    {
+      text: '后端框架',
+      items: [
+        { text: 'node 后端基础', link: '/full-stack/framework/node' },
+        { text: 'express.js', link: '/full-stack/framework/express' },
+        { text: 'nest.js', link: '/full-stack/framework/nestjs' },
+        { text: 'koa.js', link: '/full-stack/framework/koa' },
+      ],
+    },
+    {
+      text: 'Serverless',
+      items: [
+        { text: 'Serverless 简介', link: '/full-stack/serverless/intro' },
+        {
+          text: 'Serverless 架构',
+          link: '/full-stack/serverless/architecture',
+        },
+        { text: '云函数', link: '/full-stack/serverless/functions' },
       ],
     },
     {
@@ -1190,57 +1196,81 @@ export const sidebar: ThemeConfig['sidebar'] = {
       ],
     },
     {
-      text: '后端框架',
+      text: '运维',
       items: [
-        { text: 'Koa.js', link: '/full-stack/koa' },
-        { text: 'Express.js', link: '/full-stack/express' },
-        { text: 'Next.js', link: '/full-stack/nextjs' },
-        { text: 'Nest.js', link: '/full-stack/nestjs' },
-      ],
-    },
-    {
-      text: 'Serverless',
-      items: [
-        { text: 'Serverless 概念', link: '/full-stack/serverless' },
-        { text: '云函数', link: '/full-stack/serverless/functions' },
         {
-          text: '无服务器架构',
-          link: '/full-stack/serverless/architecture',
+          text: 'Linux',
+          link: '/full-stack/linux',
         },
+        {
+          text: 'Docker',
+          link: '/full-stack/docker',
+        },
+        {
+          text: 'Kubernetes',
+          link: '/full-stack/kubernetes',
+        },
+        { text: 'CI/CD', link: '/full-stack/ci-cd' },
+
+        {
+          text: '监控',
+          link: '/full-stack/monitor',
+        },
+        {
+          text: '安全',
+          link: '/full-stack/security',
+        },
+        { text: '日志', link: '/full-stack/logging' },
       ],
     },
   ],
-  '/operations/': [
+  '/special/': [
     {
-      text: 'Linux',
+      text: '移动端',
       items: [
-        { text: 'Linux 基础', link: '/operations/linux/intro' },
-        { text: '常用命令', link: '/operations/linux/commands' },
-        { text: 'Shell 脚本', link: '/operations/linux/shell' },
-      ],
-    },
-    {
-      text: '容器化',
-      items: [
-        { text: 'Docker 基础', link: '/operations/docker' },
-        { text: 'Dockerfile', link: '/operations/docker/dockerfile' },
-        { text: 'Docker Compose', link: '/operations/docker/compose' },
-      ],
-    },
-    {
-      text: '编排与部署',
-      items: [
-        { text: 'Kubernetes', link: '/operations/kubernetes' },
-        { text: 'CI/CD 流水线', link: '/operations/ci-cd' },
-        { text: '自动化部署', link: '/operations/ci-cd/auto-deploy' },
-      ],
-    },
-    {
-      text: '监控与安全',
-      items: [
-        { text: '系统监控', link: '/operations/monitor' },
-        { text: '日志管理', link: '/operations/monitor/logging' },
-        { text: '安全配置', link: '/operations/security' },
+        {
+          text: '移动端基础',
+          items: [
+            { text: '移动端开发概述', link: '/mobile/basic' },
+            { text: '视口与分辨率', link: '/mobile/basic/viewport' },
+            { text: '触摸事件', link: '/mobile/basic/touch-events' },
+          ],
+        },
+        {
+          text: '移动端框架',
+          items: [
+            {
+              text: 'React Native',
+              link: '/mobile/framework/react-native',
+            },
+            { text: 'Flutter', link: '/mobile/framework/flutter' },
+            { text: 'Weex', link: '/mobile/framework/weex' },
+          ],
+        },
+        {
+          text: '移动端Web',
+          items: [
+            { text: '响应式设计', link: '/mobile/web/responsive' },
+            { text: 'PWA', link: '/mobile/web/pwa' },
+            { text: '混合开发', link: '/mobile/web/hybrid' },
+          ],
+        },
+        {
+          text: '小程序',
+          items: [
+            { text: '微信小程序', link: '/mobile/applet/wechat' },
+            { text: '支付宝小程序', link: '/mobile/applet/alipay' },
+            { text: '跨端开发', link: '/mobile/applet/cross-platform' },
+          ],
+        },
+        {
+          text: '调试与发布',
+          items: [
+            { text: '移动端调试', link: '/mobile/debug' },
+            { text: '应用商店发布', link: '/mobile/publish' },
+            { text: '热更新', link: '/mobile/publish/hot-update' },
+          ],
+        },
       ],
     },
   ],
