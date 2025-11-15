@@ -9,7 +9,7 @@
     "prepare": "husky install",
     "start": "vitepress",
     "dev": "vitepress",
-    "build": "vitepress build && node scripts/build-post.js",
+    "build": "vitepress build",
     "preview": "vitepress preview",
     "lint": "zhlint \"src/**/*.md\"",
     "clean": "rm -rf .vitepress/dist",

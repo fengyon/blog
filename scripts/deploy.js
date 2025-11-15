@@ -26,6 +26,7 @@ const main = async () => {
     console.log(`${deployDir} exsits`)
   }
   execSyncWithLog(`cd "${deployDir}" && git pull && rm -rf *`)
+  execSyncWithLog('echo "hookall.pages.dev" > CNAME')
   execSyncWithLog(
     `cp -r ${join(deployDir, '../../.vitepress/dist')}/. ${deployDir}`,
   )
