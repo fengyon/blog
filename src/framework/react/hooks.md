@@ -20,7 +20,7 @@ React Hooks 是 React 16.8 版本引入的新特性，它允许你在函数组�
 
 ## Hooks 使用规则
 
-### 1. 只在最顶层使用 Hook
+### 1。只在最顶层使用 Hook
 
 **不要在循环、条件或嵌套函数中调用 Hook**
 
@@ -41,7 +41,7 @@ function MyComponent() {
 }
 ```
 
-### 2. 只在 React 函数中调用 Hook
+### 2。只在 React 函数中调用 Hook
 
 **在 React 函数组件或自定义 Hook 中调用 Hook**
 
@@ -327,7 +327,7 @@ function TextInputWithFocusButton() {
 
 ## 自定义 Hooks
 
-自定义 Hook 是一个 JavaScript 函数，其名称以 "use" 开头，可以调用其他 Hook。
+自定义 Hook 是一个 JavaScript 函数，其名称以“use”开头，可以调用其他 Hook。
 
 ### 示例：自定义 useLocalStorage Hook
 

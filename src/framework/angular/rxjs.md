@@ -2,7 +2,7 @@
 
 ## RxJS 概述
 
-RxJS（Reactive Extensions for JavaScript）是 Angular 中用于响应式编程的库，它使用 Observable 序列来处理异步事件和数据流。
+RxJS (Reactive Extensions for JavaScript) 是 Angular 中用于响应式编程的库，它使用 Observable 序列来处理异步事件和数据流。
 
 示意图：
 ```

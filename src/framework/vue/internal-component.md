@@ -21,14 +21,14 @@ Vue 的主要内置组件包括：
 
 以下示例均使用 Vue 3 的 `script setup` 语法。
 
-### 1. `Transition` 组件
+### 1。`Transition` 组件
 
 `Transition` 组件通过自动应用 CSS 过渡类名，为元素或组件的进入/离开阶段添加动画。
 
 - **作用**：为单个元素或组件提供动画过渡效果。
 - **常用属性**：
   - `name`：用于自动生成过渡 CSS 类名的前缀。
-  - `mode`：控制离开/进入过渡的时序，例如 `out-in`（当前元素先离开，新元素再进入）。
+  - `mode`：控制离开/进入过渡的时序，例如 `out-in` (当前元素先离开，新元素再进入)。
 
 **示例：淡入淡出过渡**
 
@@ -68,12 +68,12 @@ const show = ref(true)
 </style>
 ```
 
-### 2. `TransitionGroup` 组件
+### 2。`TransitionGroup` 组件
 
 `TransitionGroup` 用于对 `v-for` 列表中的元素或组件同时进行过渡处理，特别擅长处理元素位置变化的动画。
 
 - **作用**：为列表中的多个元素或组件提供过渡效果。
-- **与 `Transition` 的区别**：`TransitionGroup` 会渲染为一个真实的 DOM 元素（默认是 `<span>`，可通过 `tag` 属性定制），并且每个子元素都必须有独立的 `key`。
+- **与 `Transition` 的区别**：`TransitionGroup` 会渲染为一个真实的 DOM 元素 (默认是 `<span>`，可通过 `tag` 属性定制)，并且每个子元素都必须有独立的 `key`。
 
 **示例：列表项过渡**
 
@@ -124,14 +124,14 @@ function removeItem(itemId) {
 </style>
 ```
 
-### 3. `KeepAlive` 组件
+### 3。`KeepAlive` 组件
 
 `KeepAlive` 是一个抽象组件，用于在动态切换多个组件时，缓存非活动组件的实例，从而保留其状态或避免重新渲染。
 
 - **作用**：缓存包裹在其中的动态切换组件。
 - **常用属性**：
   - `include` / `exclude`：明确哪些组件需要缓存或排除。
-  - `max`：限制最大缓存实例数，使用 LRU（最近最少使用）算法进行置换。
+  - `max`：限制最大缓存实例数，使用 LRU (最近最少使用) 算法进行置换。
 - **生命周期**：被缓存的组件会额外触发 `activated` (激活) 和 `deactivated` (失活) 生命周期钩子。
 
 **示例：缓存标签页**
@@ -171,9 +171,9 @@ const currentTabComponent = computed(
 </script>
 ```
 
-### 4. `Teleport` 组件
+### 4。`Teleport` 组件
 
-`Teleport` 可以将组件的一部分模板"传送"到该组件 DOM 层级之外的其他位置，常用于处理模态框、提示框等需要突破父容器布局限制的场景。
+`Teleport` 可以将组件的一部分模板“传送”到该组件 DOM 层级之外的其他位置，常用于处理模态框、提示框等需要突破父容器布局限制的场景。
 
 - **作用**：将其插槽内容渲染到 DOM 中的另一个位置。
 - **常用属性**：
@@ -223,9 +223,9 @@ const modalOpen = ref(false)
 </style>
 ```
 
-### 5. `Suspense` 组件（实验性组件）
+### 5。`Suspense` 组件 (实验性组件)
 
-`Suspense` 组件可以优雅地处理异步组件（或具有 `async setup` 的组件）的加载状态，在异步依赖解析完成前显示一个回退内容。
+`Suspense` 组件可以优雅地处理异步组件 (或具有 `async setup` 的组件) 的加载状态，在异步依赖解析完成前显示一个回退内容。
 
 - **作用**：用于协调对组件树中嵌套的异步依赖的处理。
 - **插槽**：
@@ -256,7 +256,7 @@ const AsyncComponent = defineAsyncComponent(() =>
 </script>
 ```
 
-### 6. 动态组件：`component` 与 `:is`
+### 6。动态组件：`component` 与 `:is`
 
 `component` 是一个抽象的元组件，通过绑定 `:is` 属性，可以动态地渲染不同的组件。
 

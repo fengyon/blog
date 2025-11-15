@@ -4,7 +4,7 @@
 多年以来，web 开发者都是将网页内容存放在 HTML 中，样式放在 CSS 中，而逻辑则放在 JavaScript 中 —— 通常是在不同的文件中！
 页面的内容通过标签语言描述并存放在 HTML 文件中，而逻辑则单独存放在 JavaScript 文件中。
 但随着 Web 的交互性越来越强，逻辑越来越决定页面中的内容。JavaScript 控制着 HTML 的内容！
-因此，React 推荐使用`JSX`语法扩展将渲染逻辑和标签渲染都放在 JavaScript 中。
+因此，React 推荐使用 `JSX` 语法扩展将渲染逻辑和标签渲染都放在 JavaScript 中。
 
 ## 从 HTML 到 JSX
 
@@ -19,7 +19,7 @@ JSX 是 React 最具代表性的语法扩展，它让我们可以在 JavaScript 
 </div>
 ```
 
-可以使用`jsx`函数 创建 react 元素，然后进一步渲染
+可以使用 `jsx` 函数创建 react 元素，然后进一步渲染
 
 ```javascript
 import { jsx } from 'react/jsx-runtime'
@@ -39,9 +39,9 @@ const container = jsx('div', {
 // )
 ```
 
-在 JavaScript 中使用`React.createElement`编写 html 结构非常繁琐，而且写完之后难以阅读，很难跟真正的 html 结构联系起来。
+在 JavaScript 中使用 `React.createElement` 编写 html 结构非常繁琐，而且写完之后难以阅读，很难跟真正的 html 结构联系起来。
 
-因此 react 推出了`jsx`语法扩展，可以在 JavaScript 中使用类 html 语法书写 html 结构，方便编码与阅读。
+因此 react 推出了 `jsx` 语法扩展，可以在 JavaScript 中使用类 html 语法书写 html 结构，方便编码与阅读。
 
 ```jsx
 const container = (
@@ -54,12 +54,12 @@ const container = (
 
 ## 基本语法
 
-`jsx`的语法跟 html 语法大部分类似，但是 JSX 语法更加严格并且相比 HTML 有更多的规则。
+`jsx` 的语法跟 html 语法大部分类似，但是 JSX 语法更加严格并且相比 HTML 有更多的规则。
 
 ### 必须有一个根元素
 
 如果想要在一个组件中包含多个元素，需要用一个根元素把它们包裹起来。
-如果不想在 html 中增加额外的元素，可以用`<>`和`</>`代替，这个元素会被渲染成 html 中的[Fragment](https://zh-hans.react.dev/reference/react/Fragment)
+如果不想在 html 中增加额外的元素，可以用 `<>` 和 `</>` 代替，这个元素会被渲染成 html 中的 [Fragment](https://zh-hans.react.dev/reference/react/Fragment)
 
 ```jsx
 // 1. 必须有一个根元素
@@ -80,7 +80,7 @@ const element2 = (
 
 ### 标签必须闭合
 
-JSX 要求标签必须正确闭合，像 `<img>`、`<input>`这样的自闭合标签必须书写成 `<img />`、`<input />`
+JSX 要求标签必须正确闭合，像 `<img>`、`<input>` 这样的自闭合标签必须书写成 `<img />`、`<input />`
 
 ```jsx
 // 正确
@@ -95,7 +95,7 @@ const element = (
 
 ### 大部分属性使用驼峰式命名法
 
-为了在 JavaScript 中保持统一风格，不使用`-`符号，而是使用小驼峰时命名 (第一个单词首字母小写，后面单词首字母大写)。但是由于历史原因，`aria-*` 和 `data-*` 属性是以带 `-` 符号的 HTML 格式书写的。
+为了在 JavaScript 中保持统一风格，不使用 `-` 符号，而是使用小驼峰时命名 (第一个单词首字母小写，后面单词首字母大写)。但是由于历史原因，`aria-*` 和 `data-*` 属性是以带 `-` 符号的 HTML 格式书写的。
 
 ```jsx
 <div>
@@ -109,13 +109,13 @@ const element = (
 
 ### 嵌入 JavaScript 表达式
 
-跟 html 一样，JSX 使用`""`或者`''`包裹字符串
+跟 html 一样，JSX 使用 `""` 或者 `''` 包裹字符串
 
 ```jsx
 <img customAttr="123" />
 ```
 
-如果你想传递 JS 变量来动态修改值，可以使用 `{}` 包裹 JavaScript 表达式，`{}`只能在以下两种场景中使用
+如果你想传递 JS 变量来动态修改值，可以使用 `{}` 包裹 JavaScript 表达式，`{}` 只能在以下两种场景中使用
 
 - JSX 标签内
 
@@ -167,7 +167,7 @@ const element = <div className="my-component">使用外部样式</div>
 
 ### 添加事件
 
-JSX 的事件属性为 `on` + EventName，比如 `onClick`, `onChange`, `onFocus`，值为函数
+JSX 的事件属性为 `on` + EventName，比如 `onClick`，`onChange`，`onFocus`，值为函数
 
 ```jsx
 const handleClick = () => {
@@ -192,7 +192,7 @@ const element = (
 
 在 React 中，JSX 会被编译成 `React.createElement` 调用：
 
-**编译前（JSX）：**
+**编译前 (JSX)：**
 
 ```jsx
 const handleClick = () => {
@@ -207,7 +207,7 @@ const element = (
 )
 ```
 
-**编译后（JavaScript）：**
+**编译后 (JavaScript)：**
 
 ```javascript
 import { jsx } from 'react/jsx-runtime'

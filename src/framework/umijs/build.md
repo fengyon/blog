@@ -158,7 +158,7 @@ server {
 ### 部署流程
 
 **标准部署步骤**：
-1. 准备服务器环境（Node.js、Nginx）
+1. 准备服务器环境 (Node.js、Nginx)
 2. 获取项目代码：`git clone <项目仓库地址>`
 3. 安装依赖：`npm install`
 4. 构建项目：`npm run build`

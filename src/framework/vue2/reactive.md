@@ -67,7 +67,7 @@ function observe(data) {
 
 ## 依赖收集
 
-每个响应式属性都有一个对应的 Dep 实例，用于管理所有依赖（Watcher）。
+每个响应式属性都有一个对应的 Dep 实例，用于管理所有依赖 (Watcher)。
 
 ### Dep 类
 

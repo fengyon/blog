@@ -4,7 +4,7 @@ Next.js 提供了强大且直观的文件系统路由。通过约定的目录结
 
 ## 路由基础
 
-Next.js 有两种主要的路由系统：**Pages Router**（传统）和 **App Router**（新版）。
+Next.js 有两种主要的路由系统：**Pages Router** (传统) 和 **App Router** (新版)。
 
 示意图：
 

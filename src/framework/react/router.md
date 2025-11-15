@@ -2,7 +2,7 @@
 
 ## 概述
 
-React Router 是 React 应用的标准路由库，用于实现单页面应用（SPA）的路由管理。
+React Router 是 React 应用的标准路由库，用于实现单页面应用 (SPA) 的路由管理。
 
 ## 安装
 

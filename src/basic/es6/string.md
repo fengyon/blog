@@ -4,14 +4,14 @@
 
 ## 字符的 Unicode 表示法
 
-ES6 加强了对 Unicode 的支持，允许采用`\uxxxx`形式表示一个字符，其中`xxxx`表示字符的 Unicode 码点。
+ES6 加强了对 Unicode 的支持，允许采用 `\uxxxx` 形式表示一个字符，其中 `xxxx` 表示字符的 Unicode 码点。
 
 ```javascript
 "\u0061"
 // "a"
 ```
 
-但是，这种表示法只限于码点在`\u0000`~`\uFFFF`之间的字符。超出这个范围的字符，必须用两个双字节的形式表示。
+但是，这种表示法只限于码点在 `\u0000`~`\uFFFF` 之间的字符。超出这个范围的字符，必须用两个双字节的形式表示。
 
 ```javascript
 "\uD842\uDFB7"
@@ -21,7 +21,7 @@ ES6 加强了对 Unicode 的支持，允许采用`\uxxxx`形式表示一个字�
 // " 7"
 ```
 
-上面代码表示，如果直接在`\u`后面跟上超过`0xFFFF`的数值（比如`\u20BB7`），JavaScript 会理解成`\u20BB+7`。由于`\u20BB`是一个不可打印字符，所以只会显示一个空格，后面跟着一个`7`。
+上面代码表示，如果直接在 `\u` 后面跟上超过 `0xFFFF` 的数值 (比如 `\u20BB7`)，JavaScript 会理解成 `\u20BB+7`。由于 `\u20BB` 是一个不可打印字符，所以只会显示一个空格，后面跟着一个 `7`。
 
 ES6 对这一点做出了改进，只要将码点放入大括号，就能正确解读该字符。
 
@@ -53,7 +53,7 @@ hell\u{6F} // 123
 
 ## 字符串的遍历器接口
 
-ES6 为字符串添加了遍历器接口（详见《Iterator》一章），使得字符串可以被`for...of`循环遍历。
+ES6 为字符串添加了遍历器接口 (详见《Iterator》一章)，使得字符串可以被 `for...of` 循环遍历。
 
 ```javascript
 for (let codePoint of 'foo') {
@@ -64,7 +64,7 @@ for (let codePoint of 'foo') {
 // "o"
 ```
 
-除了遍历字符串，这个遍历器最大的优点是可以识别大于`0xFFFF`的码点，传统的`for`循环无法识别这样的码点。
+除了遍历字符串，这个遍历器最大的优点是可以识别大于 `0xFFFF` 的码点，传统的 `for` 循环无法识别这样的码点。
 
 ```javascript
 let text = String.fromCodePoint(0x20BB7);
@@ -81,34 +81,34 @@ for (let i of text) {
 // "𠮷"
 ```
 
-上面代码中，字符串`text`只有一个字符，但是`for`循环会认为它包含两个字符（都不可打印），而`for...of`循环会正确识别出这一个字符。
+上面代码中，字符串 `text` 只有一个字符，但是 `for` 循环会认为它包含两个字符 (都不可打印)，而 `for...of` 循环会正确识别出这一个字符。
 
 ## 直接输入 U+2028 和 U+2029
 
-JavaScript 字符串允许直接输入字符，以及输入字符的转义形式。举例来说，“中”的 Unicode 码点是 U+4e2d，你可以直接在字符串里面输入这个汉字，也可以输入它的转义形式`\u4e2d`，两者是等价的。
+JavaScript 字符串允许直接输入字符，以及输入字符的转义形式。举例来说，“中”的 Unicode 码点是 U+4e2d，你可以直接在字符串里面输入这个汉字，也可以输入它的转义形式 `\u4e2d`，两者是等价的。
 
 ```javascript
 '中' === '\u4e2d' // true
 ```
 
-但是，JavaScript 规定有5个字符，不能在字符串里面直接使用，只能使用转义形式。
+但是，JavaScript 规定有 5 个字符，不能在字符串里面直接使用，只能使用转义形式。
 
-- U+005C：反斜杠（reverse solidus)
-- U+000D：回车（carriage return）
-- U+2028：行分隔符（line separator）
-- U+2029：段分隔符（paragraph separator）
-- U+000A：换行符（line feed）
+- U+005C：反斜杠 (reverse solidus)
+- U+000D：回车 (carriage return)
+- U+2028：行分隔符 (line separator)
+- U+2029：段分隔符 (paragraph separator)
+- U+000A：换行符 (line feed)
 
-举例来说，字符串里面不能直接包含反斜杠，一定要转义写成`\\`或者`\u005c`。
+举例来说，字符串里面不能直接包含反斜杠，一定要转义写成 `\\` 或者 `\u005c`。
 
-这个规定本身没有问题，麻烦在于 JSON 格式允许字符串里面直接使用 U+2028（行分隔符）和 U+2029（段分隔符）。这样一来，服务器输出的 JSON 被`JSON.parse`解析，就有可能直接报错。
+这个规定本身没有问题，麻烦在于 JSON 格式允许字符串里面直接使用 U+2028 (行分隔符) 和 U+2029 (段分隔符)。这样一来，服务器输出的 JSON 被 `JSON.parse` 解析，就有可能直接报错。
 
 ```javascript
 const json = '"\u2028"';
 JSON.parse(json); // 可能报错
 ```
 
-JSON 格式已经冻结（RFC 7159），没法修改了。为了消除这个报错，[ES2019](https://github.com/tc39/proposal-json-superset) 允许 JavaScript 字符串直接输入 U+2028（行分隔符）和 U+2029（段分隔符）。
+JSON 格式已经冻结 (RFC 7159)，没法修改了。为了消除这个报错，[ES2019](https://github.com/tc39/proposal-json-superset) 允许 JavaScript 字符串直接输入 U+2028 (行分隔符) 和 U+2029 (段分隔符)。
 
 ```javascript
 const PS = eval("'\u2029'");
@@ -120,17 +120,17 @@ const PS = eval("'\u2029'");
 
 ## JSON.stringify() 的改造
 
-根据标准，JSON 数据必须是 UTF-8 编码。但是，现在的`JSON.stringify()`方法有可能返回不符合 UTF-8 标准的字符串。
+根据标准，JSON 数据必须是 UTF-8 编码。但是，现在的 `JSON.stringify()` 方法有可能返回不符合 UTF-8 标准的字符串。
 
-具体来说，UTF-8 标准规定，`0xD800`到`0xDFFF`之间的码点，不能单独使用，必须配对使用。比如，`\uD834\uDF06`是两个码点，但是必须放在一起配对使用，代表字符`𝌆`。这是为了表示码点大于`0xFFFF`的字符的一种变通方法。单独使用`\uD834`和`\uDF06`这两个码点是不合法的，或者颠倒顺序也不行，因为`\uDF06\uD834`并没有对应的字符。
+具体来说，UTF-8 标准规定，`0xD800` 到 `0xDFFF` 之间的码点，不能单独使用，必须配对使用。比如，`\uD834\uDF06` 是两个码点，但是必须放在一起配对使用，代表字符 `𝌆`。这是为了表示码点大于 `0xFFFF` 的字符的一种变通方法。单独使用 `\uD834` 和 `\uDF06` 这两个码点是不合法的，或者颠倒顺序也不行，因为 `\uDF06\uD834` 并没有对应的字符。
 
-`JSON.stringify()`的问题在于，它可能返回`0xD800`到`0xDFFF`之间的单个码点。
+`JSON.stringify()` 的问题在于，它可能返回 `0xD800` 到 `0xDFFF` 之间的单个码点。
 
 ```javascript
 JSON.stringify('\u{D834}') // "\u{D834}"
 ```
 
-为了确保返回的是合法的 UTF-8 字符，[ES2019](https://github.com/tc39/proposal-well-formed-stringify) 改变了`JSON.stringify()`的行为。如果遇到`0xD800`到`0xDFFF`之间的单个码点，或者不存在的配对形式，它会返回转义字符串，留给应用自己决定下一步的处理。
+为了确保返回的是合法的 UTF-8 字符，[ES2019](https://github.com/tc39/proposal-well-formed-stringify) 改变了 `JSON.stringify()` 的行为。如果遇到 `0xD800` 到 `0xDFFF` 之间的单个码点，或者不存在的配对形式，它会返回转义字符串，留给应用自己决定下一步的处理。
 
 ```javascript
 JSON.stringify('\u{D834}') // ""\\uD834""
@@ -139,7 +139,7 @@ JSON.stringify('\uDF06\uD834') // ""\\udf06\\ud834""
 
 ## 模板字符串
 
-传统的 JavaScript 语言，输出模板通常是这样写的（下面使用了 jQuery 的方法）。
+传统的 JavaScript 语言，输出模板通常是这样写的 (下面使用了 jQuery 的方法)。
 
 ```javascript
 $('#result').append(
@@ -160,7 +160,7 @@ $('#result').append(`
 `);
 ```
 
-模板字符串（template string）是增强版的字符串，用反引号（&#96;）标识。它可以当作普通字符串使用，也可以用来定义多行字符串，或者在字符串中嵌入变量。
+模板字符串 (template string) 是增强版的字符串，用反引号 (&#96；) 标识。它可以当作普通字符串使用，也可以用来定义多行字符串，或者在字符串中嵌入变量。
 
 ```javascript
 // 普通字符串
@@ -195,7 +195,7 @@ $('#list').html(`
 `);
 ```
 
-上面代码中，所有模板字符串的空格和换行，都是被保留的，比如`<ul>`标签前面会有一个换行。如果你不想要这个换行，可以使用`trim`方法消除它。
+上面代码中，所有模板字符串的空格和换行，都是被保留的，比如 `<ul>` 标签前面会有一个换行。如果你不想要这个换行，可以使用 `trim` 方法消除它。
 
 ```javascript
 $('#list').html(`
@@ -206,7 +206,7 @@ $('#list').html(`
 `.trim());
 ```
 
-模板字符串中嵌入变量，需要将变量名写在`${}`之中。
+模板字符串中嵌入变量，需要将变量名写在 `${}` 之中。
 
 ```javascript
 function authorize(user, action) {
@@ -251,7 +251,7 @@ function fn() {
 // foo Hello World bar
 ```
 
-如果大括号中的值不是字符串，将按照一般的规则转为字符串。比如，大括号中是一个对象，将默认调用对象的`toString`方法。
+如果大括号中的值不是字符串，将按照一般的规则转为字符串。比如，大括号中是一个对象，将默认调用对象的 `toString` 方法。
 
 如果模板字符串中的变量没有声明，将报错。
 
@@ -324,7 +324,7 @@ let template = `
 `;
 ```
 
-上面代码在模板字符串之中，放置了一个常规模板。该模板使用`<%...%>`放置 JavaScript 代码，使用`<%= ... %>`输出 JavaScript 表达式。
+上面代码在模板字符串之中，放置了一个常规模板。该模板使用 `<%...%>` 放置 JavaScript 代码，使用 `<%= ... %>` 输出 JavaScript 表达式。
 
 怎么编译这个模板字符串呢？
 
@@ -353,7 +353,7 @@ template = template
 template = 'echo(`' + template + '`);';
 ```
 
-然后，将`template`封装在一个函数里面返回，就可以了。
+然后，将 `template` 封装在一个函数里面返回，就可以了。
 
 ```javascript
 let script =
@@ -372,7 +372,7 @@ let script =
 return script;
 ```
 
-将上面的内容拼装成一个模板编译函数`compile`。
+将上面的内容拼装成一个模板编译函数 `compile`。
 
 ```javascript
 function compile(template){
@@ -402,7 +402,7 @@ function compile(template){
 }
 ```
 
-`compile`函数的用法如下。
+`compile` 函数的用法如下。
 
 ```javascript
 let parse = eval(compile(template));
@@ -416,7 +416,7 @@ div.innerHTML = parse({ supplies: [ "broom", "mop", "cleaner" ] });
 
 ## 标签模板
 
-模板字符串的功能，不仅仅是上面这些。它可以紧跟在一个函数名后面，该函数将被调用来处理这个模板字符串。这被称为“标签模板”功能（tagged template）。
+模板字符串的功能，不仅仅是上面这些。它可以紧跟在一个函数名后面，该函数将被调用来处理这个模板字符串。这被称为“标签模板”功能 (tagged template)。
 
 ```javascript
 alert`hello`
@@ -437,9 +437,9 @@ tag`Hello ${ a + b } world ${ a * b }`;
 tag(['Hello ', ' world ', ''], 15, 50);
 ```
 
-上面代码中，模板字符串前面有一个标识名`tag`，它是一个函数。整个表达式的返回值，就是`tag`函数处理模板字符串后的返回值。
+上面代码中，模板字符串前面有一个标识名 `tag`，它是一个函数。整个表达式的返回值，就是 `tag` 函数处理模板字符串后的返回值。
 
-函数`tag`依次会接收到多个参数。
+函数 `tag` 依次会接收到多个参数。
 
 ```javascript
 function tag(stringArr, value1, value2){
@@ -453,23 +453,23 @@ function tag(stringArr, ...values){
 }
 ```
 
-`tag`函数的第一个参数是一个数组，该数组的成员是模板字符串中那些没有变量替换的部分，也就是说，变量替换只发生在数组的第一个成员与第二个成员之间、第二个成员与第三个成员之间，以此类推。
+`tag` 函数的第一个参数是一个数组，该数组的成员是模板字符串中那些没有变量替换的部分，也就是说，变量替换只发生在数组的第一个成员与第二个成员之间、第二个成员与第三个成员之间，以此类推。
 
-`tag`函数的其他参数，都是模板字符串各个变量被替换后的值。由于本例中，模板字符串含有两个变量，因此`tag`会接受到`value1`和`value2`两个参数。
+`tag` 函数的其他参数，都是模板字符串各个变量被替换后的值。由于本例中，模板字符串含有两个变量，因此 `tag` 会接受到 `value1` 和 `value2` 两个参数。
 
-`tag`函数所有参数的实际值如下。
+`tag` 函数所有参数的实际值如下。
 
 - 第一个参数：`['Hello ', ' world ', '']`
-- 第二个参数: 15
+- 第二个参数：15
 - 第三个参数：50
 
-也就是说，`tag`函数实际上以下面的形式调用。
+也就是说，`tag` 函数实际上以下面的形式调用。
 
 ```javascript
 tag(['Hello ', ' world ', ''], 15, 50)
 ```
 
-我们可以按照需要编写`tag`函数的代码。下面是`tag`函数的一种写法，以及运行结果。
+我们可以按照需要编写 `tag` 函数的代码。下面是 `tag` 函数的一种写法，以及运行结果。
 
 ```javascript
 let a = 5;
@@ -519,7 +519,7 @@ msg // "The total is 30 (31.5 with tax)"
 
 上面这个例子展示了，如何将各个参数按照原来的位置拼合回去。
 
-`passthru`函数采用 rest 参数的写法如下。
+`passthru` 函数采用 rest 参数的写法如下。
 
 ```javascript
 function passthru(literals, ...values) {
@@ -557,7 +557,7 @@ function SaferHTML(templateData) {
 }
 ```
 
-上面代码中，`sender`变量往往是用户提供的，经过`SaferHTML`函数处理，里面的特殊字符都会被转义。
+上面代码中，`sender` 变量往往是用户提供的，经过 `SaferHTML` 函数处理，里面的特殊字符都会被转义。
 
 ```javascript
 let sender = '<script>alert("abc")</script>'; // 恶意代码
@@ -567,7 +567,7 @@ message
 // <p>&lt;script&gt;alert("abc")&lt;/script&gt; has sent you a message.</p>
 ```
 
-标签模板的另一个应用，就是多语言转换（国际化处理）。
+标签模板的另一个应用，就是多语言转换 (国际化处理)。
 
 ```javascript
 i18n`Welcome to ${siteName}, you are visitor number ${visitorNumber}!`
@@ -602,9 +602,9 @@ jsx`
 `
 ```
 
-上面的代码通过`jsx`函数，将一个 DOM 字符串转为 React 对象。你可以在 GitHub 找到`jsx`函数的[具体实现](https://gist.github.com/lygaret/a68220defa69174bdec5)。
+上面的代码通过 `jsx` 函数，将一个 DOM 字符串转为 React 对象。你可以在 GitHub 找到 `jsx` 函数的[具体实现](https://gist.github.com/lygaret/a68220defa69174bdec5)。
 
-下面则是一个假想的例子，通过`java`函数，在 JavaScript 代码之中运行 Java 代码。
+下面则是一个假想的例子，通过 `java` 函数，在 JavaScript 代码之中运行 Java 代码。
 
 ```javascript
 java`
@@ -617,14 +617,14 @@ class HelloWorldApp {
 HelloWorldApp.main();
 ```
 
-模板处理函数的第一个参数（模板字符串数组），还有一个`raw`属性。
+模板处理函数的第一个参数 (模板字符串数组)，还有一个 `raw` 属性。
 
 ```javascript
 console.log`123`
 // ["123", raw: Array[1]]
 ```
 
-上面代码中，`console.log`接受的参数，实际上是一个数组。该数组有一个`raw`属性，保存的是转义后的原字符串。
+上面代码中，`console.log` 接受的参数，实际上是一个数组。该数组有一个 `raw` 属性，保存的是转义后的原字符串。
 
 请看下面的例子。
 
@@ -638,7 +638,7 @@ function tag(strings) {
 }
 ```
 
-上面代码中，`tag`函数的第一个参数`strings`，有一个`raw`属性，也指向一个数组。该数组的成员与`strings`数组完全一致。比如，`strings`数组是`["First line\nSecond line"]`，那么`strings.raw`数组就是`["First line\\nSecond line"]`。两者唯一的区别，就是字符串里面的斜杠都被转义了。比如，strings.raw 数组会将`\n`视为`\\`和`n`两个字符，而不是换行符。这是为了方便取得转义之前的原始模板而设计的。
+上面代码中，`tag` 函数的第一个参数 `strings`，有一个 `raw` 属性，也指向一个数组。该数组的成员与 `strings` 数组完全一致。比如，`strings` 数组是 `["First line\nSecond line"]`，那么 `strings.raw` 数组就是 `["First line\\nSecond line"]`。两者唯一的区别，就是字符串里面的斜杠都被转义了。比如，strings.raw 数组会将 `\n` 视为 `\\` 和 `n` 两个字符，而不是换行符。这是为了方便取得转义之前的原始模板而设计的。
 
 ## 模板字符串的限制
 
@@ -660,11 +660,11 @@ Breve over the h goes \u{h}ere // 报错
 `
 ```
 
-上面代码中，变量`document`内嵌的模板字符串，对于 LaTEX 语言来说完全是合法的，但是 JavaScript 引擎会报错。原因就在于字符串的转义。
+上面代码中，变量 `document` 内嵌的模板字符串，对于 LaTEX 语言来说完全是合法的，但是 JavaScript 引擎会报错。原因就在于字符串的转义。
 
-模板字符串会将`\u00FF`和`\u{42}`当作 Unicode 字符进行转义，所以`\unicode`解析时报错；而`\x56`会被当作十六进制字符串转义，所以`\xerxes`会报错。也就是说，`\u`和`\x`在 LaTEX 里面有特殊含义，但是 JavaScript 将它们转义了。
+模板字符串会将 `\u00FF` 和 `\u{42}` 当作 Unicode 字符进行转义，所以 `\unicode` 解析时报错；而 `\x56` 会被当作十六进制字符串转义，所以 `\xerxes` 会报错。也就是说，`\u` 和 `\x` 在 LaTEX 里面有特殊含义，但是 JavaScript 将它们转义了。
 
-为了解决这个问题，ES2018 [放松](https://tc39.github.io/proposal-template-literal-revision/)了对标签模板里面的字符串转义的限制。如果遇到不合法的字符串转义，就返回`undefined`，而不是报错，并且从`raw`属性上面可以得到原始字符串。
+为了解决这个问题，ES2018 [放松](https://tc39.github.io/proposal-template-literal-revision/)了对标签模板里面的字符串转义的限制。如果遇到不合法的字符串转义，就返回 `undefined`，而不是报错，并且从 `raw` 属性上面可以得到原始字符串。
 
 ```javascript
 function tag(strs) {
@@ -674,7 +674,7 @@ function tag(strs) {
 tag`\unicode and \u{55}`
 ```
 
-上面代码中，模板字符串原本是应该报错的，但是由于放松了对字符串转义的限制，所以不报错了，JavaScript 引擎将第一个字符设置为`undefined`，但是`raw`属性依然可以得到原始字符串，因此`tag`函数还是可以对原字符串进行处理。
+上面代码中，模板字符串原本是应该报错的，但是由于放松了对字符串转义的限制，所以不报错了，JavaScript 引擎将第一个字符设置为 `undefined`，但是 `raw` 属性依然可以得到原始字符串，因此 `tag` 函数还是可以对原字符串进行处理。
 
 注意，这种对字符串转义的放松，只在标签模板解析字符串时生效，不是标签模板的场合，依然会报错。
 

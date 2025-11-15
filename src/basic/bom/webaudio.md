@@ -4,7 +4,7 @@ Web Audio API 用于操作声音。这个 API 可以让网页发出声音。
 
 ## 基本用法
 
-浏览器原生提供`AudioContext`对象，该对象用于生成一个声音的上下文，与扬声器相连。
+浏览器原生提供 `AudioContext` 对象，该对象用于生成一个声音的上下文，与扬声器相连。
 
 ```javascript
 const audioContext = new AudioContext();
@@ -29,27 +29,27 @@ fetch('sound.mp4')
 
 ## context.createBuffer()
 
-`context.createBuffer()`方法生成一个内存的操作视图，用于存放数据。
+`context.createBuffer()` 方法生成一个内存的操作视图，用于存放数据。
 
 ```javascript
 const buffer = audioContext.createBuffer(channels, signalLength, sampleRate);
 ```
 
-`createBuffer`方法接受三个参数。
+`createBuffer` 方法接受三个参数。
 
 - channels：整数，表示声道。创建单声道的声音，该值为 1。
 - signalLength：整数，表示声音数组的长度。
 - sampleRate：浮点数，表示取样率，即一秒取样多少次。
 
-`signalLength`和`sampleRate`这两个参数决定了声音的长度。比如，如果取样率是`1/3000`（每秒取样3000次），声音数组长度是6000，那么播放的声音是2秒长度。
+`signalLength` 和 `sampleRate` 这两个参数决定了声音的长度。比如，如果取样率是 `1/3000` (每秒取样 3000 次)，声音数组长度是 6000，那么播放的声音是2秒长度。
 
-接着，使用`buffer.getChannelData`方法取出一个声道。
+接着，使用 `buffer.getChannelData` 方法取出一个声道。
 
 ```javascript
 const data = buffer.getChannelData(0)
 ```
 
-上面代码中，`buffer.getChannelData`的参数`0`表示取出第一个声道。
+上面代码中，`buffer.getChannelData` 的参数 `0` 表示取出第一个声道。
 
 下一步，将声音数组放入这个声道。
 
@@ -63,7 +63,7 @@ for (let i = 0; i < signalLength; i += 1) {
 }
 ```
 
-最后，使用`context.createBufferSource`方法生成一个声音节点。
+最后，使用 `context.createBufferSource` 方法生成一个声音节点。
 
 ```javascript
 // 生成一个声音节点
@@ -76,7 +76,7 @@ node.connect(audioContext.destination);
 node.start(audioContext.currentTime);
 ```
 
-默认情况下，播放一次后就将停止播放。如果需要循环播放，可以将节点对象的`looping`属性设为`true`。
+默认情况下，播放一次后就将停止播放。如果需要循环播放，可以将节点对象的 `looping` 属性设为 `true`。
 
 ```javascript
 node.looping = true;
@@ -84,15 +84,15 @@ node.looping = true;
 
 ## 过滤器
 
-Web Audio API 原生提供了一些过滤器（filter），用来处理声音。
+Web Audio API 原生提供了一些过滤器 (filter)，用来处理声音。
 
-首先，使用`context.createBiquadFilter`方法建立过滤器实例。
+首先，使用 `context.createBiquadFilter` 方法建立过滤器实例。
 
 ```javascript
 const filter = audioContext.createBiquadFilter();
 ```
 
-然后，通过`filter.type`属性指定过滤器的类型。
+然后，通过 `filter.type` 属性指定过滤器的类型。
 
 ```javascript
 filter.type = 'lowpass';
@@ -109,7 +109,7 @@ filter.type = 'lowpass';
 - notch
 - allpass
 
-然后指定过滤器的频率（frequency）属性。
+然后指定过滤器的频率 (frequency) 属性。
 
 ```javascript
 filter.frequency.value = frequency

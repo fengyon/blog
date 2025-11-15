@@ -26,7 +26,7 @@ Node.js 是一个基于 Chrome V8 JavaScript 引擎构建的 JavaScript 运行�
 ### nvm 的安装过程
 
 **Windows 系统**：
-1. 卸载已存在的 Node.js（必须）
+1. 卸载已存在的 Node.js (必须)
 2. 从 GitHub 发布页面下载 nvm-windows 安装包
 3. 以管理员身份运行安装程序
 4. 验证安装：`nvm version`
@@ -70,7 +70,7 @@ nvm alias default 16.14.2
 
 ### nvm 工作原理
 
-nvm 通过修改 **PATH 环境变量** 来实现版本切换。当你使用 `nvm use` 命令时，它实际上是将指定版本的 Node.js 二进制文件路径添加到环境变量最前面：
+nvm 通过修改 **PATH 环境变量**来实现版本切换。当你使用 `nvm use` 命令时，它实际上是将指定版本的 Node.js 二进制文件路径添加到环境变量最前面：
 
 ```
 原始 PATH: /usr/local/bin:/usr/bin:/bin
@@ -122,7 +122,7 @@ export PATH=$PATH:/usr/local/node/bin
 然后重新加载配置：`source ~/.bashrc`
 
 **Windows 环境变量**：
-1. 打开"系统属性"→"高级"→"环境变量"
+1. 打开“系统属性”→“高级”→“环境变量”
 2. 在用户变量中添加：
    - `NVM_HOME: C:\Users\用户名\AppData\Roaming\nvm`
    - `NVM_SYMLINK: C:\Program Files\nodejs`
@@ -241,7 +241,7 @@ server.listen(port, hostname, () => {
 node example.js
 ```
 
-在浏览器中访问 `http://127.0.0.1:3000`，将看到 "Hello, Node.js!" 消息。
+在浏览器中访问 `http://127.0.0.1:3000`，将看到“Hello，Node.js！”消息。
 
 ### 包管理基础操作
 
@@ -267,15 +267,15 @@ npm uninstall -g pm2
 
 ### 常见问题解决
 
-**问题1：nvm: command not found**
+**问题 1：nvm：command not found**
 - 原因：环境变量未正确配置
-- 解决：重新加载 shell 配置（`source ~/.bashrc`）或检查系统环境变量
+- 解决：重新加载 shell 配置 (`source ~/.bashrc`) 或检查系统环境变量
 
-**问题2：版本切换无效**
+**问题 2：版本切换无效**
 - 原因：存在全局安装的 Node
 - 解决：卸载全局 Node，检查 PATH 顺序确保 nvm 路径优先
 
-**问题3：权限错误**
+**问题 3：权限错误**
 - 原因：使用 Node 安装程序时，npm 被安装在具有本地权限的目录中
 - 解决：使用 nvm 安装 Node.js，或手动更改 npm 默认目录权限
 

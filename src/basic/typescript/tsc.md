@@ -4,7 +4,7 @@
 
 tsc 是 TypeScript 官方的命令行编译器，用来检查代码，并将其编译成 JavaScript 代码。
 
-tsc 默认使用当前目录下的配置文件`tsconfig.json`，但也可以接受独立的命令行参数。命令行参数会覆盖`tsconfig.json`，比如命令行指定了所要编译的文件，那么 tsc 就会忽略`tsconfig.json`的`files`属性。
+tsc 默认使用当前目录下的配置文件 `tsconfig.json`，但也可以接受独立的命令行参数。命令行参数会覆盖 `tsconfig.json`，比如命令行指定了所要编译的文件，那么 tsc 就会忽略 `tsconfig.json` 的 `files` 属性。
 
 tsc 的基本用法如下。
 
@@ -42,7 +42,7 @@ tsc 的命令行参数，大部分与 tsconfig.json 的属性一一对应。
 
 `--allowUnusedLabels`：如果 TS 脚本有没有用到的标签，不报错。
 
-`--alwaysStrict`：总是在编译产物的头部添加`use strict`。
+`--alwaysStrict`：总是在编译产物的头部添加 `use strict`。
 
 `--baseUrl`：指定非相对位置的模块定位的基准 URL。
 
@@ -54,7 +54,7 @@ tsc 的命令行参数，大部分与 tsconfig.json 的属性一一对应。
 
 `--declarationDir`：指定生成的类型声明文件的所在目录。
 
-`--declarationMap`：为`.d.ts`文件生成 SourceMap 文件。
+`--declarationMap`：为 `.d.ts` 文件生成 SourceMap 文件。
 
 `--diagnostics`：构建后输出编译性能信息。
 
@@ -64,7 +64,7 @@ tsc 的命令行参数，大部分与 tsconfig.json 的属性一一对应。
 
 `--esModuleInterop`：更容易使用 import 命令加载 CommonJS 模块。
 
-`--exactOptionalPropertyTypes`：不允许将可选属性设置为`undefined`。
+`--exactOptionalPropertyTypes`：不允许将可选属性设置为 `undefined`。
 
 `--experimentalDecorators`：支持早期的装饰器语法。
 
@@ -74,13 +74,13 @@ tsc 的命令行参数，大部分与 tsconfig.json 的属性一一对应。
 
 `--help`：输出帮助信息。
 
-`--importHelpers`：从外部库（比如 tslib）输入辅助函数。
+`--importHelpers`：从外部库 (比如 tslib) 输入辅助函数。
 
 `--incremental`：启用增量构建。
 
-`--init`：在当前目录创建一个全新的`tsconfig.json`文件，里面是预设的设置。
+`--init`：在当前目录创建一个全新的 `tsconfig.json` 文件，里面是预设的设置。
 
-`--inlineSourceMap`：SourceMap 信息嵌入 JS 文件，而不是生成独立的`.js.map`文件。
+`--inlineSourceMap`：SourceMap 信息嵌入 JS 文件，而不是生成独立的 `.js.map` 文件。
 
 `--inlineSources`：将 TypeScript 源码作为 SourceMap 嵌入编译出来的 JS 文件。
 
@@ -106,7 +106,7 @@ tsc 的命令行参数，大部分与 tsconfig.json 的属性一一对应。
 
 `--moduleSuffixes`：指定模块文件的后缀名。
 
-`--newLine`：指定编译产物的换行符，可以设为`crlf`或者`lf`。
+`--newLine`：指定编译产物的换行符，可以设为 `crlf` 或者 `lf`。
 
 `--noEmit`：不生成编译产物，只进行类型检查。
 
@@ -114,15 +114,15 @@ tsc 的命令行参数，大部分与 tsconfig.json 的属性一一对应。
 
 `--noEmitOnError`：一旦报错，就停止编译，没有编译产物。
 
-`--noFallthroughCasesInSwitch`：Switch 结构的`case`分支必须有终止语句（比如`break`）。
+`--noFallthroughCasesInSwitch`：Switch 结构的 `case` 分支必须有终止语句 (比如 `break`)。
 
-`--noImplicitAny`：类型推断只要为`any`类型就报错。
+`--noImplicitAny`：类型推断只要为 `any` 类型就报错。
 
-`--noImplicitReturns`：函数内部没有显式返回语句（比如`return`）就报错。
+`--noImplicitReturns`：函数内部没有显式返回语句 (比如 `return`) 就报错。
 
-`--noImplicitThis`：如果`this`关键字是`any`类型，就报错。
+`--noImplicitThis`：如果 `this` 关键字是 `any` 类型，就报错。
 
-`--noImplicitUseStrict`：编译产生的 JS 文件头部不添加`use strict`语句。
+`--noImplicitUseStrict`：编译产生的 JS 文件头部不添加 `use strict` 语句。
 
 `--noResolve`：不进行模块定位，除非该模块是由命令行传入。
 
@@ -134,13 +134,13 @@ tsc 的命令行参数，大部分与 tsconfig.json 的属性一一对应。
 
 `--outFile`：所有编译产物打包成一个指定文件。
 
-`--preserveConstEnums`：不将`const enum`结构在生成的代码中，替换成常量。
+`--preserveConstEnums`：不将 `const enum` 结构在生成的代码中，替换成常量。
 
-`--preserveWatchOutput`： watch 模式下不清屏。
+`--preserveWatchOutput`：watch 模式下不清屏。
 
-`--pretty`：美化显示编译时的终端输出。这是默认值，但是可以关闭`--pretty false`。
+`--pretty`：美化显示编译时的终端输出。这是默认值，但是可以关闭 `--pretty false`。
 
-`--project`（或者`-p`）：指定编译配置文件，或者该文件所在的目录。
+`--project` (或者 `-p`)：指定编译配置文件，或者该文件所在的目录。
 
 `--removeComments`：编译结果中移除代码注释。
 
@@ -152,21 +152,21 @@ tsc 的命令行参数，大部分与 tsconfig.json 的属性一一对应。
 
 `--skipDefaultLibCheck`：跳过 TypeScript 内置类型声明文件的类型检查。
 
-`--skipLibCheck`：跳过`.d.ts`类型声明文件的类型检查。这样可以加快编译速度。
+`--skipLibCheck`：跳过 `.d.ts` 类型声明文件的类型检查。这样可以加快编译速度。
 
 `--showConfig`：终端输出编译配置信息，而不进行配置。
 
-`--sourcemap`：为编译产生的 JS 文件生成 SourceMap 文件（.map 文件）。
+`--sourcemap`：为编译产生的 JS 文件生成 SourceMap 文件 (。map 文件)。
 
 `--sourceRoot`：指定 SourceMap 文件里面的 TypeScript 源码根目录位置。
 
 `--strict`：打开 TypeScript 严格检查模式。
 
-`--strictBindCallApply`：bind, call、apply 这三个函数的类型，匹配原始函数。
+`--strictBindCallApply`：bind，call、apply 这三个函数的类型，匹配原始函数。
 
 `--strictFunctionTypes`：如果函数 B 的参数是函数 A 参数的子类型，那么函数 B 不能替代函数 A。
 
-`--strictNullChecks`：对`null`和`undefined`进行严格类型检查。
+`--strictNullChecks`：对 `null` 和 `undefined` 进行严格类型检查。
 
 `--strictPropertyInitialization`：类的属性必须进行初始值，但是允许在构造函数里面赋值。
 
@@ -174,13 +174,13 @@ tsc 的命令行参数，大部分与 tsconfig.json 的属性一一对应。
 
 `--target`：指定编译出来的 JS 代码的版本，TypeScript 还会在编译时自动加入对应的库类型声明文件。
 
-`--traceResolution`：编译时在终端输出模块解析（moduleResolution）的具体步骤。
+`--traceResolution`：编译时在终端输出模块解析 (moduleResolution) 的具体步骤。
 
-`--typeRoots`：设置类型模块所在的目录，替代默认的`node_modules/@types`。
+`--typeRoots`：设置类型模块所在的目录，替代默认的 `node_modules/@types`。
 
-`--types`：设置`typeRoots`目录下需要包括在编译之中的类型模块。
+`--types`：设置 `typeRoots` 目录下需要包括在编译之中的类型模块。
 
 `--version`：终端输出 tsc 的版本号。
 
-`--watch`（或者`-w`）：进入观察模式，只要文件有修改，就会自动重新编译。
+`--watch` (或者 `-w`)：进入观察模式，只要文件有修改，就会自动重新编译。
 

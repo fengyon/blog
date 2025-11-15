@@ -723,7 +723,7 @@ class AnimationProfiler {
 }
 ```
 
-### 动画LOD系统
+### 动画 LOD 系统
 ```javascript
 class AnimationLOD {
     constructor(mixer, camera) {

@@ -53,9 +53,9 @@ navigator.serviceWorker.register('sw.js'.then(() => {
 })
 ```
 
-上面代码的`sw.js`就是需要浏览器注册的 service worker 脚本。注意，这个脚本必须与当前网址同域，service worker 不支持跨域脚本。另外，`sw.js`必须是从 HTTPS 协议加载的。
+上面代码的 `sw.js` 就是需要浏览器注册的 service worker 脚本。注意，这个脚本必须与当前网址同域，service worker 不支持跨域脚本。另外，`sw.js` 必须是从 HTTPS 协议加载的。
 
-默认情况下，Service worker 只对根目录`/`生效，如果要改变生效范围，可以运行下面的代码。
+默认情况下，Service worker 只对根目录 `/` 生效，如果要改变生效范围，可以运行下面的代码。
 
 ```javascript
 navigator.serviceWorker.register(
@@ -68,7 +68,7 @@ navigator.serviceWorker.register(
 
 一旦登记成功，接下来都是 service worker 脚本的工作。下面的代码都是写在 service worker 脚本里面的。
 
-登记后，就会触发`install`事件。service worker 脚本需要监听这个事件。
+登记后，就会触发 `install` 事件。service worker 脚本需要监听这个事件。
 
 ```javascript
 self.addEventListener('install', event => {
@@ -77,7 +77,7 @@ self.addEventListener('install', event => {
 })
 ```
 
-`event.waitUntil()`方法为事件完成后指定回调函数。
+`event.waitUntil()` 方法为事件完成后指定回调函数。
 
 ```javascript
 self.addEventListener('install', (event) => {
@@ -131,7 +131,7 @@ self.addEventListener('activate', (event) => {
 })
 ```
 
-上面代码中，Service Worker 监听`activate`事件，然后向客户端发送一条信息。
+上面代码中，Service Worker 监听 `activate` 事件，然后向客户端发送一条信息。
 
 客户端需要部署消息监听代码。
 

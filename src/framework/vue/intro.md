@@ -2,18 +2,18 @@
 
 ## Vue 的概念
 
-**Vue（读音 /vjuː/，类似于 “view”）** 是一款用于构建用户界面的前端框架。
+**Vue (读音 /vjuː/，类似于“view”)** 是一款用于构建用户界面的前端框架。
 它的核心思想是——**数据驱动视图、组件化开发**。
-通过将数据（state）与界面（view）解耦，开发者可以以声明式的方式构建交互式 Web 应用。
+通过将数据 (state) 与界面 (view) 解耦，开发者可以以声明式的方式构建交互式 Web 应用。
 
-Vue 由 **尤雨溪（Evan You）** 于 2014 年发布，灵感来源于 AngularJS 的模板语法与 React 的组件思想，旨在提供一个：
+Vue 由**尤雨溪 (Evan You)** 于 2014 年发布，灵感来源于 AngularJS 的模板语法与 React 的组件思想，旨在提供一个：
 
 > “轻量、渐进、灵活且高性能的前端框架。”
 
-Vue 的设计哲学是 **渐进式框架**（Progressive Framework）：
+Vue 的设计哲学是**渐进式框架** (Progressive Framework)：
 
 - 只想引入简单交互？用 Vue 的核心库即可。
-- 想要构建大型单页应用（SPA）？再引入 Vue Router、Pinia（或 Vuex）、Vue CLI / Vite 等工具即可。
+- 想要构建大型单页应用 (SPA)？再引入 Vue Router、Pinia (或 Vuex)、Vue CLI / Vite 等工具即可。
 
 ## Vue 的历史与发展历程
 
@@ -39,7 +39,7 @@ Vue 的设计哲学是 **渐进式框架**（Progressive Framework）：
    基于 `Object.defineProperty` 的响应式，让视图能自动更新。
 
 3. **组件化与生态完善**
-   支持单文件组件（SFC）、Vue Router、Vuex，形成完整开发体系。
+   支持单文件组件 (SFC)、Vue Router、Vuex，形成完整开发体系。
 
 4. **性能良好**
    虚拟 DOM 与 diff 算法保证了渲染效率。
@@ -69,8 +69,8 @@ Vue 的设计哲学是 **渐进式框架**（Progressive Framework）：
 
 ### 📉 现状
 
-虽然 Vue2 仍在维护（尤其是长期项目中），但其核心生态（如 Vue Router、Vuex）已转向 Vue3。
-新项目官方建议 **全面使用 Vue3**，Vue2 被视为 **维护期框架**，主要提供兼容支持。
+虽然 Vue2 仍在维护 (尤其是长期项目中)，但其核心生态 (如 Vue Router、Vuex) 已转向 Vue3。
+新项目官方建议**全面使用 Vue3**，Vue2 被视为**维护期框架**，主要提供兼容支持。
 
 ---
 
@@ -90,12 +90,12 @@ Vue3 是 Vue 的一次彻底重构，它主要解决了以下几个长期存在�
 
 ## Vue3 的核心优势
 
-### 1. Composition API —— 更灵活的逻辑组织
+### 1。Composition API —— 更灵活的逻辑组织
 
 Vue3 引入了 **Composition API**，允许开发者以函数方式组织组件逻辑。
 优点包括：
 
-- 更易于代码复用与抽离（`useXxx` 风格的逻辑函数）。
+- 更易于代码复用与抽离 (`useXxx` 风格的逻辑函数)。
 - 逻辑聚合清晰：相关逻辑可集中在一个函数中。
 
 示例：
@@ -118,7 +118,7 @@ export default {
 }
 ```
 
-### 2. 更快的响应式系统
+### 2。更快的响应式系统
 
 Vue3 使用 **Proxy** 实现响应式追踪，不再依赖 `Object.defineProperty`。
 优势包括：
@@ -129,16 +129,16 @@ Vue3 使用 **Proxy** 实现响应式追踪，不再依赖 `Object.definePropert
 
 ---
 
-### 3. 更小、更快、更现代化
+### 3。更小、更快、更现代化
 
 - **打包体积减少约 40%**；
 - **渲染性能提升约 50%**；
 - 支持 **Tree-shaking**，按需引入功能模块；
-- 与现代构建工具（如 Vite）深度集成，支持 ESM。
+- 与现代构建工具 (如 Vite) 深度集成，支持 ESM。
 
 ---
 
-### 4. 更好的 TypeScript 支持
+### 4。更好的 TypeScript 支持
 
 Vue3 核心使用 TypeScript 编写，带来了：
 
@@ -148,11 +148,11 @@ Vue3 核心使用 TypeScript 编写，带来了：
 
 ---
 
-### 5. 生态全面升级
+### 5。生态全面升级
 
-- 状态管理：Vuex → **Pinia**（轻量、类型友好）
-- 构建工具：Vue CLI → **Vite**（极速冷启动）
-- 服务端渲染：Nuxt2 → **Nuxt3**（基于 Vue3 + Vite）
+- 状态管理：Vuex → **Pinia** (轻量、类型友好)
+- 构建工具：Vue CLI → **Vite** (极速冷启动)
+- 服务端渲染：Nuxt2 → **Nuxt3** (基于 Vue3 + Vite)
 - 官方工具链全面现代化。
 
 ## Vue 快速开始
@@ -195,7 +195,7 @@ Vue.js 是一款轻量、渐进式的前端框架，非常适合构建交互丰�
 
 ### 使用脚手架
 
-如果你希望创建一个结构清晰、可扩展的 Vue 应用，那么使用脚手架（如 **Vite** 或 **Vue CLI**）会更合适。
+如果你希望创建一个结构清晰、可扩展的 Vue 应用，那么使用脚手架 (如 **Vite** 或 **Vue CLI**) 会更合适。
 
 #### 使用 Vite
 
@@ -228,7 +228,7 @@ npm run dev
 
 #### 使用 `@vue/cli`
 
-Vue CLI 适合需要较完整配置（如 webpack、自定义构建）的项目。
+Vue CLI 适合需要较完整配置 (如 webpack、自定义构建) 的项目。
 
 安装 Vue CLI：
 
@@ -242,7 +242,7 @@ npm install -g @vue/cli
 vue create my-vue-app
 ```
 
-在交互中选择你需要的配置（推荐选择默认配置）。
+在交互中选择你需要的配置 (推荐选择默认配置)。
 项目创建完成后，运行：
 
 ```bash

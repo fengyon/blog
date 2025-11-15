@@ -3,7 +3,7 @@
 ## WebXR 概述
 
 ### WebXR 架构
-WebXR 是用于在浏览器中创建虚拟现实(VR)和增强现实(AR)体验的 API：
+WebXR 是用于在浏览器中创建虚拟现实 (VR) 和增强现实 (AR) 体验的 API：
 ```
 WebXR API
     ↓

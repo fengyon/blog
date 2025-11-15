@@ -14,7 +14,7 @@
 Nuxt.js 提供了丰富的数据获取方法，主要分为：
 
 - **useAsyncData**：Composition API 风格，适用于 Nuxt 3
-- **useFetch**：基于 useAsyncData 的快捷方式  
+- **useFetch**：基于 useAsyncData 的快捷方式
 - **asyncData**：Options API 风格，仅限页面组件
 - **fetch**：组件级数据获取，支持更多配置选项
 - **直接调用 API**：使用 $fetch、axios 等 HTTP 客户端
@@ -116,9 +116,9 @@ export default {
 
 asyncData 接收上下文对象，包含：
 - `params`：路由参数
-- `query`：查询字符串  
+- `query`：查询字符串
 - `store`：Vuex 状态
-- `req`/**`res`**：HTTP 请求/响应对象（服务端）
+- `req`/**`res`**：HTTP 请求/响应对象 (服务端)
 - `redirect`：重定向方法
 - `error`：错误处理方法
 
@@ -135,7 +135,7 @@ Nuxt.js 提供了 `fetch` 方法，允许在任何组件中获取数据。自 Nu
 - 客户端导航时：前端路由切换页面
 
 **状态管理**：通过 `$fetchState` 提供：
-- `pending`：数据加载状态（仅客户端有效）
+- `pending`：数据加载状态 (仅客户端有效)
 - `error`：错误信息对象
 - `timestamp`：最后一次获取数据的时间戳
 

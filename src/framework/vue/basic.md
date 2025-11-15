@@ -1,6 +1,6 @@
 # Vue 基础
 
-Vue（读作 /vjuː/，类似于“view”）是一款用于构建用户界面的渐进式 JavaScript 框架。它以“**数据驱动视图**”为核心理念，结合模板语法、组件化设计、响应式系统，使前端开发变得更直观高效。
+Vue (读作 /vjuː/，类似于“view”) 是一款用于构建用户界面的渐进式 JavaScript 框架。它以“**数据驱动视图**”为核心理念，结合模板语法、组件化设计、响应式系统，使前端开发变得更直观高效。
 
 ## template (模板)
 
@@ -18,7 +18,7 @@ const message = 'Hello Vue 3!'
 </script>
 ```
 
-### 属性绑定（v-bind）
+### 属性绑定 (v-bind)
 
 Vue 提供 `v-bind` 指令将数据绑定到 HTML 属性上：
 
@@ -36,7 +36,7 @@ const imageUrl = 'https://vuejs.org/images/logo.png'
 
 > `v-bind` 会在属性值变化时自动更新 DOM。
 
-### 事件绑定（v-on）
+### 事件绑定 (v-on)
 
 Vue 使用 `v-on` 指令监听事件：
 
@@ -67,7 +67,7 @@ const add = () => count.value++
 | `v-bind`                        | 绑定属性                | `<img :src="url" />`                            |
 | `v-on`                          | 绑定事件                | `<button @click="doSomething">Click</button>`   |
 
-## script（脚本）
+## script (脚本)
 
 ### `<script setup>`
 
@@ -115,7 +115,7 @@ export default {
 
 ### vue jsx
 
-vue 的 jsx 在`script`中指定`lang="jsx"`或`lang="tsx"`，返回 `() => <div></div>`
+vue 的 jsx 在 `script` 中指定 `lang="jsx"` 或 `lang="tsx"`，返回 `() => <div></div>`
 
 ```vue
 <script setup lang="tsx">
@@ -152,7 +152,7 @@ export default {
 
 ### 使用 TypeScript
 
-要启用 TypeScript，只需在 `<script setup>` 中声明 `lang="ts"`或者`lang="tsx"`：
+要启用 TypeScript，只需在 `<script setup>` 中声明 `lang="ts"` 或者 `lang="tsx"`：
 
 ```vue
 <script setup lang="ts">
@@ -165,7 +165,7 @@ const add = (): void => count.value++
 
 Vue 对类型的推导非常友好，VSCode + Volar 插件能提供出色的类型提示与自动补全。
 
-## style（样式）
+## style (样式)
 
 ### 基础用法
 
@@ -187,7 +187,7 @@ h1 {
 </style>
 ```
 
-### 预处理器（Less / SCSS）
+### 预处理器 (Less / SCSS)
 
 Vue 支持在 `<style>` 标签中直接使用 Less 或 SCSS，只需安装对应依赖。
 

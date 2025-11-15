@@ -2,7 +2,7 @@
 
 ## 什么是 Fiber？
 
-Fiber 是 React 16 引入的新的协调引擎（reconciliation engine），它的核心目标是支持增量渲染，将渲染工作拆分成多个小任务，并赋予不同优先级，从而实现更流畅的用户体验。
+Fiber 是 React 16 引入的新的协调引擎 (reconciliation engine)，它的核心目标是支持增量渲染，将渲染工作拆分成多个小任务，并赋予不同优先级，从而实现更流畅的用户体验。
 
 ## Fiber 的基本原理
 
@@ -50,7 +50,7 @@ Fiber 将组件表示为链表结构，支持中断和恢复：
 
 ## React 不同版本的 Fiber 演进
 
-### React 16: Fiber 架构引入
+### React 16：Fiber 架构引入
 
 **更新方式**：
 
@@ -78,7 +78,7 @@ Fiber 将组件表示为链表结构，支持中断和恢复：
 
 **效果**：支持时间分片，避免主线程阻塞。
 
-### React 17: 渐进式升级
+### React 17：渐进式升级
 
 **更新改进**：
 
@@ -99,7 +99,7 @@ DOM 树
 
 **效果**：更好的多版本 React 共存支持。
 
-### React 18: 并发特性
+### React 18：并发特性
 
 **并发渲染**：
 
@@ -122,11 +122,11 @@ setState2() ┘
 
 **新的 API**：
 
-- `startTransition`: 标记非紧急更新
-- `useTransition`: 并发状态管理
-- `useDeferredValue`: 延迟值更新
+- `startTransition`：标记非紧急更新
+- `useTransition`：并发状态管理
+- `useDeferredValue`：延迟值更新
 
-### React 19: 编译时优化
+### React 19：编译时优化
 
 **预期改进**：
 

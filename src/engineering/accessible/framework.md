@@ -54,7 +54,7 @@
 
 在设计系统中定义组件的无障碍要求。
 
-代码示例（设计系统文档）：
+代码示例 (设计系统文档)：
 ```markdown
 ## 按钮组件无障碍规范
 
@@ -81,9 +81,9 @@
 
 ### 基础无障碍组件
 
-创建具有内置无障碍支持的React组件。
+创建具有内置无障碍支持的 React 组件。
 
-代码示例（React按钮组件）：
+代码示例 (React 按钮组件)：
 ```jsx
 import React, { useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
@@ -160,7 +160,7 @@ export default AccessibleButton;
 
 实现完整的无障碍复合组件。
 
-代码示例（React标签页组件）：
+代码示例 (React 标签页组件)：
 ```jsx
 import React, { useState, useEffect, useCallback } from 'react';
 
@@ -272,13 +272,13 @@ export const TabPanel = ({ index, children }) => {
 <TabPanel index={2}>通知偏好内容...</TabPanel>
 ```
 
-## 开发工具和SDK
+## 开发工具和 SDK
 
-### 无障碍开发SDK
+### 无障碍开发 SDK
 
-提供开发时使用的工具函数和Hooks。
+提供开发时使用的工具函数和 Hooks。
 
-代码示例（React Hooks）：
+代码示例 (React Hooks)：
 ```jsx
 import { useEffect, useRef } from 'react';
 
@@ -341,7 +341,7 @@ export const useKeyboardNavigation = (navigationMap) => {
 
 集成到开发流程中的无障碍工具。
 
-代码示例（ESLint插件配置）：
+代码示例 (ESLint 插件配置)：
 ```javascript
 // .eslintrc.js
 module.exports = {
@@ -359,7 +359,7 @@ module.exports = {
 };
 ```
 
-代码示例（VS Code代码片段）：
+代码示例 (VS Code 代码片段)：
 ```json
 {
   "Accessible Button": {
@@ -390,7 +390,7 @@ module.exports = {
 
 组件级的无障碍测试工具。
 
-代码示例（Jest + Testing Library）：
+代码示例 (Jest + Testing Library)：
 ```javascript
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -448,9 +448,9 @@ describe('AccessibleButton', () => {
 
 ### 端到端测试框架
 
-集成到E2E测试中的无障碍检查。
+集成到 E2E 测试中的无障碍检查。
 
-代码示例（Cypress测试）：
+代码示例 (Cypress 测试)：
 ```javascript
 // cypress/plugins/index.js
 const { injectAxe, checkA11y } = require('axe-cypress');
@@ -510,7 +510,7 @@ describe('页面无障碍测试', () => {
 
 在构建过程中进行无障碍检查。
 
-代码示例（Webpack插件）：
+代码示例 (Webpack 插件)：
 ```javascript
 // a11y-webpack-plugin.js
 const { axe } = require('axe-core');
@@ -558,7 +558,7 @@ module.exports = A11yWebpackPlugin;
 
 ### 自动化修复工具
 
-代码示例（自动ARIA属性添加）：
+代码示例 (自动 ARIA 属性添加)：
 ```javascript
 // a11y-auto-fix.js
 const cheerio = require('cheerio');
@@ -595,7 +595,7 @@ function enhanceAccessibility(html) {
 
 在生产环境中监控无障碍问题。
 
-代码示例（无障碍监控SDK）：
+代码示例 (无障碍监控 SDK)：
 ```javascript
 class A11yMonitor {
   constructor() {
@@ -707,7 +707,7 @@ if (typeof window !== 'undefined') {
 
 收集和分析无障碍指标。
 
-代码示例（无障碍指标API）：
+代码示例 (无障碍指标 API)：
 ```javascript
 // a11y-metrics-api.js
 const express = require('express');
@@ -769,7 +769,7 @@ module.exports = router;
 
 为不同前端框架提供统一的无障碍接口。
 
-代码示例（框架适配器）：
+代码示例 (框架适配器)：
 ```javascript
 // a11y-adapter.js
 class A11yAdapter {
@@ -831,7 +831,7 @@ class A11yAdapter {
 
 在微前端架构中协调无障碍状态。
 
-代码示例（微前端无障碍管理器）：
+代码示例 (微前端无障碍管理器)：
 ```javascript
 class MicroFrontendA11yManager {
   constructor() {

@@ -6,7 +6,7 @@ TypeScript 变量的值可以变，但是类型通常是不变的。唯一允许
 
 如果一个变量属于联合类型，所以使用时一般需要缩小类型。
 
-第一种方法是使用`if`判断。
+第一种方法是使用 `if` 判断。
 
 ```typescript
 function getScore(value: number|string): number {
@@ -24,7 +24,7 @@ function getScore(value: number|string): number {
 }
 ```
 
-如果一个值是`any`或`unknown`，你又想对它进行处理，就必须先缩小类型。
+如果一个值是 `any` 或 `unknown`，你又想对它进行处理，就必须先缩小类型。
 
 ```typescript
 function parseStringLiteral(stringLiteral: string): string {
@@ -80,7 +80,7 @@ function func(value: Function|Date|number[]) {
 
 ### typeof 运算符
 
-第二种方法是使用`switch`缩小类型。
+第二种方法是使用 `switch` 缩小类型。
 
 ```typescript
 function getScore(value: number|string): number {
@@ -101,7 +101,7 @@ function getScore(value: number|string): number {
 
 ### instanceof 运算符
 
-第三种方法是instanceof运算符。它能够检测实例对象与构造函数之间的关系。instanceof运算符的左操作数为实例对象，右操作数为构造函数，若构造函数的prototype属性值存在于实例对象的原型链上，则返回true；否则，返回false。
+第三种方法是 instanceof 运算符。它能够检测实例对象与构造函数之间的关系。instanceof 运算符的左操作数为实例对象，右操作数为构造函数，若构造函数的 prototype 属性值存在于实例对象的原型链上，则返回 true；否则，返回 false。
 
 ```typescript
 function f(x: Date | RegExp) {
@@ -115,7 +115,7 @@ function f(x: Date | RegExp) {
 }
 ```
 
-instanceof类型守卫同样适用于自定义构造函数，并对其实例对象进行类型细化。
+instanceof 类型守卫同样适用于自定义构造函数，并对其实例对象进行类型细化。
 
 ```typescript
 class A {}
@@ -134,11 +134,11 @@ function f(x: A | B) {
 
 ### in 运算符
 
-第四种方法是使用in运算符。
+第四种方法是使用 in 运算符。
 
-in运算符是JavaScript中的关系运算符之一，用来判断对象自身或其原型链中是否存在给定的属性，若存在则返回true，否则返回false。in运算符有两个操作数，左操作数为待测试的属性名，右操作数为测试对象。
+in 运算符是 JavaScript 中的关系运算符之一，用来判断对象自身或其原型链中是否存在给定的属性，若存在则返回 true，否则返回 false。in 运算符有两个操作数，左操作数为待测试的属性名，右操作数为测试对象。
 
-in类型守卫根据in运算符的测试结果，将右操作数的类型细化为具体的对象类型。
+in 类型守卫根据 in 运算符的测试结果，将右操作数的类型细化为具体的对象类型。
 
 ```typescript
 interface A {
@@ -170,7 +170,7 @@ function pickAB(ab: A | B) {
 }
 ```
 
-缩小对象的属性，要用`in`运算符。
+缩小对象的属性，要用 `in` 运算符。
 
 ```typescript
 type FirstOrSecond =
@@ -194,7 +194,7 @@ function func(firstOrSecond: FirstOrSecond) {
 }
 ```
 
-`in`运算符只能用于联合类型，不能用于检查一个属性是否存在。
+`in` 运算符只能用于联合类型，不能用于检查一个属性是否存在。
 
 ```typescript
 function func(obj: object) {
@@ -235,7 +235,7 @@ function handleEvent(e: AppEvent) {
 
 ## any 类型的细化
 
-TypeScript 推断变量类型时，会根据获知的信息，不断改变推断出来的类型，越来越细化。这种现象在`any`身上特别明显。
+TypeScript 推断变量类型时，会根据获知的信息，不断改变推断出来的类型，越来越细化。这种现象在 `any` 身上特别明显。
 
 ```typescript
 function range(
@@ -250,7 +250,7 @@ function range(
 }
 ```  
 
-上面示例中，变量`out`的类型一开始推断为`any[]`，后来在里面放入数值，类型就变为`number[]`。
+上面示例中，变量 `out` 的类型一开始推断为 `any[]`，后来在里面放入数值，类型就变为 `number[]`。
 
 再看下面的例子。
 
@@ -262,11 +262,11 @@ result.push(1);
 result // 类型为 (string | number)[]
 ```
 
-上面示例中，数组`result`随着成员类型的不同，而不断改变自己的类型。
+上面示例中，数组 `result` 随着成员类型的不同，而不断改变自己的类型。
 
-注意，这种`any`类型的细化，只在打开了编译选项`noImplicitAny`时发生。
+注意，这种 `any` 类型的细化，只在打开了编译选项 `noImplicitAny` 时发生。
 
-这时，如果在变量的推断类型还为`any`时（即没有任何写操作)，就去输出（或读取）该变量，则会报错，因为这时推断还没有完成，无法满足`noImplicitAny`的要求。
+这时，如果在变量的推断类型还为 `any` 时 (即没有任何写操作)，就去输出 (或读取) 该变量，则会报错，因为这时推断还没有完成，无法满足 `noImplicitAny` 的要求。
 
 ```typescript
 const result = []; // 类型为 any[]
@@ -274,11 +274,11 @@ console.log(typeof result); // 报错
 result.push('a'); // 类型为 string[]
 ```
 
-上面示例中，只有运行完第三行，`result`的类型才能完成第一次推断，所以第二行读取`result`就会报错。
+上面示例中，只有运行完第三行，`result` 的类型才能完成第一次推断，所以第二行读取 `result` 就会报错。
 
 ## is 运算符
 
-`is`运算符返回一个布尔值，用来判断左侧的值是否属于右侧的类型。
+`is` 运算符返回一个布尔值，用来判断左侧的值是否属于右侧的类型。
 
 ```typescript
 function isInputElement(el: HTMLElement): el is HTMLInputElement {

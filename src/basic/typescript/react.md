@@ -4,9 +4,9 @@
 
 JSX 是 React 库引入的一种语法，可以在 JavaScript 脚本中直接书写 HTML 风格的标签。
 
-TypeScript 支持 JSX 语法，但是必须将脚本后缀名改成`.tsx`。
+TypeScript 支持 JSX 语法，但是必须将脚本后缀名改成 `.tsx`。
 
-`.tsx`文件中，类型断言一律使用`as`形式，因为尖括号的写法会与 JSX 冲突。
+`.tsx` 文件中，类型断言一律使用 `as` 形式，因为尖括号的写法会与 JSX 冲突。
 
 ```typescript
 // 使用
@@ -16,7 +16,7 @@ var x = foo as any;
 var x = <any>foo;
 ```
 
-上面示例中，变量`foo`被断言为类型`any`，在`.tsx`文件中只能使用第一种写法，不使用第二种写法。
+上面示例中，变量 `foo` 被断言为类型 `any`，在 `.tsx` 文件中只能使用第一种写法，不使用第二种写法。
 
 ## React 库
 
@@ -38,7 +38,7 @@ class MyComponent extends React.Component<Props, {}> {
 
 ## 内置元素
 
-内置元素使用`JSX.IntrinsicElements`接口。默认情况下，内置元素不进行类型检查。但是，如果给出了接口定义，就会进行类型检查。
+内置元素使用 `JSX.IntrinsicElements` 接口。默认情况下，内置元素不进行类型检查。但是，如果给出了接口定义，就会进行类型检查。
 
 ```typescript
 declare namespace JSX {
@@ -50,7 +50,7 @@ declare namespace JSX {
 <bar />; // error
 ```
 
-上面示例中，`<bar />`不符合接口定义，所以报错。
+上面示例中，`<bar />` 不符合接口定义，所以报错。
 
 一种解决办法就是，在接口中定义一个通用元素。
 
@@ -62,7 +62,7 @@ declare namespace JSX {
 }
 ```
 
-上面示例中， 元素名可以是任意字符串。
+上面示例中，元素名可以是任意字符串。
 
 ## 组件的写法
 

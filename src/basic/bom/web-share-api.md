@@ -8,11 +8,11 @@
 
 目前，桌面的 Safari 浏览器，手机的安卓 Chrome 浏览器和 iOS Safari 浏览器，支持这个 API。
 
-这个 API 要求网站必须启用 HTTPS 协议，但是本地 Localhost 开发可以使用 HTTP 协议。另外，这个 API 不能直接调用，只能用来响应用户的操作（比如`click`事件）。
+这个 API 要求网站必须启用 HTTPS 协议，但是本地 Localhost 开发可以使用 HTTP 协议。另外，这个 API 不能直接调用，只能用来响应用户的操作 (比如 `click` 事件)。
 
 ## 接口细节
 
-该接口部署在`navigator.share`，可以用下面的代码检查本机是否支持该接口。
+该接口部署在 `navigator.share`，可以用下面的代码检查本机是否支持该接口。
 
 ```javascript
 if (navigator.share) {
@@ -22,7 +22,7 @@ if (navigator.share) {
 }
 ```
 
-`navigator.share`是一个函数方法，接受一个配置对象作为参数。
+`navigator.share` 是一个函数方法，接受一个配置对象作为参数。
 
 ```javascript
 navigator.share({
@@ -38,7 +38,7 @@ navigator.share({
 - `url`：分享的 URL。
 - `text`：分享的内容。
 
-一般来说，`url`是当前网页的网址，`title`是当前网页的标题，可以采用下面的写法获取。
+一般来说，`url` 是当前网页的网址，`title` 是当前网页的标题，可以采用下面的写法获取。
 
 ```javascript
 const title = document.title;
@@ -47,7 +47,7 @@ const url = document.querySelector('link[rel=canonical]') ?
   document.location.href;
 ```
 
-`navigator.share`的返回值是一个 Promise 对象。这个方法调用之后，会立刻弹出系统的分享弹窗，用户操作完毕之后，Promise 对象就会变为`resolved`状态。
+`navigator.share` 的返回值是一个 Promise 对象。这个方法调用之后，会立刻弹出系统的分享弹窗，用户操作完毕之后，Promise 对象就会变为 `resolved` 状态。
 
 ```javascript
 navigator.share({
@@ -60,7 +60,7 @@ navigator.share({
 });
 ```
 
-由于返回值是 Promise 对象，所以也可以使用`await`命令。
+由于返回值是 Promise 对象，所以也可以使用 `await` 命令。
 
 ```javascript
 shareButton.addEventListener('click', async () => {
@@ -75,7 +75,7 @@ shareButton.addEventListener('click', async () => {
 
 ## 分享文件
 
-这个 API 还可以分享文件，先使用`navigator.canShare()`方法，判断一下目标文件是否可以分享。因为不是所有文件都允许分享的，目前图像，视频，音频和文本文件可以分享2。
+这个 API 还可以分享文件，先使用 `navigator.canShare()` 方法，判断一下目标文件是否可以分享。因为不是所有文件都允许分享的，目前图像，视频，音频和文本文件可以分享 2。
 
 ```javascript
 if (navigator.canShare && navigator.canShare({ files: filesArray })) {
@@ -83,9 +83,9 @@ if (navigator.canShare && navigator.canShare({ files: filesArray })) {
 }
 ```
 
-上面代码中，`navigator.canShare()`方法的参数对象，就是`navigator.share()`方法的参数对象。这里的关键是`files`属性，它的值是一个`FileList`实例对象。
+上面代码中，`navigator.canShare()` 方法的参数对象，就是 `navigator.share()` 方法的参数对象。这里的关键是 `files` 属性，它的值是一个 `FileList` 实例对象。
 
-`navigator.canShare()`方法返回一个布尔值，如果为`true`，就可以使用`navigator.share()`方法分享文件了。
+`navigator.canShare()` 方法返回一个布尔值，如果为 `true`，就可以使用 `navigator.share()` 方法分享文件了。
 
 ```javascript
 if (navigator.canShare && navigator.canShare({ files: filesArray })) {

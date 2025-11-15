@@ -44,7 +44,7 @@ CSS 动画允许元素的样式在不同时间发生特定变化，而无需使�
 
 ### transform-origin (变换基准点)
 
-`transform-origin` 属性定义`transform`的基准点，此点坐标为 (0, 0, 0)， 再按 x 轴、y 轴、z 轴的方向生成坐标系，计算出每个像素点的坐标。
+`transform-origin` 属性定义 `transform` 的基准点，此点坐标为 (0，0，0)，再按 x 轴、y 轴、z 轴的方向生成坐标系，计算出每个像素点的坐标。
 
 ```css
 transform-origin: x-axis y-axis z-axis;
@@ -151,7 +151,7 @@ transform: scale(1.5);
 
 ### skew (倾斜)
 
-往 X 轴, Y 轴方向倾斜元素。
+往 X 轴，Y 轴方向倾斜元素。
 
 ```css
 /* transform: skew(ax, ay) */
@@ -212,7 +212,7 @@ transform: matrix(a, b, c, d, e, f);
 [ 0  0  1 ]
 ```
 
-假如有一个坐标点 (x, y)，经过 `matrix(a, b, c, d, e, f)`得到 (x', y'), 其计算过程为：
+假如有一个坐标点 (x，y)，经过 `matrix(a, b, c, d, e, f)` 得到 (x ‘，y’)，其计算过程为：
 
 ```
 
@@ -229,7 +229,7 @@ y' = b*x+d*y+f
 ```
 
 对于一个元素，把元素上的每个像素点都进行此计算，就可以得到新的元素。
-上述的 translate, rotate, scale, skew 都可以看作是特殊的矩阵变换，在只设定一种变换时（多种变换不成立），其对应关系如下
+上述的 translate，rotate，scale，skew 都可以看作是特殊的矩阵变换，在只设定一种变换时 (多种变换不成立)，其对应关系如下
 
 ```
 [ scaleX  skewY   translateX ]       [ a  c  e ]

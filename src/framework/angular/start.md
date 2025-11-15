@@ -2,7 +2,7 @@
 
 ## 什么是 Angular？
 
-Angular 是一个由 Google 维护的开源前端框架，用于构建动态的单页应用程序（SPA）。它使用 TypeScript 语言，提供了强大的工具来管理组件、数据流和用户界面。
+Angular 是一个由 Google 维护的开源前端框架，用于构建动态的单页应用程序 (SPA)。它使用 TypeScript 语言，提供了强大的工具来管理组件、数据流和用户界面。
 
 核心特点：
 - 基于组件化架构
@@ -70,7 +70,7 @@ AppModule
 安装 Angular CLI 并创建新项目：
 
 步骤：
-1. 确保已安装 Node.js（版本 14 或更高）。
+1. 确保已安装 Node.js (版本 14 或更高)。
 2. 在终端中运行以下命令：
    ```
    npm install -g @angular/cli
@@ -78,7 +78,6 @@ AppModule
    cd my-app
    ng serve
    ```
-3. 打开浏览器访问 http://localhost:4200，查看默认应用。
 
 示意图：
 ```

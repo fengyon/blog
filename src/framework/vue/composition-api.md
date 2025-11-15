@@ -72,7 +72,7 @@ export default {
 }
 ```
 
-这种"碎片化"的组织方式导致相关逻辑被分散在不同选项中，理解和维护复杂组件变得困难。
+这种“碎片化”的组织方式导致相关逻辑被分散在不同选项中，理解和维护复杂组件变得困难。
 
 ### Composition API 的优势
 
@@ -326,7 +326,7 @@ export default {
 
 ### 什么是自定义 Hook？
 
-自定义 Hook 是一个 JavaScript 函数，它使用 Composition API 来封装和复用有状态的逻辑。约定上，自定义 Hook 以 "use" 开头。
+自定义 Hook 是一个 JavaScript 函数，它使用 Composition API 来封装和复用有状态的逻辑。约定上，自定义 Hook 以“use”开头。
 
 ### 封装 `useMouse` Hook
 

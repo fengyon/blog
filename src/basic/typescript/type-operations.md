@@ -16,7 +16,7 @@ type T0 = (boolean | string) | number;
 type T1 = boolean | (string | number);
 ```
 
-联合类型的成员类型可以进行化简。假设有联合类型“U = T0 | T1”，如果T1是T0的子类型，那么可以将类型成员T1从联合类型U中消去。最后，联合类型U的结果类型为“U = T0”。例如，有联合类型“boolean | true | false”。其中，true类型和false类型是boolean类型的子类型，因此可以将true类型和false类型从联合类型中消去。最终，联合类型“boolean | true | false”的结果类型为boolean类型。
+联合类型的成员类型可以进行化简。假设有联合类型“U = T0 | T1”，如果 T1 是 T0 的子类型，那么可以将类型成员 T1 从联合类型 U 中消去。最后，联合类型 U 的结果类型为“U = T0”。例如，有联合类型“boolean | true | false”。其中，true 类型和 false 类型是 boolean 类型的子类型，因此可以将 true 类型和 false 类型从联合类型中消去。最终，联合类型“boolean | true | false”的结果类型为 boolean 类型。
 
 ```typescript
 type T0 = boolean | true | false;
@@ -28,7 +28,7 @@ type T1 = boolean;
 ### 优先级
 
 
-`&`的优先级高于`|`。
+`&` 的优先级高于 `|`。
 
 ```typescript
 A & B | C & D
@@ -98,7 +98,7 @@ type RedOrBlue = OnlyStrings<"red" | "blue" | 0 | false>;
 
 ## unknown 类型
 
-在联合类型中，unknown吸收所有类型。这意味着如果任何组成类型是unknown，则联合类型的计算结果为unknown。
+在联合类型中，unknown 吸收所有类型。这意味着如果任何组成类型是 unknown，则联合类型的计算结果为 unknown。
 
 ```typescript
 // In an intersection everything absorbs unknown
@@ -137,13 +137,13 @@ type UnionType3 = unknown | string; // unknown
 type UnionType4 = unknown | number[]; // unknown
 ```
 
-该规则的一个例外是any。如果至少有一种构成类型是any，则联合类型的计算结果为any：
+该规则的一个例外是 any。如果至少有一种构成类型是 any，则联合类型的计算结果为 any：
 
 ```typescript
 type UnionType5 = unknown | any; // any
 ```
 
-在交叉类型中，每种类型都吸收unknown. 这意味着与任何类型相交unknown不会改变结果类型：
+在交叉类型中，每种类型都吸收 unknown。这意味着与任何类型相交 unknown 不会改变结果类型：
 
 ```typescript
 type IntersectionType1 = unknown & null; // null
@@ -153,7 +153,7 @@ type IntersectionType4 = unknown & number[]; // number[]
 type IntersectionType5 = unknown & any; // any
 ```
 
-除非使用`as`断言，首先缩小类型`unknown`类型的范围，然后才可以用于其他类型。
+除非使用 `as` 断言，首先缩小类型 `unknown` 类型的范围，然后才可以用于其他类型。
 
 ```typescript
 const value: unknown = "Hello World";
@@ -190,7 +190,7 @@ type T1 = boolean & boolean;
 type T2 = boolean & boolean & boolean;
 ```
 
-上面示例中，T0、T1和T2都表示同一种类型boolean。
+上面示例中，T0、T1 和 T2 都表示同一种类型 boolean。
 
 改变成员类型的顺序不影响交叉类型的结果类型。
 
@@ -227,7 +227,7 @@ function foo(
 }
 ```
 
-此例第8行和第9行使用不同的成员类型顺序定义了两个交叉类型。第15行，调用“register()”方法的返回值类型为void，说明在ClickableAndFocusable类型中，Clickable接口中定义的“register()”方法具有更高的优先级。第16行，调用“register()”方法的返回值类型为boolean，说明FocusableAndFocusable类型中Focusable接口中定义的“register()”方法具有更高的优先级。此例也说明了调用签名重载的顺序与交叉类型中成员类型的定义顺序是一致的。
+此例第 8 行和第 9 行使用不同的成员类型顺序定义了两个交叉类型。第 15 行，调用“register()”方法的返回值类型为 void，说明在 ClickableAndFocusable 类型中，Clickable 接口中定义的“register()”方法具有更高的优先级。第 16 行，调用“register()”方法的返回值类型为 boolean，说明 FocusableAndFocusable 类型中 Focusable 接口中定义的“register()”方法具有更高的优先级。此例也说明了调用签名重载的顺序与交叉类型中成员类型的定义顺序是一致的。
 
 对部分类型成员使用分组运算符不影响交叉类型的结果类型。
 
@@ -246,14 +246,14 @@ type T0 = (Clickable & Focusable) & Scrollable;
 type T1 = Clickable & (Focusable & Scrollable);
 ```
 
-上面示例的T0和T1类型是同一种类型。
+上面示例的 T0 和 T1 类型是同一种类型。
 
 ```typescript
 type Combined = { a: number } & { b: string };
 type Conflicting = { a: number } & { a: string };
 ```
 
-只要交叉类型I中任意一个成员类型包含了属性签名M，那么交叉类型I也包含属性签名M。
+只要交叉类型 I 中任意一个成员类型包含了属性签名 M，那么交叉类型 I 也包含属性签名 M。
 
 ```typescript
 interface A {
@@ -271,7 +271,7 @@ interface B {
 }
 ```
 
-若交叉类型的属性签名M在所有成员类型中都是可选属性，那么该属性签名在交叉类型中也是可选属性。否则，属性签名M是一个必选属性。
+若交叉类型的属性签名 M 在所有成员类型中都是可选属性，那么该属性签名在交叉类型中也是可选属性。否则，属性签名 M 是一个必选属性。
 
 ```typescript
 interface A {

@@ -2,11 +2,11 @@
 
 ## 什么是 React？
 
-React 是一个用于构建用户界面的 JavaScript 库，由 Facebook（现 Meta）开发并维护。自 2013 年开源以来，它彻底改变了前端开发的方式，引入了组件化、虚拟 DOM 等创新概念，成为当今最流行的前端框架之一。
+React 是一个用于构建用户界面的 JavaScript 库，由 Facebook (现 Meta) 开发并维护。自 2013 年开源以来，它彻底改变了前端开发的方式，引入了组件化、虚拟 DOM 等创新概念，成为当今最流行的前端框架之一。
 
 ## React 的历史沿革
 
-### 诞生背景（2011-2013）
+### 诞生背景 (2011-2013)
 
 - **内部项目起源**：React 最初是 Facebook 为了解决复杂的用户界面开发问题而创建的内部项目
 - **Instagram 收购契机**：2012 年 Facebook 收购 Instagram 后，React 在该平台得到进一步应用和验证
@@ -19,7 +19,7 @@ React 是一个用于构建用户界面的 JavaScript 库，由 Facebook（现 M
 - **2018 年**：发布 React 16，新增 Fiber 架构和 Hooks
 - **2019 年**：发布 React 17，作为渐进式升级版本
 - **2022 年**：发布 React 18，新增并发特性
-- **2024 年**：发布 React 19，新增`Server Components`特性
+- **2024 年**：发布 React 19，新增 `Server Components` 特性
 
 ## React 解决的核心问题
 
@@ -152,7 +152,7 @@ React API 相对简洁，新手可以快速上手基础功能，随着技能提�
 npm create vite@latest my-app -- --template react
 ```
 
-Vite 采用约定式设计，开箱即提供合理的默认配置。它拥有丰富的插件生态系统，能够支持快速热更新、JSX、Babel/SWC 等常见功能。你可以查看 Vite 的 [React 插件](https://vite.dev/plugins/#vitejs-plugin-react) 或 [React SWC 插件](https://vite.dev/plugins/#vitejs-plugin-react-swc) 和 [React 服务器端渲染示例项目](https://vite.dev/guide/ssr.html#example-projects) 来开始使用。
+Vite 采用约定式设计，开箱即提供合理的默认配置。它拥有丰富的插件生态系统，能够支持快速热更新、JSX、Babel/SWC 等常见功能。你可以查看 Vite 的 [React 插件](https://vite.dev/plugins/#vitejs-plugin-react)或 [React SWC 插件](https://vite.dev/plugins/#vitejs-plugin-react-swc)和 [React 服务器端渲染示例项目](https://vite.dev/guide/ssr.html#example-projects)来开始使用。
 
 #### Parcel
 
@@ -164,7 +164,7 @@ cd my-react-app
 npm start
 ```
 
-Parcel 支持快速刷新、JSX、TypeScript、Flow 和开箱即用的样式。请查看 [Parcel 的 React 教程](https://parceljs.org/recipes/react/#getting-started) 以开始。
+Parcel 支持快速刷新、JSX、TypeScript、Flow 和开箱即用的样式。请查看 [Parcel 的 React 教程](https://parceljs.org/recipes/react/#getting-started)以开始。
 
 #### Rsbuild
 
@@ -174,4 +174,4 @@ Parcel 支持快速刷新、JSX、TypeScript、Flow 和开箱即用的样式。�
 npx create-rsbuild --template react
 ```
 
-Rsbuild 内置了对 React 特性的支持，如快速刷新、JSX、TypeScript 和样式。请查看 [Rsbuild 的 React 指南](https://rsbuild.dev/zh/guide/framework/react) 以开始使用。
+Rsbuild 内置了对 React 特性的支持，如快速刷新、JSX、TypeScript 和样式。请查看 [Rsbuild 的 React 指南](https://rsbuild.dev/zh/guide/framework/react)以开始使用。

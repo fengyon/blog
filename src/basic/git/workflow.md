@@ -6,7 +6,7 @@ Git 工作流是团队在协作开发过程中使用 Git 的一套约定和规�
 
 ## 基础工作流
 
-### 1. 集中式工作流
+### 1。集中式工作流
 
 最简单的 Git 工作流，适合小型团队。
 
@@ -25,7 +25,7 @@ Git 工作流是团队在协作开发过程中使用 Git 的一套约定和规�
 3. 推送更改：`git push origin main`
 4. 如有冲突，先拉取再推送
 
-### 2. 功能分支工作流
+### 2。功能分支工作流
 
 每个新功能在独立分支上开发。
 
@@ -52,7 +52,7 @@ git merge feature/new-feature
 
 ## 高级工作流
 
-### 3. Gitflow 工作流
+### 3。Gitflow 工作流
 
 Vincent Driessen 提出的标准化工作流，适合有固定发布周期的项目。
 
@@ -100,7 +100,7 @@ git checkout develop
 git merge --no-ff hotfix/critical-bug
 ```
 
-### 4. Forking 工作流
+### 4。Forking 工作流
 
 适合开源项目，贡献者没有直接推送权限。
 
@@ -122,7 +122,7 @@ git merge --no-ff hotfix/critical-bug
 
 ## 现代工作流实践
 
-### 5. 基于主干开发 (Trunk-Based Development)
+### 5。基于主干开发 (Trunk-Based Development)
 
 强调小批量、频繁集成。
 
@@ -136,7 +136,7 @@ main: o-o-o-o-o-o-o-o-o-o (持续集成)
 
 - 所有开发者每天至少向主干合并一次
 - 特性开关控制未完成功能
-- 短期特性分支（最多 1-2 天）
+- 短期特性分支 (最多 1-2 天)
 
 ### 6. GitHub Flow
 

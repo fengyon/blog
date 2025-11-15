@@ -5,6 +5,7 @@
 Next.js 是一个基于 React 的框架，用于构建现代 Web 应用程序。它提供了服务器端渲染、静态站点生成和客户端渲染等能力，让开发更高效。
 
 示意图：
+
 ```
 传统 React 应用：浏览器加载 JS -> 渲染内容
 Next.js 应用：服务器预渲染 HTML -> 发送给浏览器 -> 更快加载
@@ -17,6 +18,7 @@ Next.js 应用：服务器预渲染 HTML -> 发送给浏览器 -> 更快加载
 - 简化开发：内置路由、代码分割和优化工具。
 
 示意图：
+
 ```
 优势：
 - 速度: [客户端] --慢--> [服务器预渲染 --快-->]
@@ -25,7 +27,7 @@ Next.js 应用：服务器预渲染 HTML -> 发送给浏览器 -> 更快加载
 
 ## 开始使用
 
-首先，确保已安装 Node.js（版本 12 或更高）。然后，通过以下命令创建新项目：
+首先，确保已安装 Node.js (版本 12 或更高)。然后，通过以下命令创建新项目：
 
 ```bash
 npx create-next-app@latest my-next-app
@@ -33,9 +35,8 @@ cd my-next-app
 npm run dev
 ```
 
-访问 http://localhost:3000 查看应用。
-
 示意图：
+
 ```
 步骤：
 1. 运行命令 -> 创建项目文件夹
@@ -56,6 +57,7 @@ my-next-app/
 ```
 
 示意图：
+
 ```
 路由映射：
 pages/index.js -> /
@@ -70,13 +72,14 @@ pages/about.js -> /about
 
 ```jsx
 export default function About() {
-  return <h1>关于我们</h1>;
+  return <h1>关于我们</h1>
 }
 ```
 
 访问 `/about` 即可显示该页面。
 
 示意图：
+
 ```
 文件系统路由：
 pages/
@@ -90,10 +93,11 @@ pages/
 
 Next.js 支持多种渲染方式：
 
-- 静态生成（SSG）：构建时生成 HTML，适合内容不变的页面。
-- 服务器端渲染（SSR）：每次请求时生成 HTML，适合动态内容。
+- 静态生成 (SSG)：构建时生成 HTML，适合内容不变的页面。
+- 服务器端渲染 (SSR)：每次请求时生成 HTML，适合动态内容。
 
 示意图：
+
 ```
 静态生成：
 构建时: [数据获取] -> [生成 HTML] -> [存储]
@@ -111,13 +115,14 @@ Next.js 允许在 `pages/api` 目录下创建 API 端点，用于处理后端逻
 
 ```jsx
 export default function handler(req, res) {
-  res.status(200).json({ message: 'Hello World' });
+  res.status(200).json({ message: 'Hello World' })
 }
 ```
 
 访问 `/api/hello` 返回 JSON 数据。
 
 示意图：
+
 ```
 API 结构：
 pages/api/

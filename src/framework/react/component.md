@@ -8,7 +8,7 @@ React 组件是构建用户界面的独立、可复用的代码片段。每个�
 
 ### 函数组件
 
-通过定义函数，返回一个`jsx`元素，这是现代 React 开发中最常用的组件形式。
+通过定义函数，返回一个 `jsx` 元素，这是现代 React 开发中最常用的组件形式。
 函数名的首字母通常要大写，用来跟一般函数区分开。
 
 ```jsx
@@ -35,7 +35,7 @@ class Welcome extends Component {
 
 ### 组件 Props 是什么
 
-Props（属性）是组件的输入，类似于函数的参数。它们是从父组件传递给子组件的只读数据。
+Props (属性) 是组件的输入，类似于函数的参数。它们是从父组件传递给子组件的只读数据。
 
 ```jsx
 // 父组件向 Welcom 传递 props
@@ -95,7 +95,7 @@ function App() {
 
 #### className
 
-className 是 DOM 属性`class`的别称，用来定义样式，支持字符串、数组、对象三种方式定义
+className 是 DOM 属性 `class` 的别称，用来定义样式，支持字符串、数组、对象三种方式定义
 
 ```jsx
 const element1 = <div className="class1 class2 class3"></div>
@@ -221,11 +221,11 @@ function App() {
 
 ## Ref 详解
 
-`Ref`对应的英文单词是 `reference`，意思是“引用”。
+`Ref` 对应的英文单词是 `reference`，意思是“引用”。
 
 ### 定义组件 Ref
 
-- 原生组件，如`div`, `p`, `span`等的`ref`指向 DOM 元素
+- 原生组件，如 `div`，`p`，`span` 等的 `ref` 指向 DOM 元素
 - 使用 `useImperativeHandle` 自定义组件 Ref：
 
 ```jsx

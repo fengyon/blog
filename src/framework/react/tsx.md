@@ -12,7 +12,7 @@ TSX 是 TypeScript 与 JSX 的结合，它允许我们在 TypeScript 文件中�
 
 ## 定义组件 Props 类型
 
-### 1. 使用接口定义 Props
+### 1。使用接口定义 Props
 
 ```tsx
 interface ButtonProps {
@@ -42,7 +42,7 @@ const Button: React.FC<ButtonProps> = ({
 }
 ```
 
-### 2. 使用类型别名定义 Props
+### 2。使用类型别名定义 Props
 
 ```tsx
 type CardProps = {
@@ -73,7 +73,7 @@ const Card: React.FC<CardProps> = ({
 }
 ```
 
-### 3. 扩展 HTML 属性
+### 3。扩展 HTML 属性
 
 ```tsx
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -108,7 +108,7 @@ const Input: React.FC<InputProps> = ({
 
 ## 定义 Ref 类型
 
-### 1. 使用 useRef Hook
+### 1。使用 useRef Hook
 
 ```tsx
 import React, { useRef, useEffect } from 'react'
@@ -166,7 +166,7 @@ const TimerComponent: React.FC = () => {
 }
 ```
 
-### 2. 使用 forwardRef
+### 2。使用 forwardRef
 
 ```tsx
 import React, { forwardRef, useImperativeHandle } from 'react'
@@ -242,7 +242,7 @@ const ParentComponent: React.FC = () => {
 
 ## 定义 Hook 类型
 
-### 1. 自定义 Hook 类型定义
+### 1。自定义 Hook 类型定义
 
 ```tsx
 import { useState, useEffect, useCallback } from 'react'
@@ -295,7 +295,7 @@ const CounterComponent: React.FC = () => {
 }
 ```
 
-### 2. API 请求 Hook
+### 2。API 请求 Hook
 
 ```tsx
 import { useState, useEffect } from 'react'
@@ -365,7 +365,7 @@ const UserList: React.FC = () => {
 }
 ```
 
-### 3. 表单处理 Hook
+### 3。表单处理 Hook
 
 ```tsx
 import { useState, useCallback } from 'react'

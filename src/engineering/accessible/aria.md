@@ -1,8 +1,8 @@
 # aria
 
-## 什么是ARIA
+## 什么是 ARIA
 
-可访问的富互联网应用程序（ARIA）是一组特殊属性，用于增强HTML的无障碍性。当原生HTML无法充分描述组件的语义和行为时，ARIA通过修改浏览器可访问性树来为辅助技术提供额外信息。
+可访问的富互联网应用程序 (ARIA) 是一组特殊属性，用于增强 HTML 的无障碍性。当原生 HTML 无法充分描述组件的语义和行为时，ARIA 通过修改浏览器可访问性树来为辅助技术提供额外信息。
 
 示意图：
 ```
@@ -15,13 +15,13 @@ ARIA增强: <div role="menu" aria-label="主导航">菜单</div>
 屏幕阅读器: "主导航 菜单"
 ```
 
-核心原理：ARIA在DOM和可访问性树之间架起桥梁，将自定义组件映射为辅助技术能够理解的标准角色和状态。
+核心原理：ARIA 在 DOM 和可访问性树之间架起桥梁，将自定义组件映射为辅助技术能够理解的标准角色和状态。
 
-## ARIA的三个核心概念
+## ARIA 的三个核心概念
 
-### 角色（Roles）
+### 角色 (Roles)
 
-定义元素的类型或目的，将自定义组件映射为标准UI模式。
+定义元素的类型或目的，将自定义组件映射为标准 UI 模式。
 
 代码示例：
 ```html
@@ -45,7 +45,7 @@ ARIA增强: <div role="menu" aria-label="主导航">菜单</div>
     └── 地标角色: banner, navigation, main
 ```
 
-### 属性（Properties）
+### 属性 (Properties)
 
 描述元素的特征或关系，提供额外语义信息。
 
@@ -66,7 +66,7 @@ ARIA增强: <div role="menu" aria-label="主导航">菜单</div>
 </div>
 ```
 
-### 状态（States）
+### 状态 (States)
 
 表示元素的当前条件，通常是动态变化的。
 
@@ -90,9 +90,9 @@ ARIA增强: <div role="menu" aria-label="主导航">菜单</div>
 
 ## 可访问性树原理
 
-### DOM树到可访问性树
+### DOM 树到可访问性树
 
-浏览器将DOM元素转换为辅助技术可理解的可访问性节点。
+浏览器将 DOM 元素转换为辅助技术可理解的可访问性节点。
 
 示意图：
 ```
@@ -126,7 +126,7 @@ button: "点击我"
 3. 暴露给辅助技术API
 ```
 
-JavaScript检查可访问性树：
+JavaScript 检查可访问性树：
 ```javascript
 // 获取元素的可访问性信息
 const element = document.getElementById('custom');
@@ -141,7 +141,7 @@ const state = {
 console.log(`角色: ${role}, 名称: ${name}, 状态:`, state);
 ```
 
-## 核心ARIA模式
+## 核心 ARIA 模式
 
 ### 地标角色
 
@@ -178,7 +178,7 @@ console.log(`角色: ${role}, 名称: ${name}, 状态:`, state);
 输出: "横幅, 主导航 导航, 主内容 主区域, 文章, 相关链接 补充内容, 内容信息"
 ```
 
-### 实时区域（Live Regions）
+### 实时区域 (Live Regions)
 
 声明动态更新内容，控制屏幕阅读器如何宣布变化。
 
@@ -292,7 +292,7 @@ document.getElementById('email').addEventListener('blur', function() {
 </div>
 ```
 
-JavaScript交互实现：
+JavaScript 交互实现：
 ```javascript
 class TabComponent {
   constructor(container) {
@@ -395,7 +395,7 @@ class TabComponent {
 </div>
 ```
 
-模态框管理JavaScript：
+模态框管理 JavaScript：
 ```javascript
 let previousActiveElement;
 
@@ -460,7 +460,7 @@ function trapFocus(modal) {
 }
 ```
 
-## ARIA属性分类详解
+## ARIA 属性分类详解
 
 ### 标签和描述属性
 
@@ -531,11 +531,11 @@ function trapFocus(modal) {
 <input type="text" aria-required="true">
 ```
 
-## ARIA使用最佳实践
+## ARIA 使用最佳实践
 
-### ARIA第一规则
+### ARIA 第一规则
 
-"如果你能使用原生HTML元素或属性具有所需的语义和行为，而不是重新使用ARIA来补充，那么就这样做。"
+“如果你能使用原生 HTML 元素或属性具有所需的语义和行为，而不是重新使用 ARIA 来补充，那么就这样做。”
 
 代码示例对比：
 ```html
@@ -553,7 +553,7 @@ function trapFocus(modal) {
 
 ### 角色和属性验证
 
-确保ARIA使用符合规范。
+确保 ARIA 使用符合规范。
 
 代码示例：
 ```html
@@ -571,7 +571,7 @@ function trapFocus(modal) {
 
 ### 动态更新管理
 
-正确处理ARIA状态的动态变化。
+正确处理 ARIA 状态的动态变化。
 
 代码示例：
 ```javascript
@@ -612,7 +612,7 @@ class AccessibleComponent {
 
 ### 屏幕阅读器测试
 
-使用不同屏幕阅读器验证ARIA实现。
+使用不同屏幕阅读器验证 ARIA 实现。
 
 测试流程：
 ```
@@ -645,9 +645,9 @@ navigation: "侧边栏导航"
 
 ### 自动化测试
 
-使用工具验证ARIA使用正确性。
+使用工具验证 ARIA 使用正确性。
 
-代码示例（使用axe-core）：
+代码示例 (使用 axe-core)：
 ```javascript
 // ARIA规则测试
 axe.run(document, {
@@ -670,7 +670,7 @@ axe.run(document, {
 });
 ```
 
-### ARIA属性验证函数
+### ARIA 属性验证函数
 
 自定义验证工具检查常见错误。
 

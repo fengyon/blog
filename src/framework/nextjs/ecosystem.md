@@ -74,7 +74,7 @@ const useStore = create((set) => ({
 
 **Drizzle ORM + Vercel Postgres** 的组合获得了显著的关注。Drizzle ORM 提供类型安全的数据库操作，而 Vercel Postgres 则与 Next.js 无缝集成。
 
-另一种流行的选择是 **Prisma**，它是一个强大的数据库工具包，具有模式管理功能，常与 **Supabase**（一个开源的 Firebase 替代品）配对使用。
+另一种流行的选择是 **Prisma**，它是一个强大的数据库工具包，具有模式管理功能，常与 **Supabase** (一个开源的 Firebase 替代品) 配对使用。
 
 示意图：
 
@@ -140,7 +140,7 @@ Next.js 也支持部署到其他平台，如 Netlify、AWS 和 Azure，但 Verce
 
 ### Vercel AI SDK
 
-Vercel 的 AI SDK 使得在 Next.js 应用中集成人工智能功能变得简单。该 SDK 允许开发者选择他们偏好的大语言模型（LLM），如 GPT-4、Claude、Llama 等。
+Vercel 的 AI SDK 使得在 Next.js 应用中集成人工智能功能变得简单。该 SDK 允许开发者选择他们偏好的大语言模型 (LLM)，如 GPT-4、Claude、Llama 等。
 
 AI 聊天机器人是展示 Next.js AI 能力的流行项目。
 

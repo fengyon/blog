@@ -4,7 +4,7 @@ git hooks 是 Git 版本控制系统中的脚本机制，允许在特定的 Git 
 
 ## 什么是 git hooks？
 
-git hooks 是存储在 Git 仓库 `.git/hooks` 目录中的可执行脚本，在特定的 Git 操作（如提交、推送、合并等）前后自动触发执行。
+git hooks 是存储在 Git 仓库 `.git/hooks` 目录中的可执行脚本，在特定的 Git 操作 (如提交、推送、合并等) 前后自动触发执行。
 
 ```
 git hooks 位置:

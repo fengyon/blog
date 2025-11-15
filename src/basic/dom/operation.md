@@ -2,7 +2,7 @@
 
 在 Web 开发中，通过对 DOM 元素的操作，我们可以修改页面内容、样式、结构以及响应用户行为。
 
-## 获取DOM
+## 获取 DOM
 
 ### 传统方法
 
@@ -14,24 +14,24 @@
 | `document.getElementsByTagName('div')`                       | `<div></div>`                 | HTMLCollection \| `null` |
 | `document.getElementsByTagNameNS('http://www.w3.org/2000/svg', 'rect')` | `<svg><rect></rect></svg>`    | NodeList \| `null`       |
 
-说明: 
+说明：
 
 - `HTMLCollection`：元素的类数组，仅包含元素节点
 - `NodeList`：节点的类数组，可能包含元素节点、文本节点等
-- `类数组`: 含有`length`、`0~(length-1)`属性的对象，但是没有数组的`push`、`pop`等方法，如 `{ length:2, 0: 0, 1: 1 }`
+- `类数组`：含有 `length`、`0~(length-1)` 属性的对象，但是没有数组的 `push`、`pop` 等方法，如 `{ length:2, 0: 0, 1: 1 }`
 
 
 
 ### querySelector, querySelectorAll
 
-上述方法每次只能通过一种选择器来获取DOM，复杂难用，因此更简便的API被推出了。
+上述方法每次只能通过一种选择器来获取 DOM，复杂难用，因此更简便的 API 被推出了。
 
 | 代码                               | DOM 举例                 | 返回值                        |
 | ---------------------------------- | ------------------------ | ----------------------------- |
 | `document.querySelector('div')`    | `<div></div>`            | Node \| `null` (第一个节点)   |
 | `document.querySelectorAll('div')` | `<div></div><div></div>` | NodeList\| `null`  (所有节点) |
 
-`querySelector`、`querySelectorAll`的参数都是 [selector (css选择器)](/basic/css/selector.html)，有以下类型的值：
+`querySelector`、`querySelectorAll` 的参数都是 [selector (css 选择器)](/basic/css/selector.html)，有以下类型的值：
 
 | 选择器类型           | 选择器语法             | 选择器示例       | 对应DOM举例                          |
 | -------------------- | ---------------------- | ---------------- | ------------------------------------ |
@@ -62,7 +62,7 @@ const next = element.nextSibling // 下一个兄弟节点
 const prev = element.previousSibling // 上一个兄弟节点
 ```
 
-## 2. 内容修改
+## 2。内容修改
 
 ### innerHTML
 
@@ -103,7 +103,7 @@ console.log(demo.textContent) // "文本内容 隐藏文本"
 console.log(demo.innerText) // "文本内容"
 ```
 
-## 3. 属性操作
+## 3。属性操作
 
 ### 基本属性操作
 
@@ -121,7 +121,7 @@ element.removeAttribute('data-custom')
 const hasAttr = element.hasAttribute('data-custom')
 ```
 
-### 数据集操作（data-\* 属性）
+### 数据集操作 (data-\* 属性)
 
 ```javascript
 // HTML: <div id="user" data-user-id="123" data-user-role="admin">
@@ -145,7 +145,7 @@ element.title = '新标题'
 element.src = 'image.jpg'
 ```
 
-## 4. 样式控制
+## 4。样式控制
 
 ### className
 
@@ -160,7 +160,7 @@ element.className = 'class1 class2'
 element.className += ' new-class'
 ```
 
-### classList（推荐使用）
+### classList (推荐使用)
 
 ```javascript
 // 添加class
@@ -197,7 +197,7 @@ const computedStyle = window.getComputedStyle(element)
 const color = computedStyle.color
 ```
 
-## 5. 创建新元素
+## 5。创建新元素
 
 ### createElement
 
@@ -232,7 +232,7 @@ function createListItem(text) {
 const listItem = createListItem('项目内容')
 ```
 
-## 6. 添加节点
+## 6。添加节点
 
 ### appendChild
 
@@ -276,7 +276,7 @@ element.insertAdjacentHTML('beforeend', '<div>在末尾插入</div>') // 元素�
 element.insertAdjacentHTML('afterend', '<div>在后面插入</div>') // 元素之后
 ```
 
-## 7. 删除节点
+## 7。删除节点
 
 ### removeChild
 
@@ -320,7 +320,7 @@ while (element.firstChild) {
 element.replaceChildren()
 ```
 
-## 8. 替换与克隆节点
+## 8。替换与克隆节点
 
 ### replaceChild
 

@@ -6,7 +6,7 @@ Webpack 是一个现代 JavaScript 应用程序的静态模块打包器。它诞
 
 ### 模块打包
 
-Webpack 将项目中的各种资源（JS、CSS、图片等）视为模块，通过依赖关系构建依赖图，最终打包成浏览器可执行的静态文件。
+Webpack 将项目中的各种资源 (JS、CSS、图片等) 视为模块，通过依赖关系构建依赖图，最终打包成浏览器可执行的静态文件。
 
 ```
 源文件结构:
@@ -56,7 +56,7 @@ Webpack 的编译过程遵循明确的阶段划分。
 
 ## 关键特性
 
-### 加载器（Loaders）
+### 加载器 (Loaders)
 
 Webpack 使用加载器转换非 JavaScript 模块。
 
@@ -69,7 +69,7 @@ Webpack 使用加载器转换非 JavaScript 模块。
               style-loader
 ```
 
-### 插件系统（Plugins）
+### 插件系统 (Plugins)
 
 插件提供自定义 Webpack 构建流程的能力。
 

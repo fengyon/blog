@@ -2,16 +2,16 @@
 
 ## Git 仓库的概念
 
-**Git 仓库（Repository）** 是用于存储项目代码及其历史版本信息的地方。
+**Git 仓库 (Repository)** 是用于存储项目代码及其历史版本信息的地方。
 每个仓库都包含两类核心数据：
 
-1. **工作区（Working Directory）**：开发者实际编辑代码的地方。
-2. **版本库（.git 目录）**：Git 用于追踪、管理版本历史和分支的隐藏目录。
+1. **工作区 (Working Directory)**：开发者实际编辑代码的地方。
+2. **版本库 (。git 目录)**：Git 用于追踪、管理版本历史和分支的隐藏目录。
 
 Git 仓库分为两种类型：
 
-- **本地仓库（Local Repository）**：存储在开发者电脑上。
-- **远程仓库（Remote Repository）**：托管在服务器或平台上（如 GitHub、Gitee、GitLab）。
+- **本地仓库 (Local Repository)**：存储在开发者电脑上。
+- **远程仓库 (Remote Repository)**：托管在服务器或平台上 (如 GitHub、Gitee、GitLab)。
 
 
 ## 新建仓库
@@ -30,7 +30,7 @@ git init
 git clone <repo_url>
 ```
 
-克隆远程仓库到本地，同时自动建立远程连接（默认名为 `origin`）。
+克隆远程仓库到本地，同时自动建立远程连接 (默认名为 `origin`)。
 
 示例：
 
@@ -106,7 +106,7 @@ git push origin main
 
 将本地提交推送至远程仓库。
 
-### 获取远程更新（不合并）
+### 获取远程更新 (不合并)
 
 ```bash
 git fetch origin
@@ -126,7 +126,7 @@ git fetch origin
 rm -rf my-project
 ```
 
-### 删除远程仓库（GitHub 示例）
+### 删除远程仓库 (GitHub 示例)
 
 可通过 GitHub 网页界面：
 

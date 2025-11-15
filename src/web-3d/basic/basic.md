@@ -2,7 +2,7 @@
 
 ## 三维坐标系
 
-3D图形学使用三维坐标系描述物体位置：
+3D 图形学使用三维坐标系描述物体位置：
 ```
       y
       |
@@ -14,9 +14,9 @@
 ```
 
 右手坐标系规则：
-- x轴：右方向
-- y轴：上方向  
-- z轴：向前方向
+- x 轴：右方向
+- y 轴：上方向
+- z 轴：向前方向
 
 ## 顶点与图元
 
@@ -164,7 +164,7 @@ void main() {
 ```
 
 #### 漫反射
-Lambert余弦定律：
+Lambert 余弦定律：
 ```
 漫反射强度 = 光颜色 × 材质漫反射系数 × max(0, dot(N, L))
 ```
@@ -173,7 +173,7 @@ Lambert余弦定律：
 - L：光源方向
 
 #### 镜面反射
-Phong模型：
+Phong 模型：
 ```
 镜面反射强度 = 光颜色 × 材质镜面系数 × pow(max(0, dot(R, V)), 光泽度)
 ```
@@ -204,7 +204,7 @@ vec3 calculateLight(Light light, vec3 normal, vec3 fragPos, vec3 viewDir) {
 ## 纹理映射
 
 ### 纹理坐标系统
-2D纹理使用UV坐标：
+2D 纹理使用 UV 坐标：
 ```
 (0,1)---(1,1)
   |       |
@@ -242,7 +242,7 @@ gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
 ## 深度测试
 
-### Z-Buffer算法
+### Z-Buffer 算法
 每个像素存储深度值，解决遮挡问题：
 ```
 深度缓冲区初始化：所有像素深度 = 最大值
@@ -267,7 +267,7 @@ gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
  /______\
 ```
 
-### Gouraud着色
+### Gouraud 着色
 顶点颜色插值：
 ```
 顶点计算光照 → 三角形内颜色插值
@@ -278,7 +278,7 @@ gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 颜色平滑过渡
 ```
 
-### Phong着色
+### Phong 着色
 顶点法线插值，每个像素计算光照：
 ```
 顶点法线插值 → 每个像素独立计算光照
@@ -309,9 +309,9 @@ gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   Ax + By + Cz + D ≤ 0：内部
 ```
 
-## 现代图形API
+## 现代图形 API
 
-### WebGL渲染循环
+### WebGL 渲染循环
 ```javascript
 function render() {
   // 清除缓冲区

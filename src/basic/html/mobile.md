@@ -1,8 +1,8 @@
 # 移动设备网页设计
 
-## `<meta>`的 viewport 设置
+## `<meta>` 的 viewport 设置
 
-`<meta>`的 viewport 设置用来控制网页的视觉大小。
+`<meta>` 的 viewport 设置用来控制网页的视觉大小。
 
 ```html
 <meta name="viewport" content="initial-scale=1">

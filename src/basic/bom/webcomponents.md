@@ -2,17 +2,17 @@
 
 ## 概述
 
-各种网站往往需要一些相同的模块，比如日历、调色板等等，这种模块就被称为“组件”（component）。Web Components 就是浏览器原生的组件规范。
+各种网站往往需要一些相同的模块，比如日历、调色板等等，这种模块就被称为“组件”(component)。Web Components 就是浏览器原生的组件规范。
 
 采用组件开发，有很多优点。
 
-（1）有利于代码复用。组件是模块化编程思想的体现，可以跨平台、跨框架使用，构建、部署和与其他 UI 元素互动都有统一做法。
+(1) 有利于代码复用。组件是模块化编程思想的体现，可以跨平台、跨框架使用，构建、部署和与其他 UI 元素互动都有统一做法。
 
-（2）使用非常容易。加载或卸载组件，只要添加或删除一行代码就可以了。
+(2) 使用非常容易。加载或卸载组件，只要添加或删除一行代码就可以了。
 
-（3）开发和定制很方便。组件开发不需要使用框架，只要用原生的语法就可以了。开发好的组件往往留出接口，供使用者设置常见属性，比如上面代码的`heading`属性，就是用来设置对话框的标题。
+(3) 开发和定制很方便。组件开发不需要使用框架，只要用原生的语法就可以了。开发好的组件往往留出接口，供使用者设置常见属性，比如上面代码的 `heading` 属性，就是用来设置对话框的标题。
 
-（4）组件提供了 HTML、CSS、JavaScript 封装的方法，实现了与同一页面上其他代码的隔离。
+(4) 组件提供了 HTML、CSS、JavaScript 封装的方法，实现了与同一页面上其他代码的隔离。
 
 未来的网站开发，可以像搭积木一样，把组件合在一起，就组成了一个网站。这种前景是非常诱人的。
 
@@ -31,13 +31,13 @@ Web Components 不是单一的规范，而是一系列的技术组成，以下�
 
 HTML 标准定义的网页元素，有时并不符合我们的需要，这时浏览器允许用户自定义网页元素，这就叫做 Custom Element。简单说，它就是用户自定义的网页元素，是 Web components 技术的核心。
 
-举例来说，你可以自定义一个叫做`<my-element>`的网页元素。
+举例来说，你可以自定义一个叫做 `<my-element>` 的网页元素。
 
 ```html
 <my-element></my-element>
 ```
 
-注意，自定义网页元素的标签名必须含有连字符`-`，一个或多个连字符都可以。这是因为浏览器内置的的 HTML 元素标签名，都不含有连字符，这样可以做到有效区分。
+注意，自定义网页元素的标签名必须含有连字符 `-`，一个或多个连字符都可以。这是因为浏览器内置的的 HTML 元素标签名，都不含有连字符，这样可以做到有效区分。
 
 下面的代码先定义一个自定义元素的类。
 
@@ -74,21 +74,21 @@ class MyElement extends HTMLElement {
 
 上面代码有几个注意点。
 
-- 自定义元素类的基类是`HTMLElement`。当然也可以根据需要，基于`HTMLElement`的子类，比如`HTMLButtonElement`。
-- 构造函数内部定义了 Shadow DOM。所谓`Shadow DOM`指的是，这部分的 HTML 代码和样式，不直接暴露给用户。
-- 类可以定义生命周期方法，比如`connectedCallback()`。
+- 自定义元素类的基类是 `HTMLElement`。当然也可以根据需要，基于 `HTMLElement` 的子类，比如 `HTMLButtonElement`。
+- 构造函数内部定义了 Shadow DOM。所谓 `Shadow DOM` 指的是，这部分的 HTML 代码和样式，不直接暴露给用户。
+- 类可以定义生命周期方法，比如 `connectedCallback()`。
 
-然后，`window.customElements.define()`方法，用来登记自定义元素与这个类之间的映射。
+然后，`window.customElements.define()` 方法，用来登记自定义元素与这个类之间的映射。
 
 ```javascript
 window.customElements.define('my-element', MyElement);
 ```
 
-登记以后，页面上的每一个`<my-element>`元素都是一个`MyElement`类的实例。只要浏览器解析到`<my-element>`元素，就会运行`MyElement`的构造函数。
+登记以后，页面上的每一个 `<my-element>` 元素都是一个 `MyElement` 类的实例。只要浏览器解析到 `<my-element>` 元素，就会运行 `MyElement` 的构造函数。
 
 注意，如果没有登记就使用 Custom Element，浏览器会认为这是一个不认识的元素，会当做空的 div 元素处理。
 
-`window.customElements.define()`方法定义了 Custom Element 以后，可以使用`window.customeElements.get()`方法获取该元素的构造方法。这使得除了直接插入 HTML 网页，Custom Element 也能使用脚本插入网页。
+`window.customElements.define()` 方法定义了 Custom Element 以后，可以使用 `window.customeElements.get()` 方法获取该元素的构造方法。这使得除了直接插入 HTML 网页，Custom Element 也能使用脚本插入网页。
 
 ```javascript
 window.customElements.define(
@@ -100,7 +100,7 @@ const myElement = new el();
 document.body.appendChild(myElement);
 ```
 
-如果你想扩展现有的 HTML 元素（比如`<button>`）也是可以的。
+如果你想扩展现有的 HTML 元素 (比如 `<button>`) 也是可以的。
 
 ```javascript
 class GreetingElement extends HTMLButtonElement
@@ -112,7 +112,7 @@ class GreetingElement extends HTMLButtonElement
 customElements.define('hey-there', GreetingElement, { extends: 'button' });
 ```
 
-使用的时候，为元素加上`is`属性就可以了。
+使用的时候，为元素加上 `is` 属性就可以了。
 
 ```html
 <button is="hey-there" name="World">Howdy</button>
@@ -134,12 +134,12 @@ class MyElement extends HTMLElement {
 }
 ```
 
-上面代码中，`connectedCallback()`方法就是`MyElement`元素的生命周期方法。每次，该元素插入 DOM，就会自动执行该方法。
+上面代码中，`connectedCallback()` 方法就是 `MyElement` 元素的生命周期方法。每次，该元素插入 DOM，就会自动执行该方法。
 
 - `connectedCallback()`：插入 DOM 时调用。这可能不止一次发生，比如元素被移除后又重新添加。类的设置应该尽量放到这个方法里面执行，因为这时各种属性和子元素都可用。
 - `disconnectedCallback()`：移出 DOM 时执行。
-- `attributeChangedCallback(attrName, oldVal, newVal)`：添加、删除、更新或替换属性时调用。元素创建或升级时，也会调用。注意：只有加入`observedAttributes`的属性才会执行这个方法。
-- `adoptedCallback()`：自定义元素移动到新的 document 时调用，比如执行`document.adoptNode(element)`时。
+- `attributeChangedCallback(attrName, oldVal, newVal)`：添加、删除、更新或替换属性时调用。元素创建或升级时，也会调用。注意：只有加入 `observedAttributes` 的属性才会执行这个方法。
+- `adoptedCallback()`：自定义元素移动到新的 document 时调用，比如执行 `document.adoptNode(element)` 时。
 
 下面是一个例子。
 
@@ -166,7 +166,7 @@ GreetingElement.observedAttributes = ['name'];
 customElements.define('hey-there', GreetingElement);
 ```
 
-上面代码中，`GreetingElement.observedAttributes`属性用来指定白名单里面的属性，上例是`name`属性。只要这个属性的值发生变化，就会自动调用`attributeChangedCallback`方法。
+上面代码中，`GreetingElement.observedAttributes` 属性用来指定白名单里面的属性，上例是 `name` 属性。只要这个属性的值发生变化，就会自动调用 `attributeChangedCallback` 方法。
 
 使用上面这个类的方法如下。
 
@@ -175,9 +175,9 @@ customElements.define('hey-there', GreetingElement);
 <hey-there name="Potch">Personalized Greeting</hey-there>
 ```
 
-`attributeChangedCallback`方法主要用于外部传入的属性，就像上面例子中`name="Potch"`。
+`attributeChangedCallback` 方法主要用于外部传入的属性，就像上面例子中 `name="Potch"`。
 
-生命周期方法调用的顺序如下：`constructor` -> `attributeChangedCallback` -> `connectedCallback`，即`attributeChangedCallback`早于`connectedCallback`执行。这是因为`attributeChangedCallback`相当于调整配置，应该在插入 DOM 之前完成。
+生命周期方法调用的顺序如下：`constructor` -> `attributeChangedCallback` -> `connectedCallback`，即 `attributeChangedCallback` 早于 `connectedCallback` 执行。这是因为 `attributeChangedCallback` 相当于调整配置，应该在插入 DOM 之前完成。
 
 下面的例子能够更明显地看出这一点，在插入 DOM 前修改 Custome Element 的颜色。
 
@@ -212,7 +212,7 @@ class MyElement extends HTMLElement {
 }
 ```
 
-上面代码中，`doSomething()`就是`MyElement`的自定义方法，使用方法如下。
+上面代码中，`doSomething()` 就是 `MyElement` 的自定义方法，使用方法如下。
 
 ```javascript
 const element = document.querySelector('my-element');
@@ -240,11 +240,11 @@ class MyElement extends HTMLElement {
 }
 ```
 
-上面代码中的取值器和赋值器，可用于`<my-input name="name" disabled>`这样的用法。
+上面代码中的取值器和赋值器，可用于 `<my-input name="name" disabled>` 这样的用法。
 
 ### window.customElements.whenDefined()
 
-`window.customElements.whenDefined()`方法在一个 Custom Element 被`customElements.define()`方法定义以后执行，用于“升级”一个元素。
+`window.customElements.whenDefined()` 方法在一个 Custom Element 被 `customElements.define()` 方法定义以后执行，用于“升级”一个元素。
 
 ```javascript
 window.customElements.whenDefined('my-element')
@@ -253,7 +253,7 @@ window.customElements.whenDefined('my-element')
 })
 ```
 
-如果某个属性值发生变化时，需要做出反应，可以将它放入`observedAttributes`数组。
+如果某个属性值发生变化时，需要做出反应，可以将它放入 `observedAttributes` 数组。
 
 ```javascript
 class MyElement extends HTMLElement {
@@ -294,9 +294,9 @@ class MyElement extends HTMLElement {
 自定义元素的原型有一些属性，用来指定回调函数，在特定事件发生时触发。
 
 - **createdCallback**：实例生成时触发
-- **attachedCallback**：实例插入HTML文档时触发
-- **detachedCallback**：实例从HTML文档移除时触发
-- **attributeChangedCallback(attrName, oldVal, newVal)**：实例的属性发生改变时（添加、移除、更新）触发
+- **attachedCallback**：实例插入 HTML 文档时触发
+- **detachedCallback**：实例从 HTML 文档移除时触发
+- **attributeChangedCallback(attrName，oldVal，newVal)**：实例的属性发生改变时 (添加、移除、更新) 触发
 
 下面是一个例子。
 
@@ -315,7 +315,7 @@ proto.attachedCallback = function() {
 var XFoo = document.registerElement('x-foo', {prototype: proto});
 ```
 
-利用回调函数，可以方便地在自定义元素中插入HTML语句。
+利用回调函数，可以方便地在自定义元素中插入 HTML 语句。
 
 ```javascript
 
@@ -330,7 +330,7 @@ var XFoo = document.registerElement('x-foo-with-markup',
 
 ```
 
-上面代码定义了createdCallback回调函数，生成实例时，该函数运行，插入如下的HTML语句。
+上面代码定义了 createdCallback 回调函数，生成实例时，该函数运行，插入如下的 HTML 语句。
 
 ```html
 <x-foo-with-markup>
@@ -340,9 +340,9 @@ var XFoo = document.registerElement('x-foo-with-markup',
 
 ### Custom Element 的子元素
 
-用户使用 Custom Element 时候，可以在内部放置子元素。Custom Element 提供`<slot>`用来引用内部内容。
+用户使用 Custom Element 时候，可以在内部放置子元素。Custom Element 提供 `<slot>` 用来引用内部内容。
 
-下面的`<image-gallery>`是一个 Custom Element。用户在里面放置了子元素。
+下面的 `<image-gallery>` 是一个 Custom Element。用户在里面放置了子元素。
 
 ```html
 <image-gallery>
@@ -351,7 +351,7 @@ var XFoo = document.registerElement('x-foo-with-markup',
 </image-gallery>
 ```
 
-`<image-gallery>`内部的模板如下。
+`<image-gallery>` 内部的模板如下。
 
 ```html
 <div id="container">
@@ -374,11 +374,11 @@ var XFoo = document.registerElement('x-foo-with-markup',
 </div>
 ```
 
-## `<template>`标签
+## `<template>` 标签
 
 ### 基本用法
 
-`<template>`标签表示组件的 HTML 代码模板。
+`<template>` 标签表示组件的 HTML 代码模板。
 
 ```html
 <template>
@@ -387,7 +387,7 @@ var XFoo = document.registerElement('x-foo-with-markup',
 </template>
 ```
 
-`<template>`内部就是正常的 HTML 代码，浏览器不会将这些代码加入 DOM。
+`<template>` 内部就是正常的 HTML 代码，浏览器不会将这些代码加入 DOM。
 
 下面的代码会将模板内部的代码插入 DOM。
 
@@ -398,15 +398,15 @@ document.body.appendChild(template.content);
 
 注意，模板内部的代码只能插入一次，如果第二次执行上面的代码就会报错。
 
-如果需要多次插入模板，可以复制`<template>`内部代码，然后再插入。
+如果需要多次插入模板，可以复制 `<template>` 内部代码，然后再插入。
 
 ```javascript
 document.body.appendChild(template.content.cloneNode(true));
 ```
 
-上面代码中，`cloneNode()`方法的参数`true`表示复制包含所有子节点。
+上面代码中，`cloneNode()` 方法的参数 `true` 表示复制包含所有子节点。
 
-接受`<template>`插入的元素，叫做宿主元素（host）。在`<template>`之中，可以对宿主元素设置样式。
+接受 `<template>` 插入的元素，叫做宿主元素 (host)。在 `<template>` 之中，可以对宿主元素设置样式。
 
 ```html
 <template>
@@ -423,7 +423,7 @@ document.body.appendChild(template.content.cloneNode(true));
 
 ### document.importNode()
 
-document.importNode方法用于克隆外部文档的DOM节点。
+document.importNode 方法用于克隆外部文档的 DOM 节点。
 
 ```javascript
 var iframe = document.getElementsByTagName("iframe")[0];
@@ -432,15 +432,15 @@ var newNode = document.importNode(oldNode, true);
 document.getElementById("container").appendChild(newNode);
 ```
 
-上面例子是将iframe窗口之中的节点oldNode，克隆进入当前文档。
+上面例子是将 iframe 窗口之中的节点 oldNode，克隆进入当前文档。
 
-注意，克隆节点之后，还必须用appendChild方法将其加入当前文档，否则不会显示。换个角度说，这意味着插入外部文档节点之前，必须用document.importNode方法先将这个节点准备好。
+注意，克隆节点之后，还必须用 appendChild 方法将其加入当前文档，否则不会显示。换个角度说，这意味着插入外部文档节点之前，必须用 document.importNode 方法先将这个节点准备好。
 
-document.importNode方法接受两个参数，第一个参数是外部文档的DOM节点，第二个参数是一个布尔值，表示是否连同子节点一起克隆，默认为false。大多数情况下，必须显式地将第二个参数设为true。
+document.importNode 方法接受两个参数，第一个参数是外部文档的 DOM 节点，第二个参数是一个布尔值，表示是否连同子节点一起克隆，默认为 false。大多数情况下，必须显式地将第二个参数设为 true。
 
 ## Shadow DOM
 
-所谓 Shadow DOM 指的是，浏览器将模板、样式表、属性、JavaScript 码等，封装成一个独立的 DOM 元素。外部的设置无法影响到其内部，而内部的设置也不会影响到外部，与浏览器处理原生网页元素（比如`<video>`元素）的方式很像。
+所谓 Shadow DOM 指的是，浏览器将模板、样式表、属性、JavaScript 码等，封装成一个独立的 DOM 元素。外部的设置无法影响到其内部，而内部的设置也不会影响到外部，与浏览器处理原生网页元素 (比如 `<video>` 元素) 的方式很像。
 
 Shadow DOM 最大的好处有两个，一是可以向用户隐藏细节，直接提供组件，二是可以封装内部样式表，不会影响到外部。
 
@@ -457,13 +457,13 @@ shadow.appendChild(inner);
 div.querySelector('b'); // empty
 ```
 
-上面代码中，`<div>`包含`<b>`，但是 DOM 方法无法看到它，而且页面的样式也影响不到它。
+上面代码中，`<div>` 包含 `<b>`，但是 DOM 方法无法看到它，而且页面的样式也影响不到它。
 
-`mode: 'open'`表示开发者工具里面，可以看到 Custom HTML 内部的 DOM，并与之互动。`mode: closed`将不允许 Custom Element 的使用者与内部代码互动。
+`mode: 'open'` 表示开发者工具里面，可以看到 Custom HTML 内部的 DOM，并与之互动。`mode: closed` 将不允许 Custom Element 的使用者与内部代码互动。
 
-Shadow root 内部通过指定`innerHTML`属性或使用`<template>`元素，指定 HTML 代码。
+Shadow root 内部通过指定 `innerHTML` 属性或使用 `<template>` 元素，指定 HTML 代码。
 
-Shadow DOM 内部可以通过向根添加`<style>`（或`<link>`）来设置样式。
+Shadow DOM 内部可以通过向根添加 `<style>` (或 `<link>`) 来设置样式。
 
 ```javascript
 let style = document.createElement('style');
@@ -477,7 +477,7 @@ shadowRoot.appendChild(inner);
 
 上面代码添加的样式，只会影响 Shadow DOM 内的元素。
 
-Custom Element 的 CSS 样式内部，`:root`表示这个根元素。比如，Custom Element 默认是行内元素，下面代码可以改成块级元素。
+Custom Element 的 CSS 样式内部，`:root` 表示这个根元素。比如，Custom Element 默认是行内元素，下面代码可以改成块级元素。
 
 ```css
 :host {
@@ -489,7 +489,7 @@ Custom Element 的 CSS 样式内部，`:root`表示这个根元素。比如，Cu
 }
 ```
 
-注意，外部样式会覆盖掉`:host`的设置，比如下面的样式会覆盖`:host`。
+注意，外部样式会覆盖掉 `:host` 的设置，比如下面的样式会覆盖 `:host`。
 
 ```css
 my-element {
@@ -497,7 +497,7 @@ my-element {
 }
 ```
 
-利用 CSS 的自定义属性，可以为 Custom Element 可以被覆盖的默认样式。下面是外部样式，`my-element`是 Custom Element。
+利用 CSS 的自定义属性，可以为 Custom Element 可以被覆盖的默认样式。下面是外部样式，`my-element` 是 Custom Element。
 
 ```css
 my-element {
@@ -540,15 +540,15 @@ my-element {
 </template>
 ```
 
-上面代码是一个`div`元素和模板。接下来，就是要把模板应用到`div`元素上。
+上面代码是一个 `div` 元素和模板。接下来，就是要把模板应用到 `div` 元素上。
 
 ## HTML Import
 
 ### 基本操作
 
-长久以来，网页可以加载外部的样式表、脚本、图片、多媒体，却无法方便地加载其他网页，iframe和ajax都只能提供部分的解决方案，且有很大的局限。HTML Import就是为了解决加载外部网页这个问题，而提出来的。
+长久以来，网页可以加载外部的样式表、脚本、图片、多媒体，却无法方便地加载其他网页，iframe 和 ajax 都只能提供部分的解决方案，且有很大的局限。HTML Import 就是为了解决加载外部网页这个问题，而提出来的。
 
-下面代码用于测试当前浏览器是否支持HTML Import。
+下面代码用于测试当前浏览器是否支持 HTML Import。
 
 ```javascript
 
@@ -564,7 +564,7 @@ if (supportsImports()) {
 
 ```
 
-HTML Import用于将外部的HTML文档加载进当前文档。我们可以将组件的HTML、CSS、JavaScript封装在一个文件里，然后使用下面的代码插入需要使用该组件的网页。
+HTML Import 用于将外部的 HTML 文档加载进当前文档。我们可以将组件的 HTML、CSS、JavaScript 封装在一个文件里，然后使用下面的代码插入需要使用该组件的网页。
 
 ```html
 
@@ -572,11 +572,11 @@ HTML Import用于将外部的HTML文档加载进当前文档。我们可以将�
 
 ```
 
-上面代码在网页中插入一个对话框组件，该组建封装在`dialog.html`文件。注意，dialog.html文件中的样式和JavaScript脚本，都对所插入的整个网页有效。
+上面代码在网页中插入一个对话框组件，该组建封装在 `dialog.html` 文件。注意，dialog.html 文件中的样式和 JavaScript 脚本，都对所插入的整个网页有效。
 
-假定A网页通过HTML Import加载了B网页，即B是一个组件，那么B网页的样式表和脚本，对A网页也有效（准确得说，只有style标签中的样式对A网页有效，link标签加载的样式表对A网页无效）。所以可以把多个样式表和脚本，都放在B网页中，都从那里加载。这对大型的框架，是很方便的加载方法。
+假定 A 网页通过 HTML Import 加载了 B 网页，即 B 是一个组件，那么 B 网页的样式表和脚本，对 A 网页也有效 (准确得说，只有 style 标签中的样式对 A 网页有效，link 标签加载的样式表对 A 网页无效)。所以可以把多个样式表和脚本，都放在 B 网页中，都从那里加载。这对大型的框架，是很方便的加载方法。
 
-如果B与A不在同一个域，那么A所在的域必须打开CORS。
+如果 B 与 A 不在同一个域，那么 A 所在的域必须打开 CORS。
 
 ```html
 
@@ -585,7 +585,7 @@ HTML Import用于将外部的HTML文档加载进当前文档。我们可以将�
 
 ```
 
-除了用link标签，也可以用JavaScript调用link元素，完成HTML Import。
+除了用 link 标签，也可以用 JavaScript 调用 link 元素，完成 HTML Import。
 
 ```javascript
 
@@ -598,7 +598,7 @@ document.head.appendChild(link);
 
 ```
 
-HTML Import加载成功时，会在link元素上触发load事件，加载失败时（比如404错误）会触发error事件，可以对这两个事件指定回调函数。
+HTML Import 加载成功时，会在 link 元素上触发 load 事件，加载失败时 (比如 404 错误) 会触发 error 事件，可以对这两个事件指定回调函数。
 
 ```html
 
@@ -616,9 +616,9 @@ HTML Import加载成功时，会在link元素上触发load事件，加载失败�
 
 ```
 
-上面代码中，handleLoad和handleError函数的定义，必须在link元素的前面。因为浏览器元素遇到link元素时，立刻解析并加载外部网页（同步操作），如果这时没有对这两个函数定义，就会报错。
+上面代码中，handleLoad 和 handleError 函数的定义，必须在 link 元素的前面。因为浏览器元素遇到 link 元素时，立刻解析并加载外部网页 (同步操作)，如果这时没有对这两个函数定义，就会报错。
 
-HTML Import是同步加载，会阻塞当前网页的渲染，这主要是为了样式表的考虑，因为外部网页的样式表对当前网页也有效。如果想避免这一点，可以为link元素加上async属性。当然，这也意味着，如果外部网页定义了组件，就不能立即使用了，必须等HTML Import完成，才能使用。
+HTML Import 是同步加载，会阻塞当前网页的渲染，这主要是为了样式表的考虑，因为外部网页的样式表对当前网页也有效。如果想避免这一点，可以为 link 元素加上 async 属性。当然，这也意味着，如果外部网页定义了组件，就不能立即使用了，必须等 HTML Import 完成，才能使用。
 
 ```html
 
@@ -626,13 +626,13 @@ HTML Import是同步加载，会阻塞当前网页的渲染，这主要是为了
 
 ```
 
-但是，HTML Import不会阻塞当前网页的解析和脚本执行（即阻塞渲染）。这意味着在加载的同时，主页面的脚本会继续执行。
+但是，HTML Import 不会阻塞当前网页的解析和脚本执行 (即阻塞渲染)。这意味着在加载的同时，主页面的脚本会继续执行。
 
-最后，HTML Import支持多重加载，即被加载的网页同时又加载其他网页。如果这些网页都重复加载同一个外部脚本，浏览器只会抓取并执行一次该脚本。比如，A网页加载了B网页，它们各自都需要加载jQuery，浏览器只会加载一次jQuery。
+最后，HTML Import 支持多重加载，即被加载的网页同时又加载其他网页。如果这些网页都重复加载同一个外部脚本，浏览器只会抓取并执行一次该脚本。比如，A 网页加载了 B 网页，它们各自都需要加载 jQuery，浏览器只会加载一次 jQuery。
 
 ### 脚本的执行
 
-外部网页的内容，并不会自动显示在当前网页中，它只是储存在浏览器中，等到被调用的时候才加载进入当前网页。为了加载网页网页，必须用DOM操作获取加载的内容。具体来说，就是使用link元素的import属性，来获取加载的内容。这一点与iframe完全不同。
+外部网页的内容，并不会自动显示在当前网页中，它只是储存在浏览器中，等到被调用的时候才加载进入当前网页。为了加载网页网页，必须用 DOM 操作获取加载的内容。具体来说，就是使用 link 元素的 import 属性，来获取加载的内容。这一点与 iframe 完全不同。
 
 ```javascript
 
@@ -640,15 +640,15 @@ var content = document.querySelector('link[rel="import"]').import;
 
 ```
 
-发生以下情况时，link.import属性为null。
+发生以下情况时，link.import 属性为 null。
 
-- 浏览器不支持HTML Import
-- link元素没有声明`rel="import"`
-- link元素没有被加入DOM
-- link元素已经从DOM中移除
-- 对方域名没有打开CORS
+- 浏览器不支持 HTML Import
+- link 元素没有声明 `rel="import"`
+- link 元素没有被加入 DOM
+- link 元素已经从 DOM 中移除
+- 对方域名没有打开 CORS
 
-下面代码用于从加载的外部网页选取id为template的元素，然后将其克隆后加入当前网页的DOM。
+下面代码用于从加载的外部网页选取 id 为 template 的元素，然后将其克隆后加入当前网页的 DOM。
 
 ```javascript
 
@@ -658,7 +658,7 @@ document.body.appendChild(el.cloneNode(true));
 
 ```
 
-当前网页可以获取外部网页，反过来也一样，外部网页中的脚本，不仅可以获取本身的DOM，还可以获取link元素所在的当前网页的DOM。
+当前网页可以获取外部网页，反过来也一样，外部网页中的脚本，不仅可以获取本身的 DOM，还可以获取 link 元素所在的当前网页的 DOM。
 
 ```javascript
 
@@ -678,11 +678,11 @@ mainDoc.head.appendChild(styles.cloneNode(true));
 
 上面代码将所加载的外部网页的样式表，添加进当前网页。
 
-被加载的外部网页的脚本是直接在当前网页的上下文执行，因为它的`window.document`指的是当前网页的document，而且它定义的函数可以被当前网页的脚本直接引用。
+被加载的外部网页的脚本是直接在当前网页的上下文执行，因为它的 `window.document` 指的是当前网页的 document，而且它定义的函数可以被当前网页的脚本直接引用。
 
-### Web Component的封装
+### Web Component 的封装
 
-对于Web Component来说，HTML Import的一个重要应用是在所加载的网页中，自动登记Custom Element。
+对于 Web Component 来说，HTML Import 的一个重要应用是在所加载的网页中，自动登记 Custom Element。
 
 ```html
 
@@ -744,15 +744,15 @@ mainDoc.head.appendChild(styles.cloneNode(true));
 
 ```
 
-不难想到，这意味着HTML Import使得Web Component变得可分享了，其他人只要拷贝`elements.html`，就可以在自己的页面中使用了。
+不难想到，这意味着 HTML Import 使得 Web Component 变得可分享了，其他人只要拷贝 `elements.html`，就可以在自己的页面中使用了。
 
 ## Polymer.js
 
-Web Components是非常新的技术，为了让老式浏览器也能使用，Google推出了一个函数库[Polymer.js](http://www.polymer-project.org/)。这个库不仅可以帮助开发者，定义自己的网页元素，还提供许多预先制作好的组件，可以直接使用。
+Web Components 是非常新的技术，为了让老式浏览器也能使用，Google 推出了一个函数库 [Polymer.js](http://www.polymer-project.org/)。这个库不仅可以帮助开发者，定义自己的网页元素，还提供许多预先制作好的组件，可以直接使用。
 
 ### 直接使用的组件
 
-Polymer.js提供的组件，可以直接插入网页，比如下面的google-map。。
+Polymer.js 提供的组件，可以直接插入网页，比如下面的 google-map。。
 
 ```html
 
@@ -770,7 +770,7 @@ Polymer.js提供的组件，可以直接插入网页，比如下面的google-map
 
 ```
 
-自定义标签与其他标签的用法完全相同，也可以使用CSS指定它的样式。
+自定义标签与其他标签的用法完全相同，也可以使用 CSS 指定它的样式。
 
 ```css
 
@@ -787,7 +787,7 @@ polymer-ui-clock {
 
 ### 安装
 
-如果使用bower安装，至少需要安装platform和core components这两个核心部分。
+如果使用 bower 安装，至少需要安装 platform 和 core components 这两个核心部分。
 
 ```bash
 
@@ -813,7 +813,7 @@ bower install Polymer/polymer-ui-accordion
 
 ```
 
-这时，组件根目录下的bower.json，会指明该组件的依赖的模块，这些模块会被自动安装。
+这时，组件根目录下的 bower.json，会指明该组件的依赖的模块，这些模块会被自动安装。
 
 ```javascript
 
@@ -846,15 +846,15 @@ bower install Polymer/polymer-ui-accordion
 
 ```
 
-上面代码定义了lorem-element组件。它分成三个部分。
+上面代码定义了 lorem-element 组件。它分成三个部分。
 
-**（1）import命令**
+**(1) import 命令**
 
-import命令表示载入核心模块
+import 命令表示载入核心模块
 
-**（2）polymer-element标签**
+**(2) polymer-element 标签**
 
-polymer-element标签定义了组件的名称（注意，组件名称中必须包含连字符）。它还可以使用extends属性，表示组件基于某种网页元素。
+polymer-element 标签定义了组件的名称 (注意，组件名称中必须包含连字符)。它还可以使用 extends 属性，表示组件基于某种网页元素。
 
 ```html
 
@@ -862,13 +862,13 @@ polymer-element标签定义了组件的名称（注意，组件名称中必须�
 
 ```
 
-**（3）template标签**
+**(3) template 标签**
 
-template标签定义了网页元素的模板。
+template 标签定义了网页元素的模板。
 
 ### 组件的使用方法
 
-在调用组件的网页中，首先加载polymer.js库和组件文件。
+在调用组件的网页中，首先加载 polymer.js 库和组件文件。
 
 ```html
 
@@ -877,7 +877,7 @@ template标签定义了网页元素的模板。
 
 ```
 
-然后，分成两种情况。如果组件不基于任何现有的HTML网页元素（即定义的时候没有使用extends属性），则可以直接使用组件。
+然后，分成两种情况。如果组件不基于任何现有的 HTML 网页元素 (即定义的时候没有使用 extends 属性)，则可以直接使用组件。
 
 ```html
 
@@ -887,7 +887,7 @@ template标签定义了网页元素的模板。
 
 这时网页上就会显示一行字“Lorem ipsum”。
 
-如果组件是基于（extends）现有的网页元素，则必须在该种元素上使用is属性指定组件。
+如果组件是基于 (extends) 现有的网页元素，则必须在该种元素上使用 is 属性指定组件。
 
 ```
 

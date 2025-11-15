@@ -46,9 +46,9 @@ async function fn(): Promise<number> {
 
 ## `Iterable<T>`
 
-对象只要部署了 Iterator 接口，就可以用`for...of`循环遍历。Generator 函数（生成器）返回的就是一个具有 Iterator 接口的对象。
+对象只要部署了 Iterator 接口，就可以用 `for...of` 循环遍历。Generator 函数 (生成器) 返回的就是一个具有 Iterator 接口的对象。
 
-TypeScript 使用泛型`Iterable<T>`表示具有 Iterator 接口的对象，其中`T`表示 Iterator 接口包含的值类型（每一轮遍历获得的值）。
+TypeScript 使用泛型 `Iterable<T>` 表示具有 Iterator 接口的对象，其中 `T` 表示 Iterator 接口包含的值类型 (每一轮遍历获得的值)。
 
 ```typescript
 interface Iterable<T> {
@@ -56,9 +56,9 @@ interface Iterable<T> {
 }
 ```
 
-上面是`Iterable<T>`接口的定义，表示一个具有`Symbol.iterator`属性的对象，该属性是一个函数，调用后返回的是一个 Iterator 对象。
+上面是 `Iterable<T>` 接口的定义，表示一个具有 `Symbol.iterator` 属性的对象，该属性是一个函数，调用后返回的是一个 Iterator 对象。
 
-Iterator 对象必须具有`next()`方法，另外还具有两个可选方法`return()`和`throw()`，类型表述如下。
+Iterator 对象必须具有 `next()` 方法，另外还具有两个可选方法 `return()` 和 `throw()`，类型表述如下。
 
 ```typescript
 interface Iterator<T> {
@@ -68,9 +68,9 @@ interface Iterator<T> {
 }
 ```
 
-上面的类型定义中，可以看到`next()`、`return()`、`throw()`这三个方法的返回值是一个部署了`IteratorResult<T>`接口的对象。
+上面的类型定义中，可以看到 `next()`、`return()`、`throw()` 这三个方法的返回值是一个部署了 `IteratorResult<T>` 接口的对象。
 
-`IteratorResult<T>`接口的定义如下。
+`IteratorResult<T>` 接口的定义如下。
 
 ```typescript
 interface IteratorResult<T> {
@@ -79,7 +79,7 @@ interface IteratorResult<T> {
 }
 ```
 
-上面的类型定义表示，Iterator 对象的`next()`等方法的返回值，具有`done`和`value`两个属性。
+上面的类型定义表示，Iterator 对象的 `next()` 等方法的返回值，具有 `done` 和 `value` 两个属性。
 
 下面的例子是 Generator 函数返回一个具有 Iterator 接口的对象。
 
@@ -92,7 +92,7 @@ function* g():Iterable<string> {
 }
 ```
 
-上面示例中，生成器`g()`返回的类型是`Iterable<string>`，其中`string`表示 Iterator 接口包含的是字符串。
+上面示例中，生成器 `g()` 返回的类型是 `Iterable<string>`，其中 `string` 表示 Iterator 接口包含的是字符串。
 
 这个例子的类型声明可以省略，因为 TypeScript 可以自己推断出来 Iterator 接口的类型。
 
@@ -105,7 +105,7 @@ function* g() {
 }
 ```
 
-另外，扩展运算符（`...`）后面的值必须具有 Iterator 接口，下面是一个例子。
+另外，扩展运算符 (`...`) 后面的值必须具有 Iterator 接口，下面是一个例子。
 
 ```typescript
 function toArray<X>(xs: Iterable<X>):X[] {
@@ -115,7 +115,7 @@ function toArray<X>(xs: Iterable<X>):X[] {
 
 ## Generator 函数
 
-Generator 函数返回一个同时具有 Iterable 接口（具有`[Symbol.iterator]`属性）和 Iterator 接口（具有`next()`方法）的对象，因此 TypeScript 提供了一个泛型`IterableIterator<T>`，表示同时满足`Iterable<T>`和`Iterator<T>`两个接口。
+Generator 函数返回一个同时具有 Iterable 接口 (具有 `[Symbol.iterator]` 属性) 和 Iterator 接口 (具有 `next()` 方法) 的对象，因此 TypeScript 提供了一个泛型 `IterableIterator<T>`，表示同时满足 `Iterable<T>` 和 `Iterator<T>` 两个接口。
 
 ```typescript
 interface IterableIterator<T> extends Iterator<T> {
@@ -123,7 +123,7 @@ interface IterableIterator<T> extends Iterator<T> {
 }
 ```
 
-上面类型定义中，`IterableIterator<T>`接口就是在`Iterator<T>`接口的基础上，加上`[Symbol.iterator]`属性。
+上面类型定义中，`IterableIterator<T>` 接口就是在 `Iterator<T>` 接口的基础上，加上 `[Symbol.iterator]` 属性。
 
 下面是一个例子。
 
@@ -147,7 +147,7 @@ numbers.next()
 numbers.next()
 ```
 
-上面示例中，`createNumbers()`返回的对象`numbers`即具有`next()`方法，也具有`[Symbol.iterator]`属性，所以满足`IterableIterator<T>`接口。
+上面示例中，`createNumbers()` 返回的对象 `numbers` 即具有 `next()` 方法，也具有 `[Symbol.iterator]` 属性，所以满足 `IterableIterator<T>` 接口。
 
 ## 参考链接
 

@@ -354,7 +354,7 @@ process.stdout.write = function (string) {
 }
 ```
 
-### 跳过检查（紧急情况）
+### 跳过检查 (紧急情况)
 
 ```bash
 # 跳过所有检查提交

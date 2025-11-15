@@ -1,6 +1,6 @@
 # Transform 3D
 
-CSS 的`transform`属性提供了强大的图形变换功能，可以对网页元素进行平面和三维空间中的旋转、缩放、平移等操作。
+CSS 的 `transform` 属性提供了强大的图形变换功能，可以对网页元素进行平面和三维空间中的旋转、缩放、平移等操作。
 
 ## 坐标系
 
@@ -45,7 +45,7 @@ transform-style: flat | preserve-3d;
 
 ## transform-origin
 
-`transform-origin` 属性定义`transform`的基准点，此点坐标为 (0, 0, 0)， 再按 x 轴、y 轴、z 轴的方向生成坐标系，计算出每个像素点的坐标。
+`transform-origin` 属性定义 `transform` 的基准点，此点坐标为 (0，0，0)，再按 x 轴、y 轴、z 轴的方向生成坐标系，计算出每个像素点的坐标。
 
 ```css
 transform-origin: x-axis y-axis z-axis;
@@ -117,7 +117,7 @@ perspective 定义了观察者在 z 轴上的位置。
 
 ## translate3d, translateZ
 
-位移变换可以移动元素的位置。使用`translate3d`方法，可以在 X、Y、Z 三个轴上进行平移。
+位移变换可以移动元素的位置。使用 `translate3d` 方法，可以在 X、Y、Z 三个轴上进行平移。
 
 ### 语法：
 
@@ -133,7 +133,7 @@ transform: translateZ(z);
 
 ## rotate3d, rotateZ
 
-`rotate3d`用于在三维空间中围绕指定轴进行旋转。它需要四个参数：旋转轴的方向（X, Y, Z）和旋转角度。
+`rotate3d` 用于在三维空间中围绕指定轴进行旋转。它需要四个参数：旋转轴的方向 (X，Y，Z) 和旋转角度。
 
 ### 语法：
 
@@ -161,7 +161,7 @@ div {
 
 ## scale3d, scaleZ
 
-`scale3d`允许在三维空间内对元素进行缩放。
+`scale3d` 允许在三维空间内对元素进行缩放。
 
 ```css
 transform: scale3d(x, y, z);
@@ -175,7 +175,7 @@ transform: scaleZ(z);
 
 ## matrix3d
 
-`matrix3d`是 CSS3 提供的一种强大的变换方式，它允许通过一个 4x4 矩阵来实现复杂的三维变换。矩阵变换提供了对多个变换操作的综合控制，包括平移、旋转、缩放等。
+`matrix3d` 是 CSS3 提供的一种强大的变换方式，它允许通过一个 4x4 矩阵来实现复杂的三维变换。矩阵变换提供了对多个变换操作的综合控制，包括平移、旋转、缩放等。
 
 ### 语法：
 
@@ -211,7 +211,7 @@ transform: matrix3d(
 
 ### 计算原理
 
-假如有一个坐标点 (x, y, z)，经过上述转换得到 (x', y', z'), 其计算过程为：
+假如有一个坐标点 (x，y，z)，经过上述转换得到 (x ‘，y’，z ‘)，其计算过程为：
 
 ```
 注: C为常数

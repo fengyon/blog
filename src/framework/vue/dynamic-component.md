@@ -25,7 +25,7 @@
 
 ## 使用动态组件
 
-### 1. 基本使用
+### 1。基本使用
 
 ```vue
 <template>
@@ -46,7 +46,7 @@ const currentComponent = ref('ComponentA')
 </script>
 ```
 
-### 2. 使用组件对象引用
+### 2。使用组件对象引用
 
 ```vue
 <template>
@@ -67,7 +67,7 @@ const currentComponent = shallowRef(CompA)
 </script>
 ```
 
-### 3. 带参数的动态组件
+### 3。带参数的动态组件
 
 ```vue
 <template>
@@ -146,7 +146,7 @@ const handleCustomEvent = (data) => {
 </style>
 ```
 
-### 4. 保持组件状态（keep-alive）
+### 4。保持组件状态 (keep-alive)
 
 使用 `<keep-alive>` 包裹动态组件可以保持组件状态，避免重复渲染：
 
@@ -171,7 +171,7 @@ const currentView = ref('UserList')
 </script>
 ```
 
-### 5. 完整的示例项目
+### 5。完整的示例项目
 
 **App.vue**
 

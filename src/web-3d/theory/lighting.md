@@ -34,13 +34,13 @@
 完全黑暗       基础可见
 ```
 
-GLSL实现：
+GLSL 实现：
 ```glsl
 vec3 ambient = uAmbientLight * uMaterial.ambient;
 ```
 
 ### 漫反射
-Lambertian反射，光线均匀散射：
+Lambertian 反射，光线均匀散射：
 ```
 漫反射强度 = 光颜色 × 材质漫反射系数 × max(0, N·L)
 
@@ -56,7 +56,7 @@ L: 光源方向
  表面
 ```
 
-GLSL实现：
+GLSL 实现：
 ```glsl
 vec3 lightDir = normalize(uLightPosition - fragPos);
 float diff = max(dot(normal, lightDir), 0.0);
@@ -64,7 +64,7 @@ vec3 diffuse = uLightColor * uMaterial.diffuse * diff;
 ```
 
 ### 镜面反射
-Phong模型，产生高光效果：
+Phong 模型，产生高光效果：
 ```
 镜面反射强度 = 光颜色 × 材质镜面系数 × max(0, R·V)^光泽度
 
@@ -82,7 +82,7 @@ V: 视线方向
            \/
 ```
 
-GLSL实现：
+GLSL 实现：
 ```glsl
 vec3 reflectDir = reflect(-lightDir, normal);
 vec3 viewDir = normalize(uViewPosition - fragPos);
@@ -92,7 +92,7 @@ vec3 specular = uLightColor * uMaterial.specular * spec;
 
 ## 经典光照模型
 
-### Lambert模型
+### Lambert 模型
 只包含漫反射分量的简单模型：
 ```glsl
 vec3 lambertModel(vec3 normal, vec3 lightDir, vec3 lightColor, vec3 materialDiffuse) {
@@ -101,7 +101,7 @@ vec3 lambertModel(vec3 normal, vec3 lightDir, vec3 lightColor, vec3 materialDiff
 }
 ```
 
-### Phong模型
+### Phong 模型
 完整的漫反射+镜面反射模型：
 ```glsl
 vec3 phongModel(vec3 normal, vec3 lightDir, vec3 viewDir, vec3 lightColor, 
@@ -119,8 +119,8 @@ vec3 phongModel(vec3 normal, vec3 lightDir, vec3 viewDir, vec3 lightColor,
 }
 ```
 
-### Blinn-Phong模型
-改进的Phong模型，计算更高效：
+### Blinn-Phong 模型
+改进的 Phong 模型，计算更高效：
 ```
 Blinn-Phong使用半角向量H：
 镜面反射强度 = 光颜色 × 材质镜面系数 × max(0, N·H)^光泽度
@@ -135,7 +135,7 @@ H = normalize(L + V)
         N
 ```
 
-GLSL实现：
+GLSL 实现：
 ```glsl
 vec3 blinnPhongModel(vec3 normal, vec3 lightDir, vec3 viewDir, vec3 lightColor,
                      Material material) {
@@ -231,7 +231,7 @@ uniform int uNumSpotLights;
 ## 光源类型实现
 
 ### 定向光
-模拟无限远光源（如太阳）：
+模拟无限远光源 (如太阳)：
 ```glsl
 vec3 calculateDirectionalLight(DirectionalLight light, Material material,
                               vec3 normal, vec3 viewDir) {
@@ -266,7 +266,7 @@ vec3 calculateDirectionalLight(DirectionalLight light, Material material,
 /  |  \
 ```
 
-GLSL实现：
+GLSL 实现：
 ```glsl
 vec3 calculatePointLight(PointLight light, Material material, vec3 normal,
                         vec3 fragPos, vec3 viewDir) {
@@ -302,7 +302,7 @@ vec3 calculatePointLight(PointLight light, Material material, vec3 normal,
    /---|---\
 ```
 
-GLSL实现：
+GLSL 实现：
 ```glsl
 vec3 calculateSpotLight(SpotLight light, Material material, vec3 normal,
                        vec3 fragPos, vec3 viewDir) {
@@ -423,7 +423,7 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0) {
 }
 ```
 
-### 完整PBR光照
+### 完整 PBR 光照
 ```glsl
 vec3 calculatePBR(Material material, vec3 normal, vec3 viewDir, 
                  vec3 lightDir, vec3 lightColor, vec3 radiance) {
@@ -530,7 +530,7 @@ float calculatePCFShadow(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir) {
 }
 ```
 
-## JavaScript端光照设置
+## JavaScript 端光照设置
 
 ### 光照数据管理
 ```javascript

@@ -4,7 +4,7 @@ UmiJS 是一个插件化的企业级前端应用框架，以路由为基础，�
 
 ## 什么是 UmiJS
 
-Umi，中文发音为"乌米"，是一个可扩展的企业级前端应用框架。它内置了路由、构建、部署、测试等功能，仅需一个依赖即可上手开发。Umi 实现了完整的生命周期，并使其插件化，内部功能全由插件完成。 
+Umi，中文发音为“乌米”，是一个可扩展的企业级前端应用框架。它内置了路由、构建、部署、测试等功能，仅需一个依赖即可上手开发。Umi 实现了完整的生命周期，并使其插件化，内部功能全由插件完成。
 
 **主要特性：**
 - 开箱即用，内置 React、React Router 等
@@ -209,7 +209,7 @@ export default {
 
 **dva 数据流示意图：**
 
-页面 -> 触发action -> dispatch -> model(effects) -> service(异步请求) -> effects(put) -> reducers -> 更新state -> 连接页面
+页面 -> 触发 action -> dispatch -> model(effects) -> service (异步请求) -> effects(put) -> reducers -> 更新 state -> 连接页面
 
 ## 构建和部署
 

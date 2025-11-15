@@ -2,7 +2,7 @@
 
 ## 概述
 
-SVG 是一种基于 XML 语法的图像格式，全称是可缩放矢量图（Scalable Vector Graphics）。其他图像格式都是基于像素处理的，SVG 则是属于对图像的形状描述，所以它本质上是文本文件，体积较小，且不管放大多少倍都不会失真。
+SVG 是一种基于 XML 语法的图像格式，全称是可缩放矢量图 (Scalable Vector Graphics)。其他图像格式都是基于像素处理的，SVG 则是属于对图像的形状描述，所以它本质上是文本文件，体积较小，且不管放大多少倍都不会失真。
 
 SVG 文件可以直接插入网页，成为 DOM 的一部分，然后用 JavaScript 和 CSS 进行操作。
 
@@ -25,7 +25,7 @@ SVG 文件可以直接插入网页，成为 DOM 的一部分，然后用 JavaScr
 
 上面是 SVG 代码直接插入网页的例子。
 
-SVG 代码也可以写在一个独立文件中，然后用`<img>`、`<object>`、`<embed>`、`<iframe>`等标签插入网页。
+SVG 代码也可以写在一个独立文件中，然后用 `<img>`、`<object>`、`<embed>`、`<iframe>` 等标签插入网页。
 
 ```html
 <img src="circle.svg">
@@ -50,9 +50,9 @@ SVG 文件还可以转为 BASE64 编码，然后作为 Data URI 写入网页。
 
 ## 语法
 
-### `<svg>`标签
+### `<svg>` 标签
 
-SVG 代码都放在顶层标签`<svg>`之中。下面是一个例子。
+SVG 代码都放在顶层标签 `<svg>` 之中。下面是一个例子。
 
 ```xml
 <svg width="100%" height="100%">
@@ -60,9 +60,9 @@ SVG 代码都放在顶层标签`<svg>`之中。下面是一个例子。
 </svg>
 ```
 
-`<svg>`的`width`属性和`height`属性，指定了 SVG 图像在 HTML 元素中所占据的宽度和高度。除了相对单位，也可以采用绝对单位（单位：像素）。如果不指定这两个属性，SVG 图像的大小默认为300像素（宽）x 150像素（高）。
+`<svg>` 的 `width` 属性和 `height` 属性，指定了 SVG 图像在 HTML 元素中所占据的宽度和高度。除了相对单位，也可以采用绝对单位 (单位：像素)。如果不指定这两个属性，SVG 图像的大小默认为 300 像素 (宽) x 150 像素 (高)。
 
-如果只想展示 SVG 图像的一部分，就要指定`viewBox`属性。
+如果只想展示 SVG 图像的一部分，就要指定 `viewBox` 属性。
 
 ```xml
 <svg width="100" height="100" viewBox="50 50 50 50">
@@ -70,15 +70,15 @@ SVG 代码都放在顶层标签`<svg>`之中。下面是一个例子。
 </svg>
 ```
 
-`<viewBox>`属性的值有四个数字，分别是左上角的横坐标和纵坐标、视口的宽度和高度。上面代码中，SVG 图像是100像素宽 x 100像素高，`viewBox`属性指定视口从`(50, 50)`这个点开始。所以，实际看到的是右下角的四分之一圆。
+`<viewBox>` 属性的值有四个数字，分别是左上角的横坐标和纵坐标、视口的宽度和高度。上面代码中，SVG 图像是 100 像素宽 x 100 像素高，`viewBox` 属性指定视口从 `(50, 50)` 这个点开始。所以，实际看到的是右下角的四分之一圆。
 
 注意，视口必须适配所在的空间。上面代码中，视口的大小是 50 x 50，由于 SVG 图像的大小是 100 x 100，所以视口会放大去适配 SVG 图像的大小，即放大了四倍。
 
-如果不指定`width`属性和`height`属性，只指定`viewBox`属性，则相当于只给定 SVG 图像的长宽比。这时，SVG 图像的大小默认是所在的 HTML 元素的大小。
+如果不指定 `width` 属性和 `height` 属性，只指定 `viewBox` 属性，则相当于只给定 SVG 图像的长宽比。这时，SVG 图像的大小默认是所在的 HTML 元素的大小。
 
-### `<circle>`标签
+### `<circle>` 标签
 
-`<circle>`标签代表圆形。
+`<circle>` 标签代表圆形。
 
 ```xml
 <svg width="300" height="180">
@@ -88,9 +88,9 @@ SVG 代码都放在顶层标签`<svg>`之中。下面是一个例子。
 </svg>
 ```
 
-上面的代码定义了三个圆。`<circle>`标签的`cx`、`cy`、`r`属性分别为横坐标、纵坐标和半径，单位为像素。坐标都是相对于`<svg>`画布的左上角原点。
+上面的代码定义了三个圆。`<circle>` 标签的 `cx`、`cy`、`r` 属性分别为横坐标、纵坐标和半径，单位为像素。坐标都是相对于 `<svg>` 画布的左上角原点。
 
-`class`属性用来指定对应的 CSS 类。
+`class` 属性用来指定对应的 CSS 类。
 
 ```css
 .red {
@@ -110,9 +110,9 @@ SVG 的 CSS 属性与网页元素有所不同。
 > - stroke：描边色
 > - stroke-width：边框宽度
 
-### `<line>`标签
+### `<line>` 标签
 
-`<line>`标签用来绘制直线。
+`<line>` 标签用来绘制直线。
 
 ```xml
 <svg width="300" height="180">
@@ -120,11 +120,11 @@ SVG 的 CSS 属性与网页元素有所不同。
 </svg>
 ```
 
-上面代码中，`<line>`标签的`x1`属性和`y1`属性，表示线段起点的横坐标和纵坐标；`x2`属性和`y2`属性，表示线段终点的横坐标和纵坐标；`style`属性表示线段的样式。
+上面代码中，`<line>` 标签的 `x1` 属性和 `y1` 属性，表示线段起点的横坐标和纵坐标；`x2` 属性和 `y2` 属性，表示线段终点的横坐标和纵坐标；`style` 属性表示线段的样式。
 
-### `<polyline>`标签
+### `<polyline>` 标签
 
-`<polyline>`标签用于绘制一根折线。
+`<polyline>` 标签用于绘制一根折线。
 
 ```xml
 <svg width="300" height="180">
@@ -132,11 +132,11 @@ SVG 的 CSS 属性与网页元素有所不同。
 </svg>
 ```
 
-`<polyline>`的`points`属性指定了每个端点的坐标，横坐标与纵坐标之间与逗号分隔，点与点之间用空格分隔。
+`<polyline>` 的 `points` 属性指定了每个端点的坐标，横坐标与纵坐标之间与逗号分隔，点与点之间用空格分隔。
 
-### `<rect>`标签
+### `<rect>` 标签
 
-`<rect>`标签用于绘制矩形。
+`<rect>` 标签用于绘制矩形。
 
 ```xml
 <svg width="300" height="180">
@@ -144,11 +144,11 @@ SVG 的 CSS 属性与网页元素有所不同。
 </svg>
 ```
 
-`<rect>`的`x`属性和`y`属性，指定了矩形左上角端点的横坐标和纵坐标；`width`属性和`height`属性指定了矩形的宽度和高度（单位像素）。
+`<rect>` 的 `x` 属性和 `y` 属性，指定了矩形左上角端点的横坐标和纵坐标；`width` 属性和 `height` 属性指定了矩形的宽度和高度 (单位像素)。
 
-### `<ellipse>`标签
+### `<ellipse>` 标签
 
-`<ellipse>`标签用于绘制椭圆。
+`<ellipse>` 标签用于绘制椭圆。
 
 ```xml
 <svg width="300" height="180">
@@ -156,11 +156,11 @@ SVG 的 CSS 属性与网页元素有所不同。
 </svg>
 ```
 
-`<ellipse>`的`cx`属性和`cy`属性，指定了椭圆中心的横坐标和纵坐标（单位像素）；`rx`属性和`ry`属性，指定了椭圆横向轴和纵向轴的半径（单位像素）。
+`<ellipse>` 的 `cx` 属性和 `cy` 属性，指定了椭圆中心的横坐标和纵坐标 (单位像素)；`rx` 属性和 `ry` 属性，指定了椭圆横向轴和纵向轴的半径 (单位像素)。
 
-### `<polygon>`标签
+### `<polygon>` 标签
 
-`<polygon>`标签用于绘制多边形。
+`<polygon>` 标签用于绘制多边形。
 
 ```xml
 <svg width="300" height="180">
@@ -168,11 +168,11 @@ SVG 的 CSS 属性与网页元素有所不同。
 </svg>
 ```
 
-`<polygon>`的`points`属性指定了每个端点的坐标，横坐标与纵坐标之间与逗号分隔，点与点之间用空格分隔。
+`<polygon>` 的 `points` 属性指定了每个端点的坐标，横坐标与纵坐标之间与逗号分隔，点与点之间用空格分隔。
 
-### `<path>`标签
+### `<path>` 标签
 
-`<path>`标签用于制路径。
+`<path>` 标签用于制路径。
 
 ```xml
 <svg width="300" height="180">
@@ -189,15 +189,15 @@ SVG 的 CSS 属性与网页元素有所不同。
 </svg>
 ```
 
-`<path>`的`d`属性表示绘制顺序，它的值是一个长字符串，每个字母表示一个绘制动作，后面跟着坐标。
+`<path>` 的 `d` 属性表示绘制顺序，它的值是一个长字符串，每个字母表示一个绘制动作，后面跟着坐标。
 
-> - M：移动到（moveto）
-> - L：画直线到（lineto）
+> - M：移动到 (moveto)
+> - L：画直线到 (lineto)
 > - Z：闭合路径
 
-### `<text>`标签
+### `<text>` 标签
 
-`<text>`标签用于绘制文本。
+`<text>` 标签用于绘制文本。
 
 ```xml
 <svg width="300" height="180">
@@ -205,11 +205,11 @@ SVG 的 CSS 属性与网页元素有所不同。
 </svg>
 ```
 
-`<text>`的`x`属性和`y`属性，表示文本区块基线（baseline）起点的横坐标和纵坐标。文字的样式可以用`class`或`style`属性指定。
+`<text>` 的 `x` 属性和 `y` 属性，表示文本区块基线 (baseline) 起点的横坐标和纵坐标。文字的样式可以用 `class` 或 `style` 属性指定。
 
-### `<use>`标签
+### `<use>` 标签
 
-`<use>`标签用于复制一个形状。
+`<use>` 标签用于复制一个形状。
 
 ```xml
 <svg viewBox="0 0 30 10" xmlns="http://www.w3.org/2000/svg">
@@ -220,11 +220,11 @@ SVG 的 CSS 属性与网页元素有所不同。
 </svg>
 ```
 
-`<use>`的`href`属性指定所要复制的节点，`x`属性和`y`属性是`<use>`左上角的坐标。另外，还可以指定`width`和`height`坐标。
+`<use>` 的 `href` 属性指定所要复制的节点，`x` 属性和 `y` 属性是 `<use>` 左上角的坐标。另外，还可以指定 `width` 和 `height` 坐标。
 
-### `<g>`标签
+### `<g>` 标签
 
-`<g>`标签用于将多个形状组成一个组（group），方便复用。
+`<g>` 标签用于将多个形状组成一个组 (group)，方便复用。
 
 ```xml
 <svg width="300" height="100">
@@ -238,9 +238,9 @@ SVG 的 CSS 属性与网页元素有所不同。
 </svg>
 ```
 
-### `<defs>`标签
+### `<defs>` 标签
 
-`<defs>`标签用于自定义形状，它内部的代码不会显示，仅供引用。
+`<defs>` 标签用于自定义形状，它内部的代码不会显示，仅供引用。
 
 ```xml
 <svg width="300" height="100">
@@ -257,9 +257,9 @@ SVG 的 CSS 属性与网页元素有所不同。
 </svg>
 ```
 
-### `<pattern>`标签
+### `<pattern>` 标签
 
-`<pattern>`标签用于自定义一个形状，该形状可以被引用来平铺一个区域。
+`<pattern>` 标签用于自定义一个形状，该形状可以被引用来平铺一个区域。
 
 ```xml
 <svg width="500" height="500">
@@ -272,11 +272,11 @@ SVG 的 CSS 属性与网页元素有所不同。
 </svg>
 ```
 
-上面代码中，`<pattern>`标签将一个圆形定义为`dots`模式。`patternUnits="userSpaceOnUse"`表示`<pattern>`的宽度和长度是实际的像素值。然后，指定这个模式去填充下面的矩形。
+上面代码中，`<pattern>` 标签将一个圆形定义为 `dots` 模式。`patternUnits="userSpaceOnUse"` 表示 `<pattern>` 的宽度和长度是实际的像素值。然后，指定这个模式去填充下面的矩形。
 
-### `<image>`标签
+### `<image>` 标签
 
-`<image>`标签用于插入图片文件。
+`<image>` 标签用于插入图片文件。
 
 ```xml
 <svg viewBox="0 0 100 100" width="100" height="100">
@@ -285,11 +285,11 @@ SVG 的 CSS 属性与网页元素有所不同。
 </svg>
 ```
 
-上面代码中，`<image>`的`xlink:href`属性表示图像的来源。
+上面代码中，`<image>` 的 `xlink:href` 属性表示图像的来源。
 
-### `<animate>`标签
+### `<animate>` 标签
 
-`<animate>`标签用于产生动画效果。
+`<animate>` 标签用于产生动画效果。
 
 ```xml
 <svg width="500px" height="500px">
@@ -301,7 +301,7 @@ SVG 的 CSS 属性与网页元素有所不同。
 
 上面代码中，矩形会不断移动，产生动画效果。
 
-`<animate>`的属性含义如下。
+`<animate>` 的属性含义如下。
 
 > - attributeName：发生动画效果的属性名。
 > - from：单次动画的初始值。
@@ -316,9 +316,9 @@ SVG 的 CSS 属性与网页元素有所不同。
 <animate attributeName="width" to="500" dur="2s" repeatCount="indefinite" />
 ```
 
-### `<animateTransform>`标签
+### `<animateTransform>` 标签
 
-`<animate>`标签对 CSS 的`transform`属性不起作用，如果需要变形，就要使用`<animateTransform>`标签。
+`<animate>` 标签对 CSS 的 `transform` 属性不起作用，如果需要变形，就要使用 `<animateTransform>` 标签。
 
 ```xml
 <svg width="500px" height="500px">
@@ -328,7 +328,7 @@ SVG 的 CSS 属性与网页元素有所不同。
 </svg>
 ```
 
-上面代码中，`<animateTransform>`的效果为旋转（`rotate`），这时`from`和`to`属性值有三个数字，第一个数字是角度值，第二个值和第三个值是旋转中心的坐标。`from="0 200 200"`表示开始时，角度为0，围绕`(200, 200)`开始旋转；`to="360 400 400"`表示结束时，角度为360，围绕`(400, 400)`旋转。
+上面代码中，`<animateTransform>` 的效果为旋转 (`rotate`)，这时 `from` 和 `to` 属性值有三个数字，第一个数字是角度值，第二个值和第三个值是旋转中心的坐标。`from="0 200 200"` 表示开始时，角度为 0，围绕 `(200, 200)` 开始旋转；`to="360 400 400"` 表示结束时，角度为 360，围绕 `(400, 400)` 旋转。
 
 ## JavaScript 操作
 
@@ -373,11 +373,11 @@ mycircle.addEventListener('click', function(e) {
 }, false);
 ```
 
-上面代码指定，如果点击图形，就改写`circle`元素的`r`属性。
+上面代码指定，如果点击图形，就改写 `circle` 元素的 `r` 属性。
 
 ### 获取 SVG DOM
 
-使用`<object>`、`<iframe>`、`<embed>`标签插入 SVG 文件，可以获取 SVG DOM。
+使用 `<object>`、`<iframe>`、`<embed>` 标签插入 SVG 文件，可以获取 SVG DOM。
 
 ```javascript
 var svgObject = document.getElementById('object').contentDocument;
@@ -385,7 +385,7 @@ var svgIframe = document.getElementById('iframe').contentDocument;
 var svgEmbed = document.getElementById('embed').getSVGDocument();
 ```
 
-注意，如果使用`<img>`标签插入 SVG 文件，就无法获取 SVG DOM。
+注意，如果使用 `<img>` 标签插入 SVG 文件，就无法获取 SVG DOM。
 
 ### 读取 SVG 源码
 
@@ -403,7 +403,7 @@ var svgEmbed = document.getElementById('embed').getSVGDocument();
 </div>
 ```
 
-使用`XMLSerializer`实例的`serializeToString()`方法，获取 SVG 元素的代码。
+使用 `XMLSerializer` 实例的 `serializeToString()` 方法，获取 SVG 元素的代码。
 
 ```javascript
 var svgString = new XMLSerializer()
@@ -412,7 +412,7 @@ var svgString = new XMLSerializer()
 
 ### SVG 图像转为 Canvas 图像
 
-首先，需要新建一个`Image`对象，将 SVG 图像指定到该`Image`对象的`src`属性。
+首先，需要新建一个 `Image` 对象，将 SVG 图像指定到该 `Image` 对象的 `src` 属性。
 
 ```javascript
 var img = new Image();
@@ -424,7 +424,7 @@ var url = DOMURL.createObjectURL(svg);
 img.src = url;
 ```
 
-然后，当图像加载完成后，再将它绘制到`<canvas>`元素。
+然后，当图像加载完成后，再将它绘制到 `<canvas>` 元素。
 
 ```javascript
 img.onload = function () {
@@ -447,7 +447,7 @@ Date |Amount
 2014-04-01 | $80
 ```
 
-上面的图形，可以画成一个坐标系，`Date`作为横轴，`Amount`作为纵轴，四行数据画成一个数据点。
+上面的图形，可以画成一个坐标系，`Date` 作为横轴，`Amount` 作为纵轴，四行数据画成一个数据点。
 
 ```xml
 <svg width="350" height="160">

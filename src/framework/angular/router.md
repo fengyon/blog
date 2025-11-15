@@ -69,7 +69,7 @@ URL: /about → AboutComponent 显示在 router-outlet 位置
 ```
 
 ### 通配符路由
-处理未匹配路径的404页面。
+处理未匹配路径的 404 页面。
 
 示意图：
 ```

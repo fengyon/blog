@@ -1,6 +1,6 @@
 # Vue3 组件开发指南
 
-## 1. Component 的概念
+## 1。Component 的概念
 
 在 Vue3 中，组件是可复用的 Vue 实例，具有自己的模板、逻辑和样式。组件是 Vue 应用的基本构建块，允许我们将 UI 拆分为独立、可复用的部分。
 
@@ -14,7 +14,7 @@
 </template>
 ```
 
-## 2. 如何定义一个 Vue Component
+## 2。如何定义一个 Vue Component
 
 ### 使用 Composition API 定义组件
 
@@ -130,7 +130,7 @@ console.log('所有属性:', attrs)
 </script>
 ```
 
-### 特殊的 Prop: class 和 ref
+### 特殊的 Prop：class 和 ref
 
 ```vue
 <template>
@@ -236,7 +236,7 @@ defineProps({
 </template>
 ```
 
-## 5. 组件如何复用
+## 5。组件如何复用
 
 ### 使用 Composables 实现逻辑复用
 
@@ -305,7 +305,7 @@ const users = ref([
 </script>
 ```
 
-## 6. 组件引用 (useTemplateRef)
+## 6。组件引用 (useTemplateRef)
 
 ### 模板引用基础用法
 
@@ -504,10 +504,10 @@ const handleModalAction = async () => {
 
 Vue3 的 Composition API 提供了更灵活和强大的组件开发方式：
 
-- **组件定义**: 使用 `<script setup>` 语法糖简化组件编写
-- **Props 处理**: 使用 `defineProps` 和 `useAttrs` 处理属性和非属性特性
-- **插槽系统**: 提供默认插槽、具名插槽和作用域插槽
-- **组件复用**: 通过 Composables 实现逻辑复用，通过组件组合实现 UI 复用
-- **模板引用**: 使用 `ref` 访问 DOM 元素和子组件实例
+- **组件定义**：使用 `<script setup>` 语法糖简化组件编写
+- **Props 处理**：使用 `defineProps` 和 `useAttrs` 处理属性和非属性特性
+- **插槽系统**：提供默认插槽、具名插槽和作用域插槽
+- **组件复用**：通过 Composables 实现逻辑复用，通过组件组合实现 UI 复用
+- **模板引用**：使用 `ref` 访问 DOM 元素和子组件实例
 
 这些特性使得 Vue3 组件开发更加模块化、可维护和类型安全。
