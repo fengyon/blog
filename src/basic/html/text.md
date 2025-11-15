@@ -34,7 +34,7 @@
 
 ```html
 <div>
-  <img src="warning.jpg" alt="警告">
+  <img src="warning.jpg" alt="警告" />
   <p>小心</p>
 </div>
 ```
@@ -66,7 +66,7 @@
 `<br>` 让网页产生一个换行效果。该标签是单独使用的，没有闭合标签。
 
 ```html
-hello<br>world
+hello<br />world
 ```
 
 浏览器渲染上面代码时，会分成两行，`hello` 和 `world` 各占一行。
@@ -75,9 +75,9 @@ hello<br>world
 
 ```html
 <p>
-  床前明月光，<br>
-  疑是地上霜。<br>
-  举头望明月，<br>
+  床前明月光，<br />
+  疑是地上霜。<br />
+  举头望明月，<br />
   低头思故乡。
 </p>
 ```
@@ -88,8 +88,8 @@ hello<br>world
 
 ```html
 <p>第一段</p>
-<br>
-<br>
+<br />
+<br />
 <p>第二段</p>
 ```
 
@@ -98,9 +98,7 @@ hello<br>world
 `<wbr>` 标签跟 `<br>` 很相似，表示一个可选的断行。如果一行的宽度足够，则不断行；如果宽度不够，需要断行，就在 `<wbr>` 的位置的断行。它是为了防止浏览器在一个很长的单词中间，不正确地断行或者不断行，所以事先标明可以断行的位置，主要用于欧洲一些单词很长的语言或者 URL 的断行。
 
 ```html
-<p>
-Fernstraßen<wbr>bau<wbr>privat<wbr>finanzierungs<wbr>gesetz
-</p>
+<p>Fernstraßen<wbr />bau<wbr />privat<wbr />finanzierungs<wbr />gesetz</p>
 ```
 
 上面代码是一个很长的德语单词，为了防止不正确断行，事先用 `<wbr>` 告诉浏览器，可以选择在哪里断行。
@@ -111,7 +109,7 @@ Fernstraßen<wbr>bau<wbr>privat<wbr>finanzierungs<wbr>gesetz
 
 ```html
 <p>第一个主题</p>
-<hr>
+<hr />
 <p>第二个主题</p>
 ```
 
@@ -124,9 +122,11 @@ Fernstraßen<wbr>bau<wbr>privat<wbr>finanzierungs<wbr>gesetz
 `<pre>` 是一个块级元素，表示保留原来的格式 (preformatted)，即浏览器会保留该标签内部原始的换行和空格。浏览器默认以等宽字体显示标签内容。
 
 ```html
-<pre>hello
+<pre>
+hello
 
-   world</pre>
+   world</pre
+>
 ```
 
 上面代码中，换行和连续空格都会由于 `<pre>` 标签，而被保留下来，浏览器按照原样输出。
@@ -184,9 +184,10 @@ Fernstraßen<wbr>bau<wbr>privat<wbr>finanzierungs<wbr>gesetz
 `<var>` 标签表示代码或数学公式的变量。
 
 ```html
-<p>勾股定理是
-  <var>a</var><sup>2</sup> + <var>b</var><sup>2</sup> = <var>c</var><sup>2</sup>
-。</p>
+<p>
+  勾股定理是 <var>a</var><sup>2</sup> + <var>b</var><sup>2</sup> =
+  <var>c</var><sup>2</sup> 。
+</p>
 ```
 
 ## `<u>`，`<s>`
@@ -194,9 +195,7 @@ Fernstraßen<wbr>bau<wbr>privat<wbr>finanzierungs<wbr>gesetz
 `<u>` 标签是一个行内元素，表示对内容提供某种注释，提醒用户这里可能有问题，基本上只用来表示拼写错误。浏览器默认以下划线渲染内容。
 
 ```html
-<p>
-一个容易写错的成语是把<em>安分守己</em>写成<u>安份守己</u>。
-</p>
+<p>一个容易写错的成语是把<em>安分守己</em>写成<u>安份守己</u>。</p>
 ```
 
 上面代码中，`<u>` 提示用户这是一个拼写错误，“安份守己”的下方会有一个下划线。
@@ -253,22 +252,22 @@ Fernstraßen<wbr>bau<wbr>privat<wbr>finanzierungs<wbr>gesetz
 
 注意，浏览器默认会斜体显示 `<q>` 的内容，并且会自动添加半角的双引号。所以，引用中文内容时要小心。
 
-## `<code>`
+## `code`
 
-`<code>`标签是一个行内元素，表示标签内容是计算机代码，浏览器默认会以等宽字体显示。
+`<code>` 标签是一个行内元素，表示标签内容是计算机代码，浏览器默认会以等宽字体显示。
 
 ```html
-<code>alert()</code>的作用是让网页弹出一个提示框。
+<code>let a = 1;</code>
 ```
 
-如果要表示多行代码，如果要表示多行代码，如果要表示多行代码，如果要表示多行代码，如果要表示多行代码， 如果要表示多行代码， 如果要表示多行代码，如果要表示多行代码，如果要表示多行代码，`<code>`标签必须放在 `<pre>` 内部。如果要表示多行代码，如果要表示多行代码，如果要表示多行代码， 如果要表示多行代码，`<code>`标签必须放在 `<pre>` 内部。如果要表示多行代码， 如果要表示多行代码，如果要表示多行代码，如果要表示多行代码，`<code>`标签必须放在 `<pre>` 内部。如果要表示多行代码，`<code>`标签必须放在 `<pre>` 内部。如果要表示多行代码，如果要表示多行代码，如果要表示多行代码， 如果要表示多行代码，`<code>`标签必须放在 `<pre>` 内部。如果要表示多行代码，`<code>`标签必须放在`<pre>`内部。 如果要表示多行代码， 如果要表示多行代码，如果要表示多行代码，如果要表示多行代码，`<code>`标签必须放在 `<pre>` 内部。如果要表示多行代码，`<code>`标签必须放在`<pre>`内部。如果要表示多行代码，`<code>`标签必须放在 `<pre>` 内部。如果要表示多行代码，如果要表示多行代码， 如果要表示多行代码，`<code>`标签必须放在 `<pre>` 内部。如果要表示多行代码，`<code>`标签必须放在`<pre>`内部。 如果要表示多行代码，`<code>`标签必须放在`<pre>`内部。 如果要表示多行代码，如果要表示多行代码，如果要表示多行代码，`<code>`标签必须放在 `<pre>` 内部。如果要表示多行代码，`<code>`标签必须放在`<pre>`内部。如果要表示多行代码，`<code>`标签必须放在`<pre>`内部。`<code>`本身仅表示一行代码。
+`<code>` 本身仅表示一行代码，如果要表示多行代码，必须放在 `<pre>` 内部。
 
 ```html
 <pre>
-<code>
-  let a = 1;
-  console.log(a);
-</code>
+  <code>
+    let a = 1;
+    console.log(a);
+  </code>
 </pre>
 ```
 
@@ -277,22 +276,28 @@ Fernstraßen<wbr>bau<wbr>privat<wbr>finanzierungs<wbr>gesetz
 `<kbd>` 标签是一个行内元素，原意是用户从键盘输入的内容，现在扩展到各种输入，包括语音输入。浏览器默认以等宽字体显示标签内容。
 
 ```html
-<p>Windows 可以按下 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Del</kbd> 重启。</p>
+<p>
+  Windows 可以按下 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> +
+  <kbd>Del</kbd> 重启。
+</p>
 ```
 
 `<kbd>` 可以嵌套，方便指定样式。
 
 ```html
-<p>Windows 可以按下
-<kbd> <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Del</kbd> </kbd>
-重启。</p>
+<p>
+  Windows 可以按下
+  <kbd> <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Del</kbd> </kbd>
+  重启。
+</p>
 ```
 
 `<samp>` 标签是一个行内元素，表示计算机程序输出内容的一个例子。浏览器默认以等宽字体显示。
 
 ```html
-<p>如果使用没有定义的变量，浏览器会报错：
-<samp>Uncaught ReferenceError: foo is not defined</samp>。
+<p>
+  如果使用没有定义的变量，浏览器会报错：
+  <samp>Uncaught ReferenceError: foo is not defined</samp>。
 </p>
 ```
 
@@ -308,7 +313,7 @@ Fernstraßen<wbr>bau<wbr>privat<wbr>finanzierungs<wbr>gesetz
 
 ```html
 <blockquote>
-床前明月光，疑是地上霜。<mark>举头望明月，低头思故乡。</mark>
+  床前明月光，疑是地上霜。<mark>举头望明月，低头思故乡。</mark>
 </blockquote>
 ```
 
@@ -352,7 +357,8 @@ Fernstraßen<wbr>bau<wbr>privat<wbr>finanzierungs<wbr>gesetz
 `<data>` 标签与 `<time>` 类似，也是提供机器可读的内容，但是用于非时间的场合。
 
 ```html
-<p>本次马拉松比赛第一名是<data value="39">张三</data></p>。
+<p>本次马拉松比赛第一名是<data value="39">张三</data></p>
+。
 ```
 
 上面代码中，选手的机读数据就放在 `<data>` 标签的 `value` 属性。
@@ -383,8 +389,9 @@ Fernstraßen<wbr>bau<wbr>privat<wbr>finanzierungs<wbr>gesetz
 ```html
 <footer>
   <address>
-    文章的相关问题请联系<a href="mailto:zhangsan@example.com">张三
-    McClure</a>。
+    文章的相关问题请联系<a href="mailto:zhangsan@example.com"
+      >张三 McClure</a
+    >。
   </address>
 </footer>
 ```
@@ -426,17 +433,15 @@ Fernstraßen<wbr>bau<wbr>privat<wbr>finanzierungs<wbr>gesetz
 `<dfn>` 是一个行内元素，表示标签内容是一个术语 (definition)，本段或本句包含它的定义。
 
 ```html
-<p>
-通过 TCP/IP 协议连接的全球性计算机网络，叫做 <dfn>Internet</dfn>。
-</p>
+<p>通过 TCP/IP 协议连接的全球性计算机网络，叫做 <dfn>Internet</dfn>。</p>
 ```
 
 为了脚本操作的方便，可以把术语的定义写入 `<dfn>` 标签的 `title` 属性。
 
 ```html
 <p>
-通过 TCP/IP 协议连接的全球性计算机网络，叫做
-<dfn title="全球性计算机网络">Internet</dfn>。
+  通过 TCP/IP 协议连接的全球性计算机网络，叫做
+  <dfn title="全球性计算机网络">Internet</dfn>。
 </p>
 ```
 
@@ -446,8 +451,8 @@ Fernstraßen<wbr>bau<wbr>privat<wbr>finanzierungs<wbr>gesetz
 
 ```html
 <p>
-<dfn><abbr title="acquired immune deficiency syndrome">AIDS</abbr></dfn>
-的全称是获得性免疫缺陷综合征。
+  <dfn><abbr title="acquired immune deficiency syndrome">AIDS</abbr></dfn>
+  的全称是获得性免疫缺陷综合征。
 </p>
 ```
 
@@ -457,8 +462,7 @@ Fernstraßen<wbr>bau<wbr>privat<wbr>finanzierungs<wbr>gesetz
 
 ```html
 <ruby>
-汉<rp>(</rp><rt>han</rt><rp>)</rp>
-字<rp>(</rp><rt>zi</rt><rp>)</rp>
+  汉<rp>(</rp><rt>han</rt><rp>)</rp> 字<rp>(</rp><rt>zi</rt><rp>)</rp>
 </ruby>
 ```
 
@@ -468,7 +472,7 @@ Fernstraßen<wbr>bau<wbr>privat<wbr>finanzierungs<wbr>gesetz
 
 `<ruby>` 的内部还有许多配套的标签。
 
-**（1）`<rp>`**
+1. `<rp>`
 
 `<rp>` 标签的用处，是为不支持语音注释的浏览器，提供一个兼容方案。对于那些支持语音注释的浏览器，该标签的内容不显示。
 
@@ -476,18 +480,17 @@ Fernstraßen<wbr>bau<wbr>privat<wbr>finanzierungs<wbr>gesetz
 
 ```html
 <ruby>
-汉<rp>(</rp><rt>han</rt><rp>)</rp>
-字<rp>(</rp><rt>zi</rt><rp>)</rp>
+  汉<rp>(</rp><rt>han</rt><rp>)</rp> 字<rp>(</rp><rt>zi</rt><rp>)</rp>
 </ruby>
 ```
 
 上面代码在不支持语音注释的浏览器中，渲染结果为 `汉(han)字(zi)`。遇到支持语音注释的浏览器，就不会显示圆括号。
 
-**（2）`<rt>`**
+2. `<rt>`
 
 `<rt>` 标签用于放置语音注释。
 
-**（3）`<rb>`**
+3. `<rb>`
 
 `<rb>` 标签用于划分文字单位，与语音注释一一对应。
 
@@ -505,7 +508,7 @@ Fernstraßen<wbr>bau<wbr>privat<wbr>finanzierungs<wbr>gesetz
 
 注意，Chrome 浏览器目前不支持这个标签。
 
-**(4) `<rbc>`，`<rtc>`**
+4. `<rbc>`，`<rtc>`
 
 `<rbc>` 标签表示一组文字，通常包含多个 `<rb>` 元素。`<rtc>` 标签表示一组语音注释，跟 `<rbc>` 对应。
 
@@ -542,4 +545,3 @@ Fernstraßen<wbr>bau<wbr>privat<wbr>finanzierungs<wbr>gesetz
 ```html
 <p><bdi>床前明月光，疑是地上霜。</bdi></p>
 ```
-

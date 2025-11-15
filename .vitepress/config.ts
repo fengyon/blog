@@ -42,7 +42,7 @@ const nav: ThemeConfig['nav'] = [
       { text: 'umijs', link: '/framework/umijs/intro' },
       { text: 'nuxtjs', link: '/framework/nuxtjs/intro' },
       { text: 'Vue 2 (EOL)', link: '/framework/vue2/intro' },
-      { text: 'Angular', link: '/framework/angular/intro' },
+      { text: 'Angular', link: '/framework/angular/start' },
     ],
   },
   {
@@ -132,7 +132,7 @@ const nav: ThemeConfig['nav'] = [
       },
       {
         text: '运维',
-        link: '/full-stack/linux',
+        link: '/full-stack/operation/linux',
       },
     ],
   },
@@ -1096,7 +1096,7 @@ export const sidebar: ThemeConfig['sidebar'] = {
         },
         {
           text: '自动测试无障碍',
-          link: '/engineering/accessible/test',
+          link: '/engineering/accessible/autotest',
         },
       ],
     },
@@ -1161,7 +1161,7 @@ export const sidebar: ThemeConfig['sidebar'] = {
       items: [
         { text: 'HTTP', link: '/full-stack/network/http' },
         { text: 'TCP/IP', link: '/full-stack/network/tcp-ip' },
-        { text: 'UPD', link: '/full-stack/network/tcp-ip' },
+        { text: 'UPD', link: '/full-stack/network/udp' },
         { text: 'HTTPS', link: '/full-stack/network/https' },
         { text: 'WebSocket', link: '/full-stack/network/websocket' },
         { text: 'wireshark', link: '/full-stack/network/wireshark' },
@@ -1190,8 +1190,10 @@ export const sidebar: ThemeConfig['sidebar'] = {
     {
       text: '数据库',
       items: [
+        { text: '数据库简介', link: '/full-stack/database/intro' },
         { text: 'MySQL', link: '/full-stack/database/mysql' },
         { text: 'MongoDB', link: '/full-stack/database/mongodb' },
+        { text: 'PostgreSQL', link: '/full-stack/database/postgresql' },
         { text: 'Redis', link: '/full-stack/database/redis' },
       ],
     },
@@ -1200,27 +1202,26 @@ export const sidebar: ThemeConfig['sidebar'] = {
       items: [
         {
           text: 'Linux',
-          link: '/full-stack/linux',
+          link: '/full-stack/operation/linux',
         },
         {
           text: 'Docker',
-          link: '/full-stack/docker',
+          link: '/full-stack/operation/docker',
         },
         {
           text: 'Kubernetes',
-          link: '/full-stack/kubernetes',
+          link: '/full-stack/operation/kubernetes',
         },
-        { text: 'CI/CD', link: '/full-stack/ci-cd' },
+        { text: 'CI/CD', link: '/full-stack/operation/ci-cd' },
 
         {
           text: '监控',
-          link: '/full-stack/monitor',
+          link: '/full-stack/operation/monitor',
         },
         {
           text: '安全',
-          link: '/full-stack/security',
+          link: '/full-stack/operation/security',
         },
-        { text: '日志', link: '/full-stack/logging' },
       ],
     },
   ],
