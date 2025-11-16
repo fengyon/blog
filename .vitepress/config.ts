@@ -81,6 +81,32 @@ const nav: ThemeConfig['nav'] = [
     ],
   },
   {
+    text: '全栈',
+    activeMatch: '^/full-stack/',
+    items: [
+      {
+        text: '网络基础',
+        link: '/full-stack/network/http',
+      },
+      {
+        text: '后端框架',
+        link: '/full-stack/framework/node',
+      },
+      {
+        text: 'Serverless',
+        link: '/full-stack/serverless/intro',
+      },
+      {
+        text: '数据库',
+        link: '/full-stack/database/mysql',
+      },
+      {
+        text: '运维',
+        link: '/full-stack/operation/linux',
+      },
+    ],
+  },
+  {
     text: 'Web 3D',
     activeMatch: '^/web-3d/',
     items: [
@@ -107,32 +133,6 @@ const nav: ThemeConfig['nav'] = [
       {
         text: '性能优化',
         link: '/web-3d/performance/rendering',
-      },
-    ],
-  },
-  {
-    text: '全栈',
-    activeMatch: '^/full-stack/',
-    items: [
-      {
-        text: '网络基础',
-        link: '/full-stack/network/http',
-      },
-      {
-        text: '后端框架',
-        link: '/full-stack/framework/node',
-      },
-      {
-        text: 'Serverless',
-        link: '/full-stack/serverless/intro',
-      },
-      {
-        text: '数据库',
-        link: '/full-stack/database/mysql',
-      },
-      {
-        text: '运维',
-        link: '/full-stack/operation/linux',
       },
     ],
   },
@@ -1101,60 +1101,6 @@ export const sidebar: ThemeConfig['sidebar'] = {
       ],
     },
   ],
-  '/web-3d/': [
-    {
-      text: 'Web 3D 基础',
-      items: [
-        { text: '3D 图形学基础', link: '/web-3d/basic/basic' },
-        { text: '坐标系系统', link: '/web-3d/basic/coordinate-system' },
-        { text: '变换与矩阵', link: '/web-3d/basic/transform' },
-      ],
-    },
-    {
-      text: '核心原理',
-      items: [
-        { text: '渲染管线', link: '/web-3d/theory/principle' },
-        { text: '着色器基础', link: '/web-3d/theory/shaders' },
-        { text: '光照模型', link: '/web-3d/theory/lighting' },
-      ],
-    },
-    {
-      text: 'WebGL',
-      items: [
-        { text: 'WebGL 基础', link: '/web-3d/webgl/basic' },
-        { text: '缓冲区与顶点', link: '/web-3d/webgl/buffers' },
-        { text: '纹理与材质', link: '/web-3d/webgl/textures' },
-      ],
-    },
-    {
-      text: 'Three.js',
-      items: [
-        { text: 'Three.js 入门', link: '/web-3d/threejs/basic' },
-        { text: '场景与相机', link: '/web-3d/threejs/scene-camera' },
-        {
-          text: '几何体与材质',
-          link: '/web-3d/threejs/geometry-material',
-        },
-        { text: '动画系统', link: '/web-3d/threejs/animation' },
-      ],
-    },
-    {
-      text: 'WebXR',
-      items: [
-        { text: 'WebXR 基础', link: '/web-3d/webxr/basic' },
-        { text: 'VR 开发', link: '/web-3d/webxr/vr' },
-        { text: 'AR 开发', link: '/web-3d/webxr/ar' },
-      ],
-    },
-    {
-      text: '性能优化',
-      items: [
-        { text: '渲染优化', link: '/web-3d/performance/rendering' },
-        { text: '内存管理', link: '/web-3d/performance/memory' },
-        { text: '加载优化', link: '/web-3d/performance/loading' },
-      ],
-    },
-  ],
   '/full-stack/': [
     {
       text: '网络基础',
@@ -1222,6 +1168,60 @@ export const sidebar: ThemeConfig['sidebar'] = {
           text: '安全',
           link: '/full-stack/operation/security',
         },
+      ],
+    },
+  ],
+  '/web-3d/': [
+    {
+      text: 'Web 3D 基础',
+      items: [
+        { text: '3D 图形学基础', link: '/web-3d/basic/basic' },
+        { text: '坐标系系统', link: '/web-3d/basic/coordinate-system' },
+        { text: '变换与矩阵', link: '/web-3d/basic/transform' },
+      ],
+    },
+    {
+      text: '核心原理',
+      items: [
+        { text: '渲染管线', link: '/web-3d/theory/principle' },
+        { text: '着色器基础', link: '/web-3d/theory/shaders' },
+        { text: '光照模型', link: '/web-3d/theory/lighting' },
+      ],
+    },
+    {
+      text: 'WebGL',
+      items: [
+        { text: 'WebGL 基础', link: '/web-3d/webgl/basic' },
+        { text: '缓冲区与顶点', link: '/web-3d/webgl/buffers' },
+        { text: '纹理与材质', link: '/web-3d/webgl/textures' },
+      ],
+    },
+    {
+      text: 'Three.js',
+      items: [
+        { text: 'Three.js 入门', link: '/web-3d/threejs/basic' },
+        { text: '场景与相机', link: '/web-3d/threejs/scene-camera' },
+        {
+          text: '几何体与材质',
+          link: '/web-3d/threejs/geometry-material',
+        },
+        { text: '动画系统', link: '/web-3d/threejs/animation' },
+      ],
+    },
+    {
+      text: 'WebXR',
+      items: [
+        { text: 'WebXR 基础', link: '/web-3d/webxr/basic' },
+        { text: 'VR 开发', link: '/web-3d/webxr/vr' },
+        { text: 'AR 开发', link: '/web-3d/webxr/ar' },
+      ],
+    },
+    {
+      text: '性能优化',
+      items: [
+        { text: '渲染优化', link: '/web-3d/performance/rendering' },
+        { text: '内存管理', link: '/web-3d/performance/memory' },
+        { text: '加载优化', link: '/web-3d/performance/loading' },
       ],
     },
   ],
