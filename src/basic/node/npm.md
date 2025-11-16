@@ -144,7 +144,7 @@ npm config set cache D:\app_install\nodejs\node_cache
 ### 项目级环境配置
 
 在项目根目录创建 `.env` 文件：
-```env
+```ini
 PORT=3000
 DB_HOST=localhost
 DB_USER=username
