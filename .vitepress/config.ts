@@ -38,9 +38,9 @@ const nav: ThemeConfig['nav'] = [
     items: [
       { text: 'React', link: '/framework/react/intro' },
       { text: 'Vue', link: '/framework/vue/intro' },
-      { text: 'nextjs', link: '/framework/nextjs/intro' },
-      { text: 'umijs', link: '/framework/umijs/intro' },
-      { text: 'nuxtjs', link: '/framework/nuxtjs/intro' },
+      { text: 'nextjs', link: '/framework/nextjs/start' },
+      { text: 'umijs', link: '/framework/umijs/start' },
+      { text: 'nuxtjs', link: '/framework/nuxtjs/start' },
       { text: 'Vue 2 (EOL)', link: '/framework/vue2/intro' },
       { text: 'Angular', link: '/framework/angular/start' },
     ],
@@ -67,7 +67,7 @@ const nav: ThemeConfig['nav'] = [
       },
       {
         text: '代码质量',
-        link: '/engineering/coding-rule',
+        link: '/engineering/coding/rule',
       },
       { text: '性能与安全', link: '/engineering/performance' },
       {
@@ -76,7 +76,7 @@ const nav: ThemeConfig['nav'] = [
       },
       {
         text: '无障碍',
-        link: '/engineering/accessible/into',
+        link: '/engineering/accessible/intro',
       },
     ],
   },
@@ -123,6 +123,10 @@ const nav: ThemeConfig['nav'] = [
         link: '/web-3d/webgl/basic',
       },
       {
+        text: 'WebGPU',
+        link: '/web-3d/webgpu/start',
+      },
+      {
         text: 'three.js',
         link: '/web-3d/threejs/basic',
       },
@@ -142,33 +146,15 @@ const nav: ThemeConfig['nav'] = [
     items: [
       {
         text: '移动端',
-        activeMatch: '^/mobile/',
-        items: [
-          {
-            text: '移动端基础',
-            link: '/mobile/basic',
-          },
-          {
-            text: '移动端框架',
-            link: '/mobile/framework',
-          },
-          {
-            text: '移动端Web开发',
-            link: '/mobile/web',
-          },
-          {
-            text: '小程序',
-            link: '/mobile/applet',
-          },
-          {
-            text: '移动端调试',
-            link: '/mobile/debug',
-          },
-          {
-            text: '构建与发布',
-            link: '/mobile/publish',
-          },
-        ],
+        link: '/special/mobile/basic/intro',
+      },
+      {
+        text: '命令行开发',
+        link: '/special/cli/intro',
+      },
+      {
+        text: '算法',
+        link: '/special/algorithm/intro',
       },
     ],
   },
@@ -1197,6 +1183,17 @@ export const sidebar: ThemeConfig['sidebar'] = {
       ],
     },
     {
+      text: 'WebGPU',
+      items: [
+        { text: 'WebGPU 入门', link: '/web-3d/webgpu/start' },
+        { text: 'WebGPU 运行机制', link: '/web-3d/webgpu/mechanism' },
+        { text: 'WebGPU 渲染管线', link: '/web-3d/webgpu/pipeline' },
+        { text: 'WebGPU 计算', link: '/web-3d/webgpu/compute' },
+        { text: 'WebGPU API', link: '/web-3d/webgpu/api' },
+        { text: 'WebGPU 工具链', link: '/web-3d/webgpu/toolchain' },
+      ],
+    },
+    {
       text: 'Three.js',
       items: [
         { text: 'Three.js 入门', link: '/web-3d/threejs/basic' },
@@ -1229,49 +1226,31 @@ export const sidebar: ThemeConfig['sidebar'] = {
     {
       text: '移动端',
       items: [
+        { text: '移动端开发概述', link: '/special/mobile/basic/intro' },
+        { text: '视窗与分辨率', link: '/special/mobile/basic/viewport' },
+        { text: '触摸事件', link: '/special/mobile/basic/touch-events' },
+
         {
-          text: '移动端基础',
-          items: [
-            { text: '移动端开发概述', link: '/mobile/basic' },
-            { text: '视口与分辨率', link: '/mobile/basic/viewport' },
-            { text: '触摸事件', link: '/mobile/basic/touch-events' },
-          ],
+          text: 'React Native',
+          link: '/special/mobile/framework/react-native',
         },
+        { text: 'Flutter', link: '/special/mobile/framework/flutter' },
+        { text: 'Weex', link: '/special/mobile/framework/weex' },
+
+        { text: '响应式设计', link: '/special/mobile/web/responsive' },
+        { text: 'PWA', link: '/special/mobile/web/pwa' },
+        { text: '混合开发', link: '/special/mobile/web/hybrid' },
+
+        { text: '微信小程序', link: '/special/mobile/applet/wechat' },
+        { text: '支付宝小程序', link: '/special/mobile/applet/alipay' },
         {
-          text: '移动端框架',
-          items: [
-            {
-              text: 'React Native',
-              link: '/mobile/framework/react-native',
-            },
-            { text: 'Flutter', link: '/mobile/framework/flutter' },
-            { text: 'Weex', link: '/mobile/framework/weex' },
-          ],
+          text: '跨端开发',
+          link: '/special/mobile/applet/cross-platform',
         },
-        {
-          text: '移动端Web',
-          items: [
-            { text: '响应式设计', link: '/mobile/web/responsive' },
-            { text: 'PWA', link: '/mobile/web/pwa' },
-            { text: '混合开发', link: '/mobile/web/hybrid' },
-          ],
-        },
-        {
-          text: '小程序',
-          items: [
-            { text: '微信小程序', link: '/mobile/applet/wechat' },
-            { text: '支付宝小程序', link: '/mobile/applet/alipay' },
-            { text: '跨端开发', link: '/mobile/applet/cross-platform' },
-          ],
-        },
-        {
-          text: '调试与发布',
-          items: [
-            { text: '移动端调试', link: '/mobile/debug' },
-            { text: '应用商店发布', link: '/mobile/publish' },
-            { text: '热更新', link: '/mobile/publish/hot-update' },
-          ],
-        },
+
+        { text: '移动端调试', link: '/special/mobile/publish/debug' },
+        { text: '应用商店发布', link: '/special/mobile/publish/publish' },
+        { text: '热更新', link: '/special/mobile/publish/hot-update' },
       ],
     },
   ],

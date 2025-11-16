@@ -41,7 +41,7 @@ VPN (Virtual Private Network) 是最常见的跨区域访问工具，能够加�
 
 - pokemon (有免费版，注意隐私风险)：[https://web1.go52pokemon.com](https://web1.go52pokemon.com)
 - 星链 (有免费版，注意隐私风险)：[星链](https://星链机场.com/)
-- 免费、傻瓜式自建 VPN（不要泄漏个人信息）：[edgetunnel](https://github.com/cmliu/edgetunnel)
+- 免费、傻瓜式自建 VPN (不要泄漏个人信息)：[edgetunnel](https://github.com/cmliu/edgetunnel)
 
 ### 使用付费 VPN 或专线服务
 
