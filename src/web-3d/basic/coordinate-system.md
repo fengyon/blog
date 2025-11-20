@@ -1,451 +1,246 @@
 # 坐标系系统
 
-## 坐标系基础概念
+3D 图形学中的坐标系系统是构建虚拟世界的数学基础，它定义了物体在空间中的位置、方向和变换关系。在 Web 3D 开发中，理解不同的坐标系及其转换过程至关重要，这直接影响着场景的渲染效果和交互逻辑。
 
-### 坐标系定义
-坐标系是描述空间中点位置的参照系统，由原点、轴方向和单位长度定义：
+## 坐标系基础
+
+坐标系是用于描述空间中点位置的参考系统，由原点、坐标轴和度量单位构成。3D 图形学使用笛卡尔坐标系，通过三个相互垂直的轴 (X、Y、Z) 来定位点。
+
+特点：
+- 提供统一的数学框架进行空间计算
+- 支持向量和矩阵运算
+- 便于实现几何变换和投影
+
+示意图 (3D 笛卡尔坐标系)：
 ```
-3D坐标系：
-      y
+      Y
       |
       |
-      +--- x
+      +--- X
      /
     /
-   z
-```
-
-### 右手坐标系
-WebGL 和 OpenGL 使用右手坐标系：
-- x 轴：右方向
-- y 轴：上方向
-- z 轴：向前方向 (屏幕向外)
-```
-右手定则：
-食指 = x轴
-中指 = y轴  
-拇指 = z轴
+   Z
 ```
 
 ## 局部坐标系
 
-### 模型空间
-每个物体自身的坐标系，原点通常位于物体中心或底部：
-```
-模型坐标系：
-    y
-    |  物体
-    |  /\
-    | /  \
-    |/____\
-    +------ x
-   /
-  z
-```
+局部坐标系 (模型坐标系) 是相对于单个模型自身的坐标系，原点通常位于模型的中心或特定锚点。每个模型都有自己独立的局部坐标系。
 
-### 顶点数据
-在模型空间中定义顶点位置：
-```javascript
-// 立方体顶点数据（模型空间）
-const cubeVertices = new Float32Array([
-  // 前面
-  -0.5, -0.5,  0.5,  // 左下前
-   0.5, -0.5,  0.5,  // 右下前
-   0.5,  0.5,  0.5,  // 右上前
-  -0.5,  0.5,  0.5,  // 左上前
+特点：
+- 简化模型创建和编辑过程
+- 便于实现相对变换和动画
+- 模型数据通常在此坐标系中定义
+
+示意图 (立方体的局部坐标系)：
+```
+    Y
+    |
+    +--- X
+   /
+  Z
   
-  // 后面
-  -0.5, -0.5, -0.5,
-   0.5, -0.5, -0.5,
-   0.5,  0.5, -0.5,
-  -0.5,  0.5, -0.5
-]);
+  立方体顶点：
+  (-1,-1,-1) 到 (1,1,1)
 ```
 
 ## 世界坐标系
 
-### 世界空间
-所有物体共享的全局坐标系，用于描述场景中物体的绝对位置：
+世界坐标系是场景的全局参考系，所有对象都通过变换矩阵放置到这个统一的坐标系中。它定义了场景中所有物体的绝对位置和方向。
+
+特点：
+- 提供统一的全局参考框架
+- 便于计算物体间的空间关系
+- 支持场景管理和碰撞检测
+
+示意图 (多个物体在世界坐标系中)：
 ```
 世界坐标系：
-      y
-      |    物体A
-      |    /\ 
-      |   /  \
-      |  /____\
-      +---------- x
-     /   物体B
-    /    |==|
-   z
+      Y
+      |
+   A  |  B
+  []  |  []
+------+------ X
+     /
+    /
+   Z   C
+      /\
 ```
 
-### 模型变换
-将物体从模型空间变换到世界空间：
-```javascript
-// 创建模型矩阵（世界变换）
-function createModelMatrix(position, rotation, scale) {
-  const modelMatrix = mat4.create();
-  
-  // 平移
-  mat4.translate(modelMatrix, modelMatrix, position);
-  
-  // 旋转（绕各轴）
-  mat4.rotateX(modelMatrix, modelMatrix, rotation[0]);
-  mat4.rotateY(modelMatrix, modelMatrix, rotation[1]); 
-  mat4.rotateZ(modelMatrix, modelMatrix, rotation[2]);
-  
-  // 缩放
-  mat4.scale(modelMatrix, modelMatrix, scale);
-  
-  return modelMatrix;
-}
-
-// 使用示例
-const modelMatrix = createModelMatrix(
-  [2.0, 1.0, -3.0],  // 世界位置
-  [0.0, Math.PI/4, 0.0],  // 旋转角度
-  [1.0, 1.0, 1.0]    // 缩放
-);
-```
+物体 A、B、C 在世界坐标系中有各自的绝对位置。
 
 ## 视图坐标系
 
-### 相机空间
-以相机为原点的坐标系，z 轴指向相机观察方向：
+视图坐标系 (相机坐标系) 以相机为参考点，Z 轴通常指向相机的观察方向。在这个坐标系中，相机位于原点，便于进行投影计算。
+
+特点：
+- 相机位于原点，简化投影计算
+- Z 坐标表示深度信息
+- 便于实现视锥体裁剪
+
+示意图 (视图坐标系)：
 ```
-世界空间 → 视图空间
-
-世界坐标系：
-      y
-      |    相机
-      |    ○→ 观察方向
-      |
-      +--- x
-     /
-    z
-
 视图坐标系：
-      y
+      Y
       |
-      |
-相机○-+--- z (观察方向)
-     /
-    x
-```
-
-### 视图变换
-```javascript
-// 创建视图矩阵
-function createViewMatrix(cameraPosition, target, up) {
-  const viewMatrix = mat4.create();
-  mat4.lookAt(viewMatrix, cameraPosition, target, up);
-  return viewMatrix;
-}
-
-// 使用示例
-const viewMatrix = createViewMatrix(
-  [0, 0, 5],      // 相机位置
-  [0, 0, 0],      // 观察目标
-  [0, 1, 0]       // 上方向
-);
-
-// 手动构建视图矩阵
-function createViewMatrixManual(eye, center, up) {
-  const z = vec3.normalize(vec3.create(), vec3.subtract(vec3.create(), eye, center));
-  const x = vec3.normalize(vec3.create(), vec3.cross(vec3.create(), up, z));
-  const y = vec3.normalize(vec3.create(), vec3.cross(vec3.create(), z, x));
-  
-  const viewMatrix = mat4.fromValues(
-    x[0], x[1], x[2], -vec3.dot(x, eye),
-    y[0], y[1], y[2], -vec3.dot(y, eye), 
-    z[0], z[1], z[2], -vec3.dot(z, eye),
-    0, 0, 0, 1
-  );
-  
-  return viewMatrix;
-}
+      |  Z（观察方向）
+      | /
+      |/
+      +--- X
+      
+相机位于原点 (0,0,0)
 ```
 
 ## 投影坐标系
 
-### 投影空间
-将 3D 场景投影到 2D 平面的坐标系系统。
+投影坐标系通过投影矩阵将视图坐标系中的 3D 坐标转换为标准化设备坐标。这个坐标系用于确定哪些部分在可视范围内。
 
-#### 透视投影
-模拟人眼视觉效果，近大远小：
+特点：
+- 坐标范围标准化 (通常 -1 到 1)
+- 便于后续的视口变换
+- 支持透视校正
+
+示意图 (透视投影)：
 ```
-透视视锥体：
-   眼位置
-    /|
-   / | 
-  /  |
- /   |
-/    |
-近平面 远平面
-```
-
-```javascript
-// 透视投影矩阵
-function createPerspectiveMatrix(fov, aspect, near, far) {
-  const projectionMatrix = mat4.create();
-  mat4.perspective(projectionMatrix, fov, aspect, near, far);
-  return projectionMatrix;
-}
-
-// 使用示例
-const perspectiveMatrix = createPerspectiveMatrix(
-  45 * Math.PI / 180,  // 视野角度（弧度）
-  16/9,                // 宽高比
-  0.1,                 // 近平面
-  100.0                // 远平面
-);
+视图空间：       投影后：
+   Y              Y
+   |              |
+   |   Z          |   
+   | /            | 
+   |/             |
+   +--- X         +--- X
+   
+3D 坐标转换为标准化坐标
 ```
 
-#### 正交投影
-平行投影，保持物体大小不变：
-```
-正交视锥体：
-   +-----+
-   |     |
-   |     |
-   |     |
-   +-----+
-近平面   远平面
-```
+## 裁剪坐标系
 
-```javascript
-// 正交投影矩阵
-function createOrthographicMatrix(left, right, bottom, top, near, far) {
-  const projectionMatrix = mat4.create();
-  mat4.ortho(projectionMatrix, left, right, bottom, top, near, far);
-  return projectionMatrix;
-}
+裁剪坐标系在投影之后、透视除法之前，用于确定哪些图元在视锥体内。超出定义范围的几何体会被裁剪掉。
 
-// 使用示例
-const orthoMatrix = createOrthographicMatrix(
-  -10, 10,   // left, right
-  -10, 10,   // bottom, top  
-  -10, 10,   // near, far
-);
+特点：
+- 使用齐次坐标 (x,y,z,w)
+- 定义可见区域边界
+- 提高渲染效率
+
+示意图 (裁剪空间)：
+```
+裁剪立方体：
+    +--------+
+   /        /|
+  /        / |
+ +--------+  |
+ |        |  |
+ |        |  +
+ |        | /
+ |        |/
+ +--------+
+ 
+坐标范围：-w ≤ x,y,z ≤ w
 ```
 
-## 裁剪空间
+## 标准化设备坐标系
 
-### 标准化设备坐标
-经过投影变换后，坐标被规范到立方体内：
+标准化设备坐标系 (NDC) 通过透视除法得到，坐标范围在所有轴上都是 [-1,1]。这个坐标系与具体设备无关。
+
+特点：
+- 坐标范围标准化
+- 设备无关的表示
+- 便于后续的视口映射
+
+示意图 (NDC 空间)：
 ```
-裁剪空间：
-    y
+NDC 立方体：
+    Y
     |
- (-1,1)------(1,1)
-    |         |
-    |         |
-    |         |
- (-1,-1)----(1,-1)
-          x
-z范围：[-1, 1]
-```
-
-### 透视除法
-将齐次坐标转换为 3D 坐标：
-```
-[x, y, z, w] → [x/w, y/w, z/w]
+ -1 +---+ 1
+  / |  /|
+ /  | / |
++---+---+ X
+|   |   |
+|   +---+
+|  /   /
+| /   /
+Z    /
+-1  1
 ```
 
 ## 屏幕坐标系
 
-### 视口变换
-从标准化设备坐标到屏幕像素坐标的变换：
-```
-标准化坐标 → 屏幕坐标
-(-1,1)       (0,0)----(width,0)
-  |            |          |
-  |    →       |          |
-(-1,-1)      (0,height)-(width,height)
-```
+屏幕坐标系是最终的 2D 坐标系统，将标准化设备坐标映射到具体的像素位置。原点通常位于左上角或左下角。
 
-```javascript
-// 设置视口
-gl.viewport(0, 0, canvas.width, canvas.height);
+特点：
+- 以像素为单位
+- 与具体显示设备相关
+- 用于最终的光栅化
 
-// 视口变换计算
-function viewportTransform(ndcX, ndcY, viewport) {
-  const pixelX = (ndcX + 1) * viewport.width / 2 + viewport.x;
-  const pixelY = (1 - ndcY) * viewport.height / 2 + viewport.y;
-  return [pixelX, pixelY];
-}
+示意图 (屏幕坐标系)：
+```
+屏幕坐标系（原点在左上角）：
+(0,0)------- +X
+ |
+ |
+ |
++Y
+ 
+视口映射：NDC → 屏幕像素
 ```
 
 ## 坐标系变换流程
 
-### 完整变换管线
+3D 图形渲染涉及一系列坐标系变换，从局部坐标到最终的屏幕坐标。这个过程通过矩阵乘法实现。
+
+变换流程：
 ```
-局部坐标 → 世界坐标 → 视图坐标 → 投影坐标 → 标准化坐标 → 屏幕坐标
-
-模型矩阵     视图矩阵     投影矩阵     透视除法     视口变换
-```
-
-### 变换矩阵组合
-```javascript
-// 完整的MVP矩阵
-const modelMatrix = createModelMatrix(position, rotation, scale);
-const viewMatrix = createViewMatrix(cameraPosition, target, up);
-const projectionMatrix = createPerspectiveMatrix(fov, aspect, near, far);
-
-// 组合变换矩阵
-const mvpMatrix = mat4.create();
-mat4.multiply(mvpMatrix, projectionMatrix, viewMatrix);
-mat4.multiply(mvpMatrix, mvpMatrix, modelMatrix);
-
-// 在着色器中使用
-gl.uniformMatrix4fv(uMVPMatrix, false, mvpMatrix);
+局部坐标 → 世界坐标 → 视图坐标 → 投影坐标 → 裁剪坐标 → 标准化设备坐标 → 屏幕坐标
 ```
 
-### 顶点着色器中的变换
-```glsl
-// 顶点着色器
-attribute vec3 aPosition;
-
-uniform mat4 uModelMatrix;
-uniform mat4 uViewMatrix;
-uniform mat4 uProjectionMatrix;
-
-void main() {
-  // 完整的坐标系变换
-  vec4 worldPosition = uModelMatrix * vec4(aPosition, 1.0);
-  vec4 viewPosition = uViewMatrix * worldPosition;
-  vec4 clipPosition = uProjectionMatrix * viewPosition;
-  
-  gl_Position = clipPosition;
-}
+示意图 (变换链条)：
+```
+模型矩阵     视图矩阵     投影矩阵     视口变换
+局部坐标 → 世界坐标 → 视图坐标 → 裁剪坐标 → NDC → 屏幕坐标
+      M        V           P          视口
 ```
 
-## 法线变换
+每个变换阶段都有对应的变换矩阵，这些矩阵在渲染管线中依次应用。
 
-### 法线坐标系
-法线向量需要特殊处理，使用逆转置矩阵：
-```javascript
-// 法线矩阵计算
-function createNormalMatrix(modelViewMatrix) {
-  const normalMatrix = mat3.create();
-  mat3.normalFromMat4(normalMatrix, modelViewMatrix);
-  return normalMatrix;
-}
+## 右手坐标系与左手坐标系
 
-// 在着色器中使用
-const normalMatrix = createNormalMatrix(modelViewMatrix);
-gl.uniformMatrix3fv(uNormalMatrix, false, normalMatrix);
+3D 图形学使用两种手性坐标系：右手坐标系和左手坐标系。区别在于 Z 轴的方向确定方式。
+
+特点：
+- 右手坐标系：Z 轴由右手定则确定
+- 左手坐标系：Z 轴由左手定则确定
+- WebGL 通常使用右手坐标系
+
+示意图 (右手定则)：
+```
+右手坐标系：
+    Y
+    |   
+    | 
+    +--- X
+   /
+  /
+ Z（拇指指向 Z，手指从 X 转向 Y）
 ```
 
-```glsl
-// 法线变换
-uniform mat3 uNormalMatrix;
-attribute vec3 aNormal;
+## 齐次坐标
 
-varying vec3 vNormal;
+齐次坐标使用四个分量 (x,y,z,w) 表示 3D 点，便于用统一的矩阵形式表示所有变换。
 
-void main() {
-  vNormal = uNormalMatrix * aNormal;
-}
+特点：
+- 支持平移、旋转、缩放的统一矩阵表示
+- w 分量用于透视投影
+- 便于实现投影变换
+
+示意图 (齐次坐标变换)：
 ```
+3D 点 (x,y,z) → 齐次坐标 (x,y,z,1)
 
-## 纹理坐标系
+变换矩阵：
+[ a b c d ]   [ x ]   [ x' ]
+[ e f g h ] × [ y ] = [ y' ]
+[ i j k l ]   [ z ]   [ z' ]
+[ m n o p ]   [ 1 ]   [ w' ]
 
-### UV 坐标系统
-2D 纹理映射使用的坐标系：
-```
-纹理坐标：
-(0,0)---(1,0)
-  |       |
-  |       |
-  |       |
-(0,1)---(1,1)
-```
-
-### 立方体贴图坐标系
-用于环境映射的 6 个面：
-```
-立方体贴图：
-    +y
- -x +z +x -z
-    -y
-```
-
-```javascript
-// 纹理坐标数据
-const texCoords = new Float32Array([
-  // 前面
-  0.0, 0.0,
-  1.0, 0.0, 
-  1.0, 1.0,
-  0.0, 1.0,
-  
-  // 右面
-  0.0, 0.0,
-  1.0, 0.0,
-  1.0, 1.0,
-  0.0, 1.0
-]);
-```
-
-## 坐标系实践应用
-
-### 鼠标交互
-将屏幕坐标转换为 3D 世界坐标：
-```javascript
-// 屏幕到世界坐标转换
-function screenToWorld(mouseX, mouseY, canvas, mvpMatrix) {
-  // 标准化设备坐标
-  const x = (mouseX / canvas.width) * 2 - 1;
-  const y = -(mouseY / canvas.height) * 2 + 1;
-  
-  // 反投影
-  const inverseMVP = mat4.create();
-  mat4.invert(inverseMVP, mvpMatrix);
-  
-  const nearPoint = unproject(x, y, -1, inverseMVP);
-  const farPoint = unproject(x, y, 1, inverseMVP);
-  
-  return { nearPoint, farPoint };
-}
-
-function unproject(x, y, z, inverseMatrix) {
-  const point = vec4.fromValues(x, y, z, 1.0);
-  vec4.transformMat4(point, point, inverseMatrix);
-  
-  // 透视除法
-  point[0] /= point[3];
-  point[1] /= point[3];
-  point[2] /= point[3];
-  
-  return vec3.fromValues(point[0], point[1], point[2]);
-}
-```
-
-### 坐标系调试
-可视化坐标系轴：
-```javascript
-// 绘制坐标系轴
-function drawCoordinateAxes(gl, program) {
-  const axisVertices = new Float32Array([
-    // x轴 (红色)
-    0,0,0, 1,0,0, 1,0,0, 1,0,0,
-    // y轴 (绿色)  
-    0,0,0, 0,1,0, 0,1,0, 0,1,0,
-    // z轴 (蓝色)
-    0,0,0, 0,0,1, 0,0,1, 0,0,1
-  ]);
-  
-  const axisColors = new Float32Array([
-    // x轴：红
-    1,0,0, 1,0,0, 1,0,0, 1,0,0,
-    // y轴：绿
-    0,1,0, 0,1,0, 0,1,0, 0,1,0, 
-    // z轴：蓝
-    0,0,1, 0,0,1, 0,0,1, 0,0,1
-  ]);
-  
-  // 绘制轴线
-  gl.drawArrays(gl.LINES, 0, 6);
-}
+标准化： (x'/w', y'/w', z'/w')
 ```

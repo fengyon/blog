@@ -1,1182 +1,1202 @@
 # 加载优化
 
-## 加载优化基础
+## 加载性能的重要性
 
-### 加载性能指标
-```
-关键性能指标:
-FP (First Paint)       首次绘制
-FCP (First Contentful Paint) 首次内容绘制
-LCP (Largest Contentful Paint) 最大内容绘制
-TTI (Time to Interactive)     可交互时间
-```
+在 Web 3D 应用中，加载性能直接影响用户体验和转化率。研究表明，页面加载时间每增加1秒，转化率下降 7%。对于 3D 应用，优化的加载流程能够显著提升用户留存率和满意度。
 
-### 资源加载流程
 ```
-用户请求 → DNS查询 → 建立连接 → 发送请求 → 接收响应 → 解析处理 → 渲染显示
-    ↓         ↓         ↓         ↓         ↓         ↓         ↓
-缓存检查   网络延迟   TCP握手   服务器处理  数据传输   资源解析   布局绘制
+加载体验对比
+优化前体验             优化后体验
+├── 长时间白屏          ├── 即时内容展示
+├── 进度不明确          ├── 清晰加载进度
+├── 资源阻塞交互        ├── 渐进式交互启用
+└── 用户流失率高        └── 用户参与度高
 ```
 
-## 资源预加载
+## 资源分析与优化
 
-### 预加载策略
+### 资源类型分析
+
+Web 3D 应用主要包含以下资源类型：
+
+```
+资源类型与特点
+几何体资源
+├── 顶点数据 (位置、法线、UV等)
+├── 索引数据
+└── 蒙皮与动画数据
+
+纹理资源
+├── 颜色贴图
+├── 法线贴图
+├── 粗糙度贴图
+└── 环境贴图
+
+其他资源
+├── 着色器代码
+├── 配置文件
+└── 音频文件
+```
+
+### 资源体积优化
+
 ```javascript
-class ResourcePreloader {
-    constructor() {
-        this.preloadQueue = new Map();
-        this.loadedResources = new Map();
-        this.priorityQueue = new PriorityQueue();
+class ResourceOptimizer {
+  constructor() {
+    this.optimizationStrategies = new Map();
+    this.setupStrategies();
+  }
+  
+  setupStrategies() {
+    // 几何体优化策略
+    this.optimizationStrategies.set('geometry', {
+      maxVertices: 50000,
+      quantization: true,
+      compression: true
+    });
+    
+    // 纹理优化策略
+    this.optimizationStrategies.set('texture', {
+      maxSize: 2048,
+      format: 'webp',
+      quality: 0.8
+    });
+  }
+  
+  async optimizeGeometry(geometry, options = {}) {
+    const strategy = this.optimizationStrategies.get('geometry');
+    
+    // 顶点数量检查
+    if (geometry.attributes.position.count > strategy.maxVertices) {
+      geometry = await this.decimateGeometry(geometry, strategy.maxVertices);
     }
-
-    // 预加载关键资源
-    preloadCriticalResources() {
-        const criticalResources = [
-            { url: 'textures/skybox.jpg', type: 'texture', priority: 1 },
-            { url: 'models/player.glb', type: 'model', priority: 1 },
-            { url: 'textures/ui/loading.png', type: 'texture', priority: 2 }
-        ];
-
-        criticalResources.forEach(resource => {
-            this.addToPreloadQueue(resource);
-        });
-
-        this.startPreloading();
+    
+    // 数据量化
+    if (strategy.quantization) {
+      geometry = this.quantizeGeometry(geometry);
     }
-
-    addToPreloadQueue(resource) {
-        this.preloadQueue.set(resource.url, {
-            ...resource,
-            status: 'pending',
-            progress: 0
-        });
-        this.priorityQueue.enqueue(resource, resource.priority);
+    
+    // 压缩
+    if (strategy.compression) {
+      geometry = await this.compressGeometry(geometry);
     }
-
-    async startPreloading() {
-        const concurrencyLimit = 3;
-        const activeLoads = new Set();
-
-        while (this.priorityQueue.size() > 0) {
-            if (activeLoads.size < concurrencyLimit) {
-                const resource = this.priorityQueue.dequeue();
-                this.loadResource(resource).then(() => {
-                    activeLoads.delete(resource.url);
-                });
-                activeLoads.add(resource.url);
-            } else {
-                await this.waitForLoadCompletion(activeLoads);
-            }
-        }
+    
+    return geometry;
+  }
+  
+  async optimizeTexture(texture, options = {}) {
+    const strategy = this.optimizationStrategies.get('texture');
+    
+    // 尺寸调整
+    if (texture.image.width > strategy.maxSize || 
+        texture.image.height > strategy.maxSize) {
+      texture = await this.resizeTexture(texture, strategy.maxSize);
     }
-
-    async loadResource(resource) {
-        try {
-            this.preloadQueue.get(resource.url).status = 'loading';
-            
-            let data;
-            switch (resource.type) {
-                case 'texture':
-                    data = await this.loadTexture(resource.url);
-                    break;
-                case 'model':
-                    data = await this.loadModel(resource.url);
-                    break;
-                case 'audio':
-                    data = await this.loadAudio(resource.url);
-                    break;
-            }
-
-            this.preloadQueue.get(resource.url).status = 'loaded';
-            this.preloadQueue.get(resource.url).progress = 100;
-            this.loadedResources.set(resource.url, data);
-
-        } catch (error) {
-            this.preloadQueue.get(resource.url).status = 'error';
-            console.error(`Failed to preload ${resource.url}:`, error);
-        }
+    
+    // 格式转换
+    if (strategy.format !== 'original') {
+      texture = await this.convertTextureFormat(texture, strategy.format);
     }
-
-    async loadTexture(url) {
-        return new Promise((resolve, reject) => {
-            const loader = new THREE.TextureLoader();
-            loader.load(
-                url,
-                (texture) => resolve(texture),
-                (progress) => this.updateProgress(url, progress),
-                reject
-            );
-        });
+    
+    return texture;
+  }
+  
+  async decimateGeometry(geometry, targetVertices) {
+    // 使用简化算法减少顶点数量
+    const simplifiedGeometry = geometry.clone();
+    const ratio = targetVertices / geometry.attributes.position.count;
+    
+    // 应用简化算法 (实际项目中可使用专业简化库)
+    return this.applySimplification(simplifiedGeometry, ratio);
+  }
+  
+  quantizeGeometry(geometry) {
+    // 量化顶点数据以减少精度
+    const positionAttribute = geometry.attributes.position;
+    const array = positionAttribute.array;
+    
+    for (let i = 0; i < array.length; i++) {
+      // 将浮点数量化为16位精度
+      array[i] = Math.round(array[i] * 1000) / 1000;
     }
-
-    async loadModel(url) {
-        return new Promise((resolve, reject) => {
-            const loader = new THREE.GLTFLoader();
-            loader.load(
-                url,
-                (gltf) => resolve(gltf),
-                (progress) => this.updateProgress(url, progress),
-                reject
-            );
-        });
-    }
-
-    updateProgress(url, progress) {
-        if (progress.lengthComputable) {
-            const percent = (progress.loaded / progress.total) * 100;
-            this.preloadQueue.get(url).progress = percent;
-        }
-    }
-
-    getPreloadedResource(url) {
-        return this.loadedResources.get(url);
-    }
-
-    getOverallProgress() {
-        const total = this.preloadQueue.size;
-        const loaded = Array.from(this.preloadQueue.values())
-            .filter(res => res.status === 'loaded').length;
-        return total > 0 ? (loaded / total) * 100 : 100;
-    }
+    
+    positionAttribute.needsUpdate = true;
+    return geometry;
+  }
+  
+  async resizeTexture(texture, maxSize) {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      const scale = Math.min(
+        maxSize / texture.image.width,
+        maxSize / texture.image.height
+      );
+      
+      canvas.width = texture.image.width * scale;
+      canvas.height = texture.image.height * scale;
+      
+      ctx.drawImage(texture.image, 0, 0, canvas.width, canvas.height);
+      
+      const resizedTexture = new THREE.Texture(canvas);
+      resizedTexture.needsUpdate = true;
+      resolve(resizedTexture);
+    });
+  }
 }
 ```
 
-### 链接预加载
-```html
-<!-- 使用 rel="preload" 预加载关键资源 -->
-<link rel="preload" href="textures/skybox.jpg" as="image">
-<link rel="preload" href="models/player.glb" as="fetch">
-<link rel="preload" href="shaders/main.vert" as="script">
+## 网络层优化
 
-<!-- 预连接重要域名 -->
-<link rel="preconnect" href="https://cdn.example.com">
-<link rel="dns-prefetch" href="https://api.example.com">
+### 资源压缩与 CDN
+
+```
+资源传输优化流程
+原始资源 → 压缩处理 → CDN分发 → 浏览器缓存
+    ↓           ↓           ↓           ↓
+ 未优化       Gzip压缩    边缘节点    本地存储
+ 大小        体积-70%    低延迟     快速加载
 ```
 
-## 渐进式加载
+```javascript
+class NetworkOptimizer {
+  constructor() {
+    this.cdnBaseUrl = 'https://cdn.example.com';
+    this.compressionFormats = this.detectSupportedFormats();
+  }
+  
+  detectSupportedFormats() {
+    const formats = ['br', 'gzip']; // 支持的压缩格式
+    
+    // 检测浏览器支持的压缩格式
+    if (typeof CompressionStream !== 'undefined') {
+      formats.push('br', 'gzip');
+    }
+    
+    return formats;
+  }
+  
+  async loadResource(url, options = {}) {
+    const optimizedUrl = this.optimizeUrl(url, options);
+    
+    // 添加缓存破坏参数
+    const cacheBustUrl = this.addCacheBuster(optimizedUrl);
+    
+    // 设置适当的请求头
+    const headers = this.getOptimizedHeaders(options);
+    
+    try {
+      const response = await fetch(cacheBustUrl, { headers });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
+      return await this.processResponse(response, options);
+    } catch (error) {
+      return this.handleLoadError(error, url, options);
+    }
+  }
+  
+  optimizeUrl(url, options) {
+    let optimizedUrl = url;
+    
+    // 使用CDN路径
+    if (options.useCDN && !url.startsWith('http')) {
+      optimizedUrl = `${this.cdnBaseUrl}${url}`;
+    }
+    
+    // 添加格式参数
+    if (options.format) {
+      const separator = optimizedUrl.includes('?') ? '&' : '?';
+      optimizedUrl += `${separator}format=${options.format}`;
+    }
+    
+    return optimizedUrl;
+  }
+  
+  getOptimizedHeaders(options) {
+    const headers = new Headers();
+    
+    // 接受压缩格式
+    if (this.compressionFormats.length > 0) {
+      headers.set('Accept-Encoding', this.compressionFormats.join(', '));
+    }
+    
+    // 添加缓存控制
+    if (options.cacheStrategy === 'aggressive') {
+      headers.set('Cache-Control', 'max-age=31536000'); // 1年
+    }
+    
+    return headers;
+  }
+  
+  addCacheBuster(url) {
+    // 对开发环境添加缓存破坏参数
+    if (process.env.NODE_ENV === 'development') {
+      const separator = url.includes('?') ? '&' : '?';
+      return `${url}${separator}_=${Date.now()}`;
+    }
+    
+    return url;
+  }
+  
+  async processResponse(response, options) {
+    let data = await response.arrayBuffer();
+    
+    // 处理压缩内容
+    const contentEncoding = response.headers.get('Content-Encoding');
+    if (contentEncoding && typeof DecompressionStream !== 'undefined') {
+      data = await this.decompressData(data, contentEncoding);
+    }
+    
+    return data;
+  }
+  
+  async decompressData(compressedData, encoding) {
+    const ds = new DecompressionStream(encoding);
+    const decompressedStream = new Response(compressedData).body.pipeThrough(ds);
+    return new Response(decompressedStream).arrayBuffer();
+  }
+}
+```
 
-### 三级加载策略
+### 预连接与 DNS 预解析
+
+```javascript
+class ConnectionOptimizer {
+  constructor() {
+    this.preconnectedOrigins = new Set();
+  }
+  
+  preconnectToOrigins(origins) {
+    origins.forEach(origin => {
+      if (!this.preconnectedOrigins.has(origin)) {
+        this.createPreconnectLink(origin);
+        this.preconnectedOrigins.add(origin);
+      }
+    });
+  }
+  
+  createPreconnectLink(origin) {
+    const link = document.createElement('link');
+    link.rel = 'preconnect';
+    link.href = origin;
+    link.crossOrigin = 'anonymous';
+    document.head.appendChild(link);
+  }
+  
+  prefetchResources(resourceUrls) {
+    resourceUrls.forEach(url => {
+      const link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.href = url;
+      link.as = this.getResourceType(url);
+      document.head.appendChild(link);
+    });
+  }
+  
+  getResourceType(url) {
+    if (url.includes('.gltf') || url.includes('.glb')) return 'model';
+    if (url.includes('.jpg') || url.includes('.png')) return 'image';
+    if (url.includes('.json')) return 'json';
+    return 'other';
+  }
+  
+  // 关键资源预加载
+  preloadCriticalResources() {
+    const criticalResources = [
+      '/models/main-scene.glb',
+      '/textures/environment.hdr',
+      '/textures/brdfLUT.png'
+    ];
+    
+    criticalResources.forEach(resource => {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.href = resource;
+      link.as = this.getResourceType(resource);
+      
+      if (resource.includes('.glb')) {
+        link.setAttribute('fetchpriority', 'high');
+      }
+      
+      document.head.appendChild(link);
+    });
+  }
+}
+```
+
+## 加载策略与流程
+
+### 渐进式加载
+
 ```javascript
 class ProgressiveLoader {
-    constructor() {
-        this.qualityLevels = {
-            low: { resolution: 0.5, textureQuality: 'low', lodDistance: 10 },
-            medium: { resolution: 0.75, textureQuality: 'medium', lodDistance: 25 },
-            high: { resolution: 1.0, textureQuality: 'high', lodDistance: 50 }
-        };
-        this.currentQuality = 'low';
+  constructor() {
+    this.phases = [
+      'initial',
+      'geometry',
+      'textures',
+      'animations',
+      'details'
+    ];
+    
+    this.currentPhase = 0;
+    this.loadingQueue = new Map();
+  }
+  
+  async loadScene(sceneConfig) {
+    // 阶段1: 初始加载 - 基础几何体
+    await this.loadPhase('initial', sceneConfig.essential);
+    
+    // 阶段2: 主要几何体
+    await this.loadPhase('geometry', sceneConfig.geometry);
+    
+    // 阶段3: 纹理
+    await this.loadPhase('textures', sceneConfig.textures);
+    
+    // 阶段4: 动画
+    await this.loadPhase('animations', sceneConfig.animations);
+    
+    // 阶段5: 细节优化
+    await this.loadPhase('details', sceneConfig.details);
+  }
+  
+  async loadPhase(phaseName, resources) {
+    this.setPhase(phaseName);
+    
+    const promises = resources.map(resource => 
+      this.loadWithPriority(resource, this.getPhasePriority(phaseName))
+    );
+    
+    await Promise.all(promises);
+    this.completePhase(phaseName);
+  }
+  
+  setPhase(phaseName) {
+    this.currentPhase = this.phases.indexOf(phaseName);
+    this.dispatchEvent(new CustomEvent('phaseStart', { detail: { phase: phaseName } }));
+  }
+  
+  completePhase(phaseName) {
+    this.dispatchEvent(new CustomEvent('phaseComplete', { detail: { phase: phaseName } }));
+  }
+  
+  getPhasePriority(phaseName) {
+    const priorities = {
+      'initial': 'high',
+      'geometry': 'medium',
+      'textures': 'medium',
+      'animations': 'low',
+      'details': 'low'
+    };
+    
+    return priorities[phaseName] || 'low';
+  }
+  
+  async loadWithPriority(resource, priority) {
+    // 设置资源加载优先级
+    if (priority === 'high' && 'scheduler' in window) {
+      // 使用 Priority Hints API
+      return scheduler.postTask(() => this.loadResource(resource), { priority });
     }
-
-    async loadSceneProgressive(sceneConfig) {
-        // 阶段1: 加载基础几何体
-        await this.loadBaseGeometry(sceneConfig.geometry);
-        
-        // 阶段2: 加载低质量纹理
-        await this.loadTextures(sceneConfig.textures, 'low');
-        
-        // 阶段3: 加载高质量资源
-        this.scheduleQualityUpgrade();
+    
+    return this.loadResource(resource);
+  }
+  
+  async loadResource(resource) {
+    const startTime = performance.now();
+    
+    try {
+      const result = await this.fetchResource(resource);
+      const loadTime = performance.now() - startTime;
+      
+      this.recordMetric('loadTime', resource.url, loadTime);
+      return result;
+    } catch (error) {
+      this.recordMetric('loadError', resource.url, error);
+      throw error;
     }
-
-    async loadBaseGeometry(geometryConfig) {
-        const promises = [];
-        
-        // 只加载可见区域的基础几何体
-        geometryConfig.forEach(geom => {
-            if (this.isInInitialView(geom.bounds)) {
-                promises.push(this.loadSimplifiedGeometry(geom));
-            }
-        });
-
-        await Promise.all(promises);
-    }
-
-    async loadTextures(texturesConfig, quality) {
-        const textureLoader = new THREE.TextureLoader();
-        
-        for (const textureConfig of texturesConfig) {
-            const qualityUrl = this.getQualityUrl(textureConfig.url, quality);
-            const texture = await this.loadTextureWithFallback(qualityUrl);
-            
-            // 应用纹理优化
-            this.optimizeTextureForQuality(texture, quality);
-        }
-    }
-
-    getQualityUrl(baseUrl, quality) {
-        const qualitySuffix = {
-            low: '_512.jpg',
-            medium: '_1024.jpg',
-            high: '_2048.jpg'
-        };
-        
-        return baseUrl.replace('.jpg', qualitySuffix[quality]);
-    }
-
-    async loadTextureWithFallback(url) {
-        try {
-            return await this.loadTexture(url);
-        } catch (error) {
-            console.warn(`Failed to load ${url}, using fallback`);
-            return this.createFallbackTexture();
-        }
-    }
-
-    optimizeTextureForQuality(texture, quality) {
-        switch (quality) {
-            case 'low':
-                texture.generateMipmaps = false;
-                texture.minFilter = THREE.LinearFilter;
-                break;
-            case 'medium':
-                texture.generateMipmaps = true;
-                texture.minFilter = THREE.LinearMipMapLinearFilter;
-                break;
-            case 'high':
-                texture.anisotropy = this.renderer.capabilities.getMaxAnisotropy();
-                break;
-        }
-    }
-
-    scheduleQualityUpgrade() {
-        // 在空闲时间升级质量
-        if ('requestIdleCallback' in window) {
-            requestIdleCallback(() => {
-                this.upgradeToMediumQuality();
-                
-                requestIdleCallback(() => {
-                    this.upgradeToHighQuality();
-                });
-            });
-        } else {
-            setTimeout(() => this.upgradeToMediumQuality(), 2000);
-            setTimeout(() => this.upgradeToHighQuality(), 5000);
-        }
-    }
-
-    async upgradeToMediumQuality() {
-        this.currentQuality = 'medium';
-        await this.loadTextures(this.sceneConfig.textures, 'medium');
-        this.updateMaterialQuality('medium');
-    }
-
-    updateMaterialQuality(quality) {
-        this.scene.traverse((object) => {
-            if (object.isMesh) {
-                const material = object.material;
-                if (material) {
-                    material.needsUpdate = true;
-                    
-                    if (quality === 'low') {
-                        material.roughness = 0.8;
-                        material.metalness = 0.2;
-                    } else {
-                        material.roughness = 0.5;
-                        material.metalness = 0.5;
-                    }
-                }
-            }
-        });
-    }
+  }
 }
 ```
 
-### 流式几何体加载
-```javascript
-class StreamableGeometry {
-    constructor(url, chunkSize = 1000) {
-        this.url = url;
-        this.chunkSize = chunkSize;
-        this.loadedChunks = new Map();
-        this.geometry = new THREE.BufferGeometry();
-    }
+### 流式加载与显示
 
-    async loadProgressive() {
-        // 首先加载元数据
-        const metadata = await this.loadMetadata();
-        
-        // 创建基础几何体结构
-        this.setupBaseGeometry(metadata);
-        
-        // 流式加载顶点数据
-        await this.streamVertexData(metadata);
-    }
-
-    async loadMetadata() {
-        const response = await fetch(`${this.url}/metadata.json`);
-        return response.json();
-    }
-
-    setupBaseGeometry(metadata) {
-        // 预分配缓冲区
-        const positionArray = new Float32Array(metadata.vertexCount * 3);
-        const normalArray = new Float32Array(metadata.vertexCount * 3);
-        const uvArray = new Float32Array(metadata.vertexCount * 2);
-
-        this.geometry.setAttribute('position', 
-            new THREE.BufferAttribute(positionArray, 3));
-        this.geometry.setAttribute('normal', 
-            new THREE.BufferAttribute(normalArray, 3));
-        this.geometry.setAttribute('uv', 
-            new THREE.BufferAttribute(uvArray, 2));
-    }
-
-    async streamVertexData(metadata) {
-        const totalChunks = Math.ceil(metadata.vertexCount / this.chunkSize);
-        
-        for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
-            const chunk = await this.loadChunk(chunkIndex);
-            this.applyChunkToGeometry(chunk, chunkIndex);
-            
-            // 每加载几个区块后让出主线程
-            if (chunkIndex % 5 === 0) {
-                await this.yieldToMainThread();
-            }
-        }
-    }
-
-    async loadChunk(chunkIndex) {
-        const response = await fetch(`${this.url}/chunk_${chunkIndex}.bin`);
-        const arrayBuffer = await response.arrayBuffer();
-        
-        // 解析二进制数据
-        return this.parseChunkData(arrayBuffer);
-    }
-
-    applyChunkToGeometry(chunk, chunkIndex) {
-        const startVertex = chunkIndex * this.chunkSize;
-        const positionAttribute = this.geometry.attributes.position;
-        const normalAttribute = this.geometry.attributes.normal;
-        const uvAttribute = this.geometry.attributes.uv;
-
-        // 将区块数据复制到主几何体
-        positionAttribute.array.set(chunk.positions, startVertex * 3);
-        normalAttribute.array.set(chunk.normals, startVertex * 3);
-        uvAttribute.array.set(chunk.uvs, startVertex * 2);
-
-        // 标记属性需要更新
-        positionAttribute.needsUpdate = true;
-        normalAttribute.needsUpdate = true;
-        uvAttribute.needsUpdate = true;
-    }
-
-    async yieldToMainThread() {
-        return new Promise(resolve => {
-            setTimeout(resolve, 0);
-        });
-    }
-}
+```
+流式加载流程
+占位几何体 → 低精度模型 → 完整几何体 → 基础纹理 → 高清纹理
+    ↓           ↓           ↓           ↓           ↓
+ 即时显示     快速替换     详细形状     基础外观     最终质量
 ```
 
-## 代码分割与懒加载
-
-### 动态导入
 ```javascript
-class DynamicModuleLoader {
-    constructor() {
-        this.loadedModules = new Map();
-        this.loadingModules = new Map();
+class StreamingLoader {
+  constructor() {
+    this.lodLevels = new Map();
+    this.activeStreams = new Set();
+  }
+  
+  async streamModel(modelUrl, options = {}) {
+    const streamId = this.generateStreamId();
+    this.activeStreams.add(streamId);
+    
+    try {
+      // 1. 加载占位几何体
+      const placeholder = await this.loadPlaceholderGeometry();
+      this.dispatchEvent('placeholderReady', { streamId, geometry: placeholder });
+      
+      // 2. 加载低精度版本
+      const lowResModel = await this.loadLODModel(modelUrl, 'low');
+      this.dispatchEvent('lowResReady', { streamId, model: lowResModel });
+      
+      // 3. 加载完整几何体
+      const fullGeometry = await this.loadLODModel(modelUrl, 'medium');
+      this.dispatchEvent('geometryReady', { streamId, geometry: fullGeometry });
+      
+      // 4. 加载基础纹理
+      const baseTextures = await this.loadTextures(modelUrl, 'base');
+      this.dispatchEvent('texturesReady', { streamId, textures: baseTextures });
+      
+      // 5. 加载高清纹理
+      const highResTextures = await this.loadTextures(modelUrl, 'high');
+      this.dispatchEvent('highResReady', { streamId, textures: highResTextures });
+      
+      this.activeStreams.delete(streamId);
+      return { geometry: fullGeometry, textures: highResTextures };
+      
+    } catch (error) {
+      this.activeStreams.delete(streamId);
+      this.dispatchEvent('streamError', { streamId, error });
+      throw error;
     }
-
-    // 按需加载功能模块
-    async loadModule(moduleName) {
-        if (this.loadedModules.has(moduleName)) {
-            return this.loadedModules.get(moduleName);
-        }
-
-        if (this.loadingModules.has(moduleName)) {
-            return this.loadingModules.get(moduleName);
-        }
-
-        const loadPromise = this.importModule(moduleName);
-        this.loadingModules.set(moduleName, loadPromise);
-
-        try {
-            const module = await loadPromise;
-            this.loadedModules.set(moduleName, module);
-            this.loadingModules.delete(moduleName);
-            return module;
-        } catch (error) {
-            this.loadingModules.delete(moduleName);
-            throw error;
-        }
+  }
+  
+  async loadLODModel(modelUrl, lodLevel) {
+    const lodUrl = this.getLODUrl(modelUrl, lodLevel);
+    
+    // 根据LOD级别调整加载参数
+    const loadOptions = this.getLODOptions(lodLevel);
+    
+    return await this.loadResource(lodUrl, loadOptions);
+  }
+  
+  getLODUrl(baseUrl, lodLevel) {
+    const extension = baseUrl.split('.').pop();
+    const baseName = baseUrl.replace(`.${extension}`, '');
+    
+    return `${baseName}_${lodLevel}.${extension}`;
+  }
+  
+  getLODOptions(lodLevel) {
+    const options = {
+      low: {
+        decode: false,
+        progressive: true,
+        maxResolution: 512
+      },
+      medium: {
+        decode: true,
+        progressive: true,
+        maxResolution: 1024
+      },
+      high: {
+        decode: true,
+        progressive: false,
+        maxResolution: 2048
+      }
+    };
+    
+    return options[lodLevel] || options.medium;
+  }
+  
+  cancelStream(streamId) {
+    if (this.activeStreams.has(streamId)) {
+      // 中止相关加载任务
+      this.abortLoadingTasks(streamId);
+      this.activeStreams.delete(streamId);
     }
-
-    async importModule(moduleName) {
-        switch (moduleName) {
-            case 'physics':
-                return import('./physics/physics-engine.js');
-            case 'ai':
-                return import('./ai/navigation-system.js');
-            case 'particles':
-                return import('./effects/particle-system.js');
-            case 'postprocessing':
-                return import('./rendering/post-processing.js');
-            default:
-                throw new Error(`Unknown module: ${moduleName}`);
-        }
-    }
-
-    // 预加载可能需要的模块
-    preloadLikelyModules(userActions) {
-        const likelyModules = this.predictModules(userActions);
-        
-        likelyModules.forEach(moduleName => {
-            if (!this.loadedModules.has(moduleName) && 
-                !this.loadingModules.has(moduleName)) {
-                this.loadModule(moduleName);
-            }
-        });
-    }
-
-    predictModules(userActions) {
-        const predictions = new Set();
-        
-        if (userActions.includes('move')) {
-            predictions.add('physics');
-        }
-        
-        if (userActions.includes('interact')) {
-            predictions.add('ai');
-        }
-        
-        if (userActions.includes('shoot')) {
-            predictions.add('particles');
-        }
-
-        return Array.from(predictions);
-    }
-}
-```
-
-### 路由级代码分割
-```javascript
-class RouteBasedLoader {
-    constructor(routes) {
-        this.routes = routes;
-        this.preloadedRoutes = new Set();
-        this.setupRoutePreloading();
-    }
-
-    setupRoutePreloading() {
-        // 预加载可见区域的路线
-        this.preloadVisibleRoutes();
-        
-        // 监听路由变化
-        window.addEventListener('popstate', () => {
-            this.handleRouteChange();
-        });
-    }
-
-    preloadVisibleRoutes() {
-        const visibleRoutes = this.getVisibleRoutes();
-        
-        visibleRoutes.forEach(route => {
-            if (!this.preloadedRoutes.has(route)) {
-                this.preloadRoute(route);
-            }
-        });
-    }
-
-    getVisibleRoutes() {
-        // 基于视口和用户行为预测可见路线
-        const routes = [];
-        
-        if (this.isInViewport('main-scene')) {
-            routes.push('main-scene');
-        }
-        
-        if (this.isUserNearPortal()) {
-            routes.push('dungeon-scene');
-        }
-
-        return routes;
-    }
-
-    async loadRoute(routeName) {
-        const route = this.routes[routeName];
-        
-        if (!route) {
-            throw new Error(`Route ${routeName} not found`);
-        }
-
-        // 并行加载路由资源
-        const [scene, textures, models] = await Promise.all([
-            this.loadScene(route.scene),
-            this.loadTextures(route.textures),
-            this.loadModels(route.models)
-        ]);
-
-        return { scene, textures, models };
-    }
-
-    async preloadRoute(routeName) {
-        try {
-            const route = this.routes[routeName];
-            
-            // 只预加载关键资源
-            await Promise.all([
-                this.preloadTextures(route.criticalTextures),
-                this.preloadModels(route.criticalModels)
-            ]);
-            
-            this.preloadedRoutes.add(routeName);
-        } catch (error) {
-            console.warn(`Failed to preload route ${routeName}:`, error);
-        }
-    }
-
-    async loadScene(sceneConfig) {
-        const loader = new THREE.ObjectLoader();
-        return loader.parse(sceneConfig);
-    }
-
-    async loadTextures(textureUrls) {
-        const loader = new THREE.TextureLoader();
-        const promises = textureUrls.map(url => 
-            new Promise((resolve, reject) => {
-                loader.load(url, resolve, null, reject);
-            })
-        );
-        
-        return Promise.all(promises);
-    }
-
-    async loadModels(modelUrls) {
-        const loader = new THREE.GLTFLoader();
-        const promises = modelUrls.map(url =>
-            new Promise((resolve, reject) => {
-                loader.load(url, resolve, null, reject);
-            })
-        );
-        
-        return Promise.all(promises);
-    }
+  }
+  
+  abortLoadingTasks(streamId) {
+    // 实现加载任务中止逻辑
+    console.log(`Aborting loading tasks for stream: ${streamId}`);
+  }
 }
 ```
 
 ## 缓存策略
 
-### 智能缓存系统
+### 多级缓存系统
+
 ```javascript
-class SmartCacheSystem {
-    constructor() {
-        this.caches = new Map();
-        this.setupCaches();
+class MultiLevelCache {
+  constructor() {
+    this.caches = new Map();
+    this.setupCacheLayers();
+  }
+  
+  setupCacheLayers() {
+    // 内存缓存 (短期)
+    this.caches.set('memory', new Map());
+    
+    // Session Storage缓存 (会话级)
+    this.caches.set('session', new SessionStorageCache());
+    
+    // Local Storage缓存 (长期)
+    this.caches.set('local', new LocalStorageCache());
+    
+    // IndexedDB缓存 (大文件)
+    this.caches.set('indexeddb', new IndexedDBCache());
+  }
+  
+  async get(key) {
+    // 按层级查找缓存
+    for (const [layerName, cache] of this.caches) {
+      const value = await cache.get(key);
+      if (value !== undefined) {
+        // 更新其他层级的缓存
+        this.populateUpperLayers(key, value, layerName);
+        return value;
+      }
     }
-
-    setupCaches() {
-        // 内存缓存 - 快速访问
-        this.caches.set('memory', new MemoryCache({
-            maxSize: 50 * 1024 * 1024, // 50MB
-            ttl: 5 * 60 * 1000 // 5分钟
-        }));
-
-        // 磁盘缓存 - 大容量存储
-        this.caches.set('disk', new DiskCache({
-            maxSize: 500 * 1024 * 1024, // 500MB
-            ttl: 24 * 60 * 60 * 1000 // 24小时
-        }));
-
-        // 预取缓存 - 预测性加载
-        this.caches.set('prefetch', new PrefetchCache());
+    
+    return undefined;
+  }
+  
+  async set(key, value, options = {}) {
+    const { ttl, priority } = options;
+    
+    // 设置所有层级的缓存
+    const setPromises = [];
+    
+    for (const [layerName, cache] of this.caches) {
+      // 根据优先级决定缓存到哪些层级
+      if (this.shouldCacheInLayer(layerName, priority)) {
+        setPromises.push(cache.set(key, value, { ttl }));
+      }
     }
-
-    async get(url, options = {}) {
-        // 检查内存缓存
-        let data = await this.caches.get('memory').get(url);
-        if (data) {
-            this.recordCacheHit('memory');
-            return data;
-        }
-
-        // 检查磁盘缓存
-        data = await this.caches.get('disk').get(url);
-        if (data) {
-            this.recordCacheHit('disk');
-            // 回填到内存缓存
-            this.caches.get('memory').set(url, data);
-            return data;
-        }
-
-        // 从网络加载
-        this.recordCacheMiss();
-        data = await this.fetchFromNetwork(url, options);
-        
-        // 缓存到各级存储
-        await this.cacheData(url, data, options);
-        
-        return data;
+    
+    await Promise.all(setPromises);
+  }
+  
+  shouldCacheInLayer(layerName, priority) {
+    const layerPriorities = {
+      'memory': ['high', 'medium', 'low'],
+      'session': ['high', 'medium'],
+      'local': ['high'],
+      'indexeddb': ['high', 'medium']
+    };
+    
+    return layerPriorities[layerName].includes(priority);
+  }
+  
+  async populateUpperLayers(key, value, sourceLayer) {
+    const layers = Array.from(this.caches.keys());
+    const sourceIndex = layers.indexOf(sourceLayer);
+    
+    // 更新上层缓存
+    for (let i = 0; i < sourceIndex; i++) {
+      const layerName = layers[i];
+      await this.caches.get(layerName).set(key, value);
     }
-
-    async cacheData(url, data, options) {
-        const cachePriority = options.priority || 'medium';
-        
-        // 总是缓存到磁盘
-        await this.caches.get('disk').set(url, data);
-        
-        // 根据优先级决定是否缓存到内存
-        if (cachePriority === 'high') {
-            await this.caches.get('memory').set(url, data);
-        }
-        
-        // 预取相关资源
-        if (options.prefetchRelated) {
-            this.prefetchRelatedResources(url, data);
-        }
+  }
+  
+  async preloadCriticalResources() {
+    const criticalResources = [
+      { key: 'brdfLUT', url: '/textures/brdfLUT.png', priority: 'high' },
+      { key: 'envMap', url: '/textures/environment.hdr', priority: 'high' },
+      { key: 'defaultMaterial', url: '/materials/default.json', priority: 'medium' }
+    ];
+    
+    for (const resource of criticalResources) {
+      const cached = await this.get(resource.key);
+      if (!cached) {
+        const data = await this.fetchResource(resource.url);
+        await this.set(resource.key, data, { priority: resource.priority });
+      }
     }
-
-    async prefetchRelatedResources(url, data) {
-        const relatedUrls = this.extractRelatedResourceUrls(data);
-        
-        relatedUrls.forEach(relatedUrl => {
-            if (!this.caches.get('prefetch').has(relatedUrl)) {
-                this.caches.get('prefetch').prefetch(relatedUrl);
-            }
-        });
-    }
-
-    extractRelatedResourceUrls(data) {
-        const urls = [];
-        
-        if (data.textures) {
-            urls.push(...data.textures);
-        }
-        
-        if (data.geometries) {
-            urls.push(...data.geometries);
-        }
-        
-        if (data.animations) {
-            urls.push(...data.animations);
-        }
-
-        return urls;
-    }
-
-    recordCacheHit(cacheLevel) {
-        // 记录缓存命中统计
-        performance.mark(`cache-hit-${cacheLevel}`);
-    }
-
-    recordCacheMiss() {
-        performance.mark('cache-miss');
-    }
-
-    clearExpired() {
-        this.caches.forEach(cache => cache.clearExpired());
-    }
-
-    getCacheStats() {
-        const stats = {};
-        
-        this.caches.forEach((cache, name) => {
-            stats[name] = cache.getStats();
-        });
-        
-        return stats;
-    }
+  }
 }
 
-class MemoryCache {
-    constructor(options) {
-        this.maxSize = options.maxSize;
-        this.ttl = options.ttl;
-        this.cache = new Map();
-        this.currentSize = 0;
-        this.hits = 0;
-        this.misses = 0;
-    }
-
-    set(key, value) {
-        const size = this.estimateSize(value);
+class SessionStorageCache {
+  constructor() {
+    this.prefix = 'cache_';
+  }
+  
+  async get(key) {
+    try {
+      const item = sessionStorage.getItem(this.prefix + key);
+      if (item) {
+        const { value, expiry } = JSON.parse(item);
         
-        // 如果超过大小限制，清理空间
-        while (this.currentSize + size > this.maxSize && this.cache.size > 0) {
-            this.evictLeastUsed();
-        }
-
-        this.cache.set(key, {
-            value,
-            size,
-            lastAccessed: Date.now(),
-            accessCount: 0
-        });
-        
-        this.currentSize += size;
-    }
-
-    get(key) {
-        const item = this.cache.get(key);
-        
-        if (item) {
-            if (Date.now() - item.lastAccessed > this.ttl) {
-                // 已过期
-                this.cache.delete(key);
-                this.currentSize -= item.size;
-                this.misses++;
-                return null;
-            }
-            
-            item.lastAccessed = Date.now();
-            item.accessCount++;
-            this.hits++;
-            return item.value;
-        }
-        
-        this.misses++;
-        return null;
-    }
-
-    evictLeastUsed() {
-        let leastUsedKey = null;
-        let minScore = Infinity;
-
-        for (const [key, item] of this.cache) {
-            const score = this.calculateEvictionScore(item);
-            if (score < minScore) {
-                minScore = score;
-                leastUsedKey = key;
-            }
-        }
-
-        if (leastUsedKey) {
-            const item = this.cache.get(leastUsedKey);
-            this.currentSize -= item.size;
-            this.cache.delete(leastUsedKey);
-        }
-    }
-
-    calculateEvictionScore(item) {
-        const age = Date.now() - item.lastAccessed;
-        const frequency = 1 / (item.accessCount + 1); // 避免除零
-        return age * frequency;
-    }
-
-    estimateSize(value) {
-        // 简单的大小估算
-        if (value instanceof THREE.BufferGeometry) {
-            return this.estimateGeometrySize(value);
-        } else if (value instanceof THREE.Texture) {
-            return this.estimateTextureSize(value);
+        if (!expiry || Date.now() < expiry) {
+          return value;
         } else {
-            return JSON.stringify(value).length;
+          this.delete(key);
         }
+      }
+    } catch (error) {
+      console.warn('SessionStorage cache get error:', error);
     }
-
-    getStats() {
-        return {
-            size: this.currentSize,
-            items: this.cache.size,
-            hitRate: this.hits / (this.hits + this.misses) || 0
-        };
+    
+    return undefined;
+  }
+  
+  async set(key, value, options = {}) {
+    try {
+      const item = {
+        value,
+        expiry: options.ttl ? Date.now() + options.ttl : null
+      };
+      
+      sessionStorage.setItem(this.prefix + key, JSON.stringify(item));
+    } catch (error) {
+      console.warn('SessionStorage cache set error:', error);
     }
+  }
+  
+  delete(key) {
+    try {
+      sessionStorage.removeItem(this.prefix + key);
+    } catch (error) {
+      console.warn('SessionStorage cache delete error:', error);
+    }
+  }
 }
 ```
 
-## 网络优化
+### 智能缓存策略
 
-### 资源压缩与优化
 ```javascript
-class ResourceCompressor {
-    constructor() {
-        this.supportedFormats = this.detectSupportedFormats();
+class IntelligentCache {
+  constructor() {
+    this.accessPatterns = new Map();
+    this.cacheDecisions = new Map();
+    this.setupLearning();
+  }
+  
+  setupLearning() {
+    // 收集访问模式数据
+    this.collectAccessPatterns();
+    
+    // 基于历史数据做出缓存决策
+    this.analyzePatterns();
+  }
+  
+  collectAccessPatterns() {
+    // 监控资源访问频率和时间模式
+    const observer = new PerformanceObserver((list) => {
+      list.getEntries().forEach(entry => {
+        this.recordResourceAccess(entry.name, entry);
+      });
+    });
+    
+    observer.observe({ entryTypes: ['resource'] });
+  }
+  
+  recordResourceAccess(url, metrics) {
+    const pattern = this.accessPatterns.get(url) || {
+      accessCount: 0,
+      lastAccess: 0,
+      averageSize: 0,
+      accessTimes: []
+    };
+    
+    pattern.accessCount++;
+    pattern.lastAccess = Date.now();
+    pattern.averageSize = (pattern.averageSize * (pattern.accessCount - 1) + metrics.transferSize) / pattern.accessCount;
+    pattern.accessTimes.push(Date.now());
+    
+    this.accessPatterns.set(url, pattern);
+  }
+  
+  analyzePatterns() {
+    // 分析访问模式，制定缓存策略
+    for (const [url, pattern] of this.accessPatterns) {
+      const strategy = this.determineCachingStrategy(pattern);
+      this.cacheDecisions.set(url, strategy);
     }
-
-    detectSupportedFormats() {
-        const formats = {
-            draco: false,
-            basis: false,
-            ktx2: false
-        };
-
-        // 检测 Draco 压缩支持
-        if (THREE.DRACOLoader) {
-            formats.draco = true;
-        }
-
-        // 检测 Basis 压缩支持
-        if (THREE.BasisTextureLoader) {
-            formats.basis = true;
-        }
-
-        return formats;
+  }
+  
+  determineCachingStrategy(pattern) {
+    const now = Date.now();
+    const oneDay = 24 * 60 * 60 * 1000;
+    
+    // 基于访问频率和新鲜度要求制定策略
+    if (pattern.accessCount > 10 && (now - pattern.lastAccess) < oneDay) {
+      return {
+        cache: true,
+        layer: 'memory',
+        ttl: 30 * 60 * 1000, // 30分钟
+        preload: true
+      };
+    } else if (pattern.accessCount > 5) {
+      return {
+        cache: true,
+        layer: 'session',
+        ttl: 2 * 60 * 60 * 1000, // 2小时
+        preload: false
+      };
+    } else {
+      return {
+        cache: false,
+        preload: false
+      };
     }
-
-    async compressGeometry(geometry, options = {}) {
-        const format = options.format || 'draco';
-        
-        switch (format) {
-            case 'draco':
-                return await this.compressWithDraco(geometry, options);
-            case 'meshopt':
-                return await this.compressWithMeshopt(geometry, options);
-            default:
-                return geometry;
-        }
-    }
-
-    async compressWithDraco(geometry, options) {
-        if (!this.supportedFormats.draco) {
-            console.warn('Draco compression not supported');
-            return geometry;
-        }
-
-        const dracoLoader = new THREE.DRACOLoader();
-        dracoLoader.setDecoderPath('path/to/draco/decoder/');
-
-        return new Promise((resolve) => {
-            // 简化几何体用于压缩
-            const simplified = this.simplifyGeometry(geometry, options.quality);
-            
-            // 这里应该是实际的 Draco 压缩逻辑
-            // 实际实现需要 Draco 编码器
-            resolve(simplified);
-        });
-    }
-
-    simplifyGeometry(geometry, quality = 0.5) {
-        const simplified = geometry.clone();
-        
-        // 简化顶点数据
-        if (quality < 0.3) {
-            this.aggressiveSimplify(simplified);
-        } else if (quality < 0.7) {
-            this.moderateSimplify(simplified);
-        }
-        
-        return simplified;
-    }
-
-    async compressTexture(texture, options = {}) {
-        const format = options.format || 'basis';
-        
-        switch (format) {
-            case 'basis':
-                return await this.compressWithBasis(texture, options);
-            case 'ktx2':
-                return await this.compressWithKtx2(texture, options);
-            default:
-                return texture;
-        }
-    }
-
-    getOptimalFormat(resourceType, capabilities) {
-        if (resourceType === 'geometry') {
-            return capabilities.draco ? 'draco' : 'none';
-        }
-        
-        if (resourceType === 'texture') {
-            if (capabilities.basis) return 'basis';
-            if (capabilities.ktx2) return 'ktx2';
-            return 'webp';
-        }
-        
-        return 'none';
-    }
-
-    createFallbackChain(primaryFormat, resourceType) {
-        const fallbacks = {
-            draco: ['meshopt', 'none'],
-            basis: ['ktx2', 'webp', 'jpg'],
-            ktx2: ['basis', 'webp', 'jpg']
-        };
-        
-        return fallbacks[primaryFormat] || ['none'];
-    }
+  }
+  
+  shouldPreload(url) {
+    const decision = this.cacheDecisions.get(url);
+    return decision ? decision.preload : false;
+  }
+  
+  getCacheStrategy(url) {
+    return this.cacheDecisions.get(url) || { cache: false, preload: false };
+  }
 }
 ```
 
-### 自适应比特率加载
+## 加载状态与用户体验
+
+### 进度反馈系统
+
 ```javascript
-class AdaptiveBitrateLoader {
-    constructor() {
-        this.networkMonitor = new NetworkMonitor();
-        this.qualityLevels = ['low', 'medium', 'high', 'ultra'];
-        this.currentQuality = 'medium';
+class LoadingProgress {
+  constructor() {
+    this.totalResources = 0;
+    this.loadedResources = 0;
+    this.totalBytes = 0;
+    this.loadedBytes = 0;
+    this.phases = new Map();
+    this.listeners = new Set();
+  }
+  
+  addResource(resource) {
+    this.totalResources++;
+    this.totalBytes += resource.estimatedSize || 0;
+    
+    this.updateProgress();
+  }
+  
+  resourceLoaded(resource, actualSize) {
+    this.loadedResources++;
+    this.loadedBytes += actualSize || resource.estimatedSize || 0;
+    
+    this.updateProgress();
+  }
+  
+  updateProgress() {
+    const progress = {
+      resources: {
+        loaded: this.loadedResources,
+        total: this.totalResources,
+        percent: (this.loadedResources / this.totalResources) * 100
+      },
+      bytes: {
+        loaded: this.loadedBytes,
+        total: this.totalBytes,
+        percent: (this.loadedBytes / this.totalBytes) * 100
+      },
+      overall: this.calculateOverallProgress()
+    };
+    
+    this.notifyListeners(progress);
+  }
+  
+  calculateOverallProgress() {
+    // 综合考虑资源数量和字节大小
+    const resourceProgress = this.loadedResources / this.totalResources;
+    const byteProgress = this.loadedBytes / this.totalBytes;
+    
+    // 资源数量占60%权重，字节大小占40%
+    return (resourceProgress * 0.6 + byteProgress * 0.4) * 100;
+  }
+  
+  addPhase(phaseName, weight) {
+    this.phases.set(phaseName, {
+      weight: weight,
+      progress: 0
+    });
+  }
+  
+  updatePhaseProgress(phaseName, progress) {
+    const phase = this.phases.get(phaseName);
+    if (phase) {
+      phase.progress = progress;
+      this.updateProgress();
     }
-
-    async loadAdaptiveResource(resourceUrl, resourceType) {
-        const networkConditions = await this.networkMonitor.getConditions();
-        const targetQuality = this.selectQualityLevel(networkConditions, resourceType);
-        
-        try {
-            return await this.loadResourceWithQuality(resourceUrl, targetQuality);
-        } catch (error) {
-            // 降级到较低质量
-            return await this.loadWithFallback(resourceUrl, targetQuality);
-        }
-    }
-
-    selectQualityLevel(networkConditions, resourceType) {
-        const { bandwidth, latency, packetLoss } = networkConditions;
-        
-        let qualityIndex = 1; // 默认中等质量
-        
-        if (bandwidth > 5000 && latency < 50) { // 5Mbps, 50ms
-            qualityIndex = 3; // ultra
-        } else if (bandwidth > 2000 && latency < 100) { // 2Mbps, 100ms
-            qualityIndex = 2; // high
-        } else if (bandwidth < 500 || latency > 300) { // 500Kbps, 300ms
-            qualityIndex = 0; // low
-        }
-
-        // 根据资源类型调整
-        if (resourceType === 'texture' && bandwidth < 1000) {
-            qualityIndex = Math.max(0, qualityIndex - 1);
-        }
-
-        return this.qualityLevels[qualityIndex];
-    }
-
-    async loadResourceWithQuality(resourceUrl, quality) {
-        const qualityUrl = this.getQualitySpecificUrl(resourceUrl, quality);
-        
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), this.getTimeoutForQuality(quality));
-        
-        try {
-            const response = await fetch(qualityUrl, {
-                signal: controller.signal
-            });
-            
-            clearTimeout(timeoutId);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-            
-            return await this.processResponse(response, quality);
-        } catch (error) {
-            clearTimeout(timeoutId);
-            throw error;
-        }
-    }
-
-    getQualitySpecificUrl(baseUrl, quality) {
-        const qualitySuffixes = {
-            low: '_512',
-            medium: '_1024', 
-            high: '_2048',
-            ultra: '_4096'
-        };
-        
-        return baseUrl.replace(/(\.\w+)$/, `${qualitySuffixes[quality]}$1`);
-    }
-
-    getTimeoutForQuality(quality) {
-        const timeouts = {
-            low: 10000,    // 10秒
-            medium: 15000, // 15秒
-            high: 20000,   // 20秒
-            ultra: 30000   // 30秒
-        };
-        
-        return timeouts[quality];
-    }
-
-    async loadWithFallback(resourceUrl, failedQuality) {
-        const currentIndex = this.qualityLevels.indexOf(failedQuality);
-        
-        for (let i = currentIndex - 1; i >= 0; i--) {
-            const fallbackQuality = this.qualityLevels[i];
-            
-            try {
-                console.log(`Trying fallback quality: ${fallbackQuality}`);
-                return await this.loadResourceWithQuality(resourceUrl, fallbackQuality);
-            } catch (error) {
-                console.warn(`Fallback ${fallbackQuality} also failed:`, error);
-                continue;
-            }
-        }
-        
-        throw new Error('All quality levels failed');
-    }
+  }
+  
+  addListener(callback) {
+    this.listeners.add(callback);
+  }
+  
+  removeListener(callback) {
+    this.listeners.delete(callback);
+  }
+  
+  notifyListeners(progress) {
+    this.listeners.forEach(callback => {
+      try {
+        callback(progress);
+      } catch (error) {
+        console.error('Progress listener error:', error);
+      }
+    });
+  }
 }
 
-class NetworkMonitor {
-    constructor() {
-        this.conditions = {
-            bandwidth: 0,
-            latency: 0,
-            packetLoss: 0
-        };
-        
-        this.startMonitoring();
+class LoadingUI {
+  constructor() {
+    this.progressSystem = new LoadingProgress();
+    this.setupUI();
+    this.setupEventListeners();
+  }
+  
+  setupUI() {
+    this.container = document.createElement('div');
+    this.container.className = 'loading-ui';
+    
+    this.container.innerHTML = `
+      <div class="loading-overlay">
+        <div class="loading-content">
+          <div class="spinner"></div>
+          <div class="progress-text">Loading...</div>
+          <div class="progress-bar">
+            <div class="progress-fill"></div>
+          </div>
+          <div class="phase-info"></div>
+          <div class="tip-container"></div>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(this.container);
+    
+    this.progressFill = this.container.querySelector('.progress-fill');
+    this.progressText = this.container.querySelector('.progress-text');
+    this.phaseInfo = this.container.querySelector('.phase-info');
+    this.tipContainer = this.container.querySelector('.tip-container');
+  }
+  
+  setupEventListeners() {
+    this.progressSystem.addListener(this.updateUI.bind(this));
+  }
+  
+  updateUI(progress) {
+    // 更新进度条
+    this.progressFill.style.width = `${progress.overall}%`;
+    
+    // 更新文本
+    this.progressText.textContent = 
+      `Loading... ${Math.round(progress.overall)}%`;
+    
+    // 更新阶段信息
+    this.updatePhaseInfo();
+    
+    // 显示加载提示
+    this.showLoadingTip(progress.overall);
+    
+    // 加载完成时隐藏UI
+    if (progress.overall >= 100) {
+      this.hide();
     }
-
-    async startMonitoring() {
-        // 使用 Navigation Timing API
-        this.analyzeNavigationTiming();
-        
-        // 使用 Resource Timing API
-        this.analyzeResourceTiming();
-        
-        // 定期测试网络条件
-        setInterval(() => this.performNetworkTest(), 30000);
+  }
+  
+  updatePhaseInfo() {
+    const phases = Array.from(this.progressSystem.phases.entries());
+    const phaseText = phases.map(([name, data]) => 
+      `${name}: ${Math.round(data.progress * 100)}%`
+    ).join(' | ');
+    
+    this.phaseInfo.textContent = phaseText;
+  }
+  
+  showLoadingTip(progress) {
+    const tips = [
+      "Optimizing 3D models for your device...",
+      "Loading high-resolution textures...",
+      "Preparing interactive elements...",
+      "Almost ready to explore..."
+    ];
+    
+    const tipIndex = Math.floor(progress / (100 / tips.length));
+    if (tipIndex < tips.length) {
+      this.tipContainer.textContent = tips[tipIndex];
     }
-
-    analyzeNavigationTiming() {
-        if (window.performance && performance.getEntriesByType) {
-            const navigation = performance.getEntriesByType('navigation')[0];
-            
-            if (navigation) {
-                this.conditions.latency = navigation.domainLookupEnd - navigation.domainLookupStart;
-                
-                // 估算带宽
-                const totalBytes = navigation.transferSize || 0;
-                const loadTime = navigation.responseEnd - navigation.requestStart;
-                
-                if (loadTime > 0) {
-                    this.conditions.bandwidth = (totalBytes * 8) / (loadTime / 1000); // bits per second
-                }
-            }
-        }
-    }
-
-    async performNetworkTest() {
-        const testUrl = '/network-test?size=100000'; // 100KB 测试文件
-        const startTime = performance.now();
-        
-        try {
-            const response = await fetch(testUrl, { cache: 'no-store' });
-            const endTime = performance.now();
-            
-            const duration = endTime - startTime;
-            const size = Number(response.headers.get('content-length')) || 100000;
-            
-            this.conditions.bandwidth = (size * 8) / (duration / 1000);
-            this.conditions.latency = duration;
-            
-        } catch (error) {
-            console.warn('Network test failed:', error);
-        }
-    }
-
-    getConditions() {
-        return { ...this.conditions };
-    }
+  }
+  
+  hide() {
+    this.container.style.opacity = '0';
+    
+    setTimeout(() => {
+      this.container.style.display = 'none';
+    }, 500);
+  }
+  
+  show() {
+    this.container.style.display = 'block';
+    this.container.style.opacity = '1';
+  }
 }
 ```
 
-## 性能监控与优化
+### 错误处理与降级
 
-### 加载性能监控
+```javascript
+class ErrorHandler {
+  constructor() {
+    this.fallbackStrategies = new Map();
+    this.setupFallbacks();
+  }
+  
+  setupFallbacks() {
+    // 模型加载失败时的降级策略
+    this.fallbackStrategies.set('model', {
+      levels: [
+        {
+          condition: (error) => error.status === 404,
+          action: async (url) => this.loadPlaceholderModel()
+        },
+        {
+          condition: (error) => error.message.includes('format'),
+          action: async (url) => this.convertModelFormat(url)
+        },
+        {
+          condition: () => true, // 默认降级
+          action: async (url) => this.loadSimplifiedModel(url)
+        }
+      ]
+    });
+    
+    // 纹理加载失败时的降级策略
+    this.fallbackStrategies.set('texture', {
+      levels: [
+        {
+          condition: (error) => error.status === 404,
+          action: async (url) => this.generateProceduralTexture()
+        },
+        {
+          condition: (error) => error.message.includes('memory'),
+          action: async (url) => this.loadLowResTexture(url)
+        }
+      ]
+    });
+  }
+  
+  async handleLoadError(error, resourceType, url, context) {
+    console.warn(`Load error for ${resourceType}:`, error);
+    
+    const strategy = this.fallbackStrategies.get(resourceType);
+    if (!strategy) {
+      throw error; // 没有降级策略，重新抛出错误
+    }
+    
+    // 找到合适的降级策略
+    for (const level of strategy.levels) {
+      if (level.condition(error)) {
+        try {
+          const fallbackResult = await level.action(url, context);
+          this.recordFallbackUsage(resourceType, url, level);
+          return fallbackResult;
+        } catch (fallbackError) {
+          console.error('Fallback also failed:', fallbackError);
+          continue;
+        }
+      }
+    }
+    
+    // 所有降级策略都失败
+    throw error;
+  }
+  
+  async loadPlaceholderModel() {
+    // 返回基础几何体作为占位符
+    return new THREE.BoxGeometry(1, 1, 1);
+  }
+  
+  async loadSimplifiedModel(originalUrl) {
+    // 尝试加载简化版本的模型
+    const simplifiedUrl = originalUrl.replace('.glb', '_simple.glb');
+    
+    try {
+      return await this.loadResource(simplifiedUrl);
+    } catch (error) {
+      return this.loadPlaceholderModel();
+    }
+  }
+  
+  async generateProceduralTexture() {
+    // 生成程序化纹理作为降级
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 256;
+    
+    const context = canvas.getContext('2d');
+    const gradient = context.createLinearGradient(0, 0, 256, 256);
+    gradient.addColorStop(0, '#888888');
+    gradient.addColorStop(1, '#cccccc');
+    
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, 256, 256);
+    
+    const texture = new THREE.Texture(canvas);
+    texture.needsUpdate = true;
+    
+    return texture;
+  }
+  
+  recordFallbackUsage(resourceType, url, fallbackLevel) {
+    // 记录降级使用情况，用于分析和优化
+    const metric = {
+      type: resourceType,
+      url,
+      fallback: fallbackLevel.condition.toString(),
+      timestamp: Date.now()
+    };
+    
+    this.reportMetric('fallback_used', metric);
+  }
+}
+```
+
+## 性能监控与自适应
+
+### 实时性能监控
+
 ```javascript
 class LoadingPerformanceMonitor {
-    constructor() {
-        this.metrics = new Map();
-        this.marks = new Map();
-        this.setupPerformanceObserver();
+  constructor() {
+    this.metrics = {
+      loadTimes: new Map(),
+      resourceSizes: new Map(),
+      cacheHits: 0,
+      cacheMisses: 0,
+      errors: new Map()
+    };
+    
+    this.thresholds = {
+      slowLoadTime: 3000, // 3秒
+      largeResource: 5 * 1024 * 1024, // 5MB
+      errorRate: 0.1 // 10%
+    };
+    
+    this.startMonitoring();
+  }
+  
+  startMonitoring() {
+    // 监听资源加载性能
+    const observer = new PerformanceObserver((list) => {
+      list.getEntries().forEach(entry => {
+        this.recordResourceMetric(entry);
+      });
+    });
+    
+    observer.observe({ entryTypes: ['resource'] });
+    
+    // 监控内存使用
+    this.startMemoryMonitoring();
+  }
+  
+  recordResourceMetric(entry) {
+    const url = entry.name;
+    
+    this.metrics.loadTimes.set(url, entry.duration);
+    this.metrics.resourceSizes.set(url, entry.transferSize);
+    
+    // 检查是否超过阈值
+    if (entry.duration > this.thresholds.slowLoadTime) {
+      this.reportSlowResource(url, entry.duration);
     }
-
-    setupPerformanceObserver() {
-        if ('PerformanceObserver' in window) {
-            // 监控资源加载
-            const resourceObserver = new PerformanceObserver((list) => {
-                list.getEntries().forEach(entry => {
-                    this.recordResourceLoad(entry);
-                });
-            });
-            
-            resourceObserver.observe({ entryTypes: ['resource'] });
-
-            // 监控长任务
-            const longTaskObserver = new PerformanceObserver((list) => {
-                list.getEntries().forEach(entry => {
-                    this.recordLongTask(entry);
-                });
-            });
-            
-            longTaskObserver.observe({ entryTypes: ['longtask'] });
-        }
+    
+    if (entry.transferSize > this.thresholds.largeResource) {
+      this.reportLargeResource(url, entry.transferSize);
     }
-
-    recordResourceLoad(entry) {
-        const resource = {
-            name: entry.name,
-            duration: entry.duration,
-            size: entry.transferSize || 0,
-            type: this.getResourceType(entry.name)
-        };
-
-        this.metrics.set(entry.name, resource);
+  }
+  
+  reportSlowResource(url, duration) {
+    console.warn(`Slow resource load: ${url} took ${duration}ms`);
+    
+    // 触发优化建议
+    this.suggestOptimization(url, 'slow_load', { duration });
+  }
+  
+  reportLargeResource(url, size) {
+    console.warn(`Large resource: ${url} size ${this.formatBytes(size)}`);
+    
+    this.suggestOptimization(url, 'large_size', { size });
+  }
+  
+  suggestOptimization(url, issue, data) {
+    const suggestions = {
+      'slow_load': [
+        'Consider using CDN for better delivery',
+        'Enable compression for this resource',
+        'Implement progressive loading'
+      ],
+      'large_size': [
+        'Optimize resource size',
+        'Use more efficient format',
+        'Implement LOD system'
+      ]
+    };
+    
+    const applicableSuggestions = suggestions[issue] || [];
+    
+    this.dispatchEvent('optimizationSuggested', {
+      url,
+      issue,
+      data,
+      suggestions: applicableSuggestions
+    });
+  }
+  
+  calculateCacheEfficiency() {
+    const total = this.metrics.cacheHits + this.metrics.cacheMisses;
+    return total > 0 ? this.metrics.cacheHits / total : 0;
+  }
+  
+  getPerformanceReport() {
+    return {
+      averageLoadTime: this.calculateAverageLoadTime(),
+      totalResources: this.metrics.loadTimes.size,
+      cacheEfficiency: this.calculateCacheEfficiency(),
+      largeResources: this.findLargeResources(),
+      slowResources: this.findSlowResources()
+    };
+  }
+  
+  calculateAverageLoadTime() {
+    const times = Array.from(this.metrics.loadTimes.values());
+    return times.reduce((sum, time) => sum + time, 0) / times.length;
+  }
+  
+  findLargeResources() {
+    return Array.from(this.metrics.resourceSizes.entries())
+      .filter(([url, size]) => size > this.thresholds.largeResource)
+      .sort((a, b) => b[1] - a[1]);
+  }
+  
+  findSlowResources() {
+    return Array.from(this.metrics.loadTimes.entries())
+      .filter(([url, time]) => time > this.thresholds.slowLoadTime)
+      .sort((a, b) => b[1] - a[1]);
+  }
+  
+  formatBytes(bytes) {
+    const units = ['B', 'KB', 'MB', 'GB'];
+    let size = bytes;
+    let unitIndex = 0;
+    
+    while (size >= 1024 && unitIndex < units.length - 1) {
+      size /= 1024;
+      unitIndex++;
     }
-
-    getResourceType(url) {
-        if (url.includes('.glb') || url.includes('.gltf')) return 'model';
-        if (url.includes('.jpg') || url.includes('.png')) return 'texture';
-        if (url.includes('.js')) return 'script';
-        if (url.includes('.css')) return 'style';
-        return 'other';
-    }
-
-    recordLongTask(entry) {
-        console.warn('Long task detected:', {
-            duration: entry.duration,
-            startTime: entry.startTime
-        });
-    }
-
-    markLoadPhase(phase) {
-        performance.mark(`${phase}-start`);
-        this.marks.set(phase, performance.now());
-    }
-
-    endLoadPhase(phase) {
-        performance.mark(`${phase}-end`);
-        performance.measure(phase, `${phase}-start`, `${phase}-end`);
-    }
-
-    getLoadPhases() {
-        const phases = {};
-        const measures = performance.getEntriesByType('measure');
-        
-        measures.forEach(measure => {
-            phases[measure.name] = measure.duration;
-        });
-        
-        return phases;
-    }
-
-    generateLoadingReport() {
-        const resources = Array.from(this.metrics.values());
-        const phases = this.getLoadPhases();
-        
-        const totalSize = resources.reduce((sum, res) => sum + res.size, 0);
-        const totalDuration = resources.reduce((sum, res) => sum + res.duration, 0);
-        
-        return {
-            summary: {
-                totalResources: resources.length,
-                totalSize,
-                totalDuration,
-                averageLoadTime: totalDuration / resources.length
-            },
-            byType: this.groupByType(resources),
-            slowResources: resources.filter(r => r.duration > 1000),
-            loadPhases: phases
-        };
-    }
-
-    groupByType(resources) {
-        const groups = {};
-        
-        resources.forEach(resource => {
-            if (!groups[resource.type]) {
-                groups[resource.type] = {
-                    count: 0,
-                    totalSize: 0,
-                    totalDuration: 0
-                };
-            }
-            
-            groups[resource.type].count++;
-            groups[resource.type].totalSize += resource.size;
-            groups[resource.type].totalDuration += resource.duration;
-        });
-        
-        return groups;
-    }
+    
+    return `${size.toFixed(1)} ${units[unitIndex]}`;
+  }
 }
 ```

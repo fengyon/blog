@@ -1,605 +1,380 @@
 # 光照模型
 
-## 光照基础概念
+光照模型是 3D 图形学中模拟光线与物体表面交互的数学方法，它决定了物体在场景中的视觉外观。在 Web 3D 开发中，合理的光照模型能够显著增强场景的真实感和沉浸感，是创建逼真视觉效果的关键技术。
 
-### 光线与材质交互
-光照模型描述光线与物体表面材质的相互作用：
-```
-入射光线 → 表面材质 → 反射/折射光线
-        ↓
-    颜色感知
-```
+## 光照模型基础
 
-### 局部光照 vs 全局光照
+光照模型描述了光线如何与材质表面相互作用，包括吸收、反射和透射等物理现象。计算机图形学中的光照模型是对真实光照的近似，平衡计算成本和视觉效果。
+
+特点：
+- 基于物理的简化模型，而非完全物理准确
+- 分离光照计算与材质属性
+- 支持实时渲染的性能要求
+
+示意图 (光线与表面交互)：
 ```
-局部光照：          全局光照：
-只考虑直接光照      考虑所有光线交互
-计算简单           计算复杂
-  光源 → 物体       光源 → 物体 → 其他物体
-                   ↓
-                 环境光照
+入射光线 → 表面 → 反射光线 + 吸收 + 透射
+    ↓        ↓         ↓
+  方向     材质属性    方向/强度
 ```
 
-## 基础光照分量
+## 局部光照与全局光照
 
-### 环境光
-模拟场景中间接光照，提供基础亮度：
+光照模型分为局部光照和全局光照两大类。局部光照只考虑直接光照，全局光照还包含间接光照和光线反弹效果。
+
+特点：
+- 局部光照：计算简单，适合实时渲染
+- 全局光照：效果真实，计算成本高
+- Web 3D 主要使用局部光照模型
+
+示意图对比：
 ```
-环境光照 = 环境光颜色 × 材质环境反射系数
-
-无环境光：    有环境光：
-  ███           ███  
-  █ █           ███
-  ███           ███
-完全黑暗       基础可见
-```
-
-GLSL 实现：
-```glsl
-vec3 ambient = uAmbientLight * uMaterial.ambient;
+局部光照：        全局光照：
+光源 → 表面 → 眼睛    光源 → 表面A → 表面B → 眼睛
+                     ↓
+                   间接光照
 ```
 
-### 漫反射
-Lambertian 反射，光线均匀散射：
+## 环境光照
+
+环境光照模拟场景中的间接光照，为物体提供基础亮度。这是最简单的光照分量，不考虑光线方向。
+
+特点：
+- 恒定照明，无方向性
+- 防止完全黑暗的区域
+- 通常与场景环境贴图结合
+
+环境光计算公式：
 ```
-漫反射强度 = 光颜色 × 材质漫反射系数 × max(0, N·L)
-
-N: 表面法线
-L: 光源方向
-
-光线垂直照射最亮，角度越大越暗
-   N
-   |   L
-   |  /
-   | /
-   |/ 
- 表面
+颜色 = 材质环境色 × 环境光强度
 ```
 
-GLSL 实现：
-```glsl
-vec3 lightDir = normalize(uLightPosition - fragPos);
-float diff = max(dot(normal, lightDir), 0.0);
-vec3 diffuse = uLightColor * uMaterial.diffuse * diff;
+示意图 (环境光效果)：
+```
+无环境光：        有环境光：
+  [暗部全黑]        [暗部可见]
+  /        \       /        \
+ |  暗面   |     |  灰色面  |
+  \        /       \        /
 ```
 
-### 镜面反射
-Phong 模型，产生高光效果：
+## 漫反射光照
+
+漫反射模拟光线在粗糙表面的均匀散射，遵循 Lambert 余弦定律。反射强度与表面法线和光线方向的夹角余弦成正比。
+
+特点：
+- 方向敏感，与观察角度无关
+- 产生柔和的明暗过渡
+- 使用点积计算光照强度
+
+Lambert 定律示意图：
 ```
-镜面反射强度 = 光颜色 × 材质镜面系数 × max(0, R·V)^光泽度
-
-R: 反射光方向
-V: 视线方向
-光泽度: 控制高光范围
-
-   L      R
-    \    /
-     \  /
-      N        V
-表面    \      /
-         \    /
-          \  /
-           \/
-```
-
-GLSL 实现：
-```glsl
-vec3 reflectDir = reflect(-lightDir, normal);
-vec3 viewDir = normalize(uViewPosition - fragPos);
-float spec = pow(max(dot(viewDir, reflectDir), 0.0), uMaterial.shininess);
-vec3 specular = uLightColor * uMaterial.specular * spec;
+表面法线  光线方向
+   ↑       ↗
+   |      /
+   |     /
+   |    /
+   | θ /
+表面-------
+强度 ∝ cos(θ) = 点积(法线, 光线)
 ```
 
-## 经典光照模型
-
-### Lambert 模型
-只包含漫反射分量的简单模型：
-```glsl
-vec3 lambertModel(vec3 normal, vec3 lightDir, vec3 lightColor, vec3 materialDiffuse) {
-    float nDotL = max(dot(normal, lightDir), 0.0);
-    return lightColor * materialDiffuse * nDotL;
-}
+漫反射计算公式：
+```
+强度 = max(点积(法线, 光线方向), 0)
+颜色 = 材质漫反射色 × 光颜色 × 强度
 ```
 
-### Phong 模型
-完整的漫反射+镜面反射模型：
-```glsl
-vec3 phongModel(vec3 normal, vec3 lightDir, vec3 viewDir, vec3 lightColor, 
-                Material material) {
-    // 漫反射
-    float diff = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = lightColor * material.diffuse * diff;
-    
-    // 镜面反射
-    vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular = lightColor * material.specular * spec;
-    
-    return diffuse + specular;
-}
+## 镜面反射光照
+
+镜面反射模拟光线在光滑表面的集中反射，产生高光效果。常见模型包括 Phong 和 Blinn-Phong 模型。
+
+特点：
+- 观察角度敏感
+- 产生明亮的高光点
+- 受表面光滑度影响
+
+镜面反射示意图：
+```
+光线方向  视线方向
+   ↗       ↘
+    \       /
+     \     /
+      \   /
+       \ /
+       表面
+反射方向 = 反射(光线方向, 法线)
+```
+
+### Phong 镜面模型
+
+Phong 模型通过反射方向与视线方向的点积计算高光，再通过指数控制高光集中度。
+
+特点：
+- 直观的物理意义
+- 计算反射方向向量
+- 高光指数控制光泽度
+
+Phong 计算公式：
+```
+反射方向 = 反射(-光线方向, 法线)
+高光强度 = max(点积(反射方向, 视线方向), 0)^光泽度
 ```
 
 ### Blinn-Phong 模型
-改进的 Phong 模型，计算更高效：
+
+Blinn-Phong 使用半角向量替代反射向量，计算更高效且高光更自然，是现代图形 API 的默认模型。
+
+特点：
+- 计算成本低于 Phong 模型
+- 高光过渡更平滑
+- 广泛用于实时渲染
+
+半角向量示意图：
 ```
-Blinn-Phong使用半角向量H：
-镜面反射强度 = 光颜色 × 材质镜面系数 × max(0, N·H)^光泽度
-
-H = normalize(L + V)
-
-   L      V
-    \    /
-     \  /
-      H
-       \
-        N
-```
-
-GLSL 实现：
-```glsl
-vec3 blinnPhongModel(vec3 normal, vec3 lightDir, vec3 viewDir, vec3 lightColor,
-                     Material material) {
-    // 漫反射
-    float diff = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = lightColor * material.diffuse * diff;
-    
-    // 镜面反射 (Blinn-Phong)
-    vec3 halfDir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(normal, halfDir), 0.0), material.shininess);
-    vec3 specular = lightColor * material.specular * spec;
-    
-    return diffuse + specular;
-}
+光线方向  视线方向
+   ↗       ↘
+    \       /
+     \     /
+      \   /
+       \ /
+        H (半角向量)
+法线 →  ↑
 ```
 
-## 完整光照计算
-
-### 单光源光照
-```glsl
-struct Material {
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
-    float shininess;
-};
-
-struct Light {
-    vec3 position;
-    vec3 color;
-    vec3 ambient;
-};
-
-vec3 calculateLight(Light light, Material material, vec3 normal, 
-                   vec3 fragPos, vec3 viewPos) {
-    // 环境光
-    vec3 ambient = light.ambient * material.ambient;
-    
-    // 漫反射
-    vec3 lightDir = normalize(light.position - fragPos);
-    float diff = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = light.color * material.diffuse * diff;
-    
-    // 镜面反射 (Blinn-Phong)
-    vec3 viewDir = normalize(viewPos - fragPos);
-    vec3 halfDir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(normal, halfDir), 0.0), material.shininess);
-    vec3 specular = light.color * material.specular * spec;
-    
-    return ambient + diffuse + specular;
-}
+Blinn-Phong 计算公式：
+```
+半角向量 = 归一化(光线方向 + 视线方向)
+高光强度 = max(点积(法线, 半角向量), 0)^光泽度
 ```
 
-### 多光源支持
-```glsl
-#define MAX_LIGHTS 8
+## 完整光照方程
 
-struct DirectionalLight {
-    vec3 direction;
-    vec3 color;
-    vec3 ambient;
-};
+将各光照分量组合得到完整的光照模型，通常采用环境光、漫反射和镜面反射的加和模型。
 
-struct PointLight {
-    vec3 position;
-    vec3 color;
-    vec3 ambient;
-    float constant;
-    float linear;
-    float quadratic;
-};
-
-struct SpotLight {
-    vec3 position;
-    vec3 direction;
-    vec3 color;
-    vec3 ambient;
-    float cutOff;
-    float outerCutOff;
-    float constant;
-    float linear;
-    float quadratic;
-};
-
-uniform DirectionalLight uDirectionalLights[MAX_LIGHTS];
-uniform PointLight uPointLights[MAX_LIGHTS];
-uniform SpotLight uSpotLights[MAX_LIGHTS];
-uniform int uNumDirectionalLights;
-uniform int uNumPointLights;
-uniform int uNumSpotLights;
+完整 Phong 光照模型：
+```
+最终颜色 = 环境光 + 漫反射 + 镜面反射
+        = 材质环境 × 光环境 
+        + 材质漫反射 × 光颜色 × max(点积(法线, 光线), 0)
+        + 材质镜面 × 光颜色 × max(点积(反射方向, 视线), 0)^光泽度
 ```
 
-## 光源类型实现
+各分量效果示意图：
+```
+环境光：    漫反射：     镜面反射：     组合效果：
+ 均匀灰色    方向明暗     高光亮斑     完整光照
+  [    ]     [亮/暗]     [ 亮斑 ]     [真实感]
+  /    \     /    \      /    \       /    \
+ | 灰   |   | 渐变 |    | 亮点 |     | 综合 |
+  \    /     \    /      \    /       \    /
+```
+
+## 光源类型
+
+不同类型的光源影响光照计算的方式，Web 3D 中常见的光源包括定向光、点光源和聚光灯。
 
 ### 定向光
-模拟无限远光源 (如太阳)：
-```glsl
-vec3 calculateDirectionalLight(DirectionalLight light, Material material,
-                              vec3 normal, vec3 viewDir) {
-    vec3 lightDir = normalize(-light.direction);
-    
-    // 漫反射
-    float diff = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = light.color * material.diffuse * diff;
-    
-    // 镜面反射
-    vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular = light.color * material.specular * spec;
-    
-    // 环境光
-    vec3 ambient = light.ambient * material.ambient;
-    
-    return ambient + diffuse + specular;
-}
+
+定向光模拟无限远处的光源 (如太阳)，所有光线平行且强度不变。
+
+特点：
+- 方向恒定，无位置概念
+- 计算简单高效
+- 适合室外场景
+
+示意图 (定向光)：
+```
+平行光线：
+   ↓↓↓↓↓
+   ↓↓↓↓↓ → 表面
+   ↓↓↓↓↓
+  方向一致
 ```
 
 ### 点光源
-模拟灯泡等放射状光源，支持衰减：
-```
-衰减公式：
-衰减因子 = 1.0 / (常数项 + 线性项×距离 + 二次项×距离²)
 
-光照强度随距离衰减：
-  ● 光源
+点光源从特定位置向所有方向发射光线，强度随距离衰减。
+
+特点：
+- 有明确位置
+- 强度随距离衰减
+- 适合灯泡、蜡烛等效果
+
+示意图 (点光源)：
+```
+  光源
+   ●
   /|\
- / | \  强度递减
+ / | \  光线辐射
 /  |  \
 ```
 
-GLSL 实现：
-```glsl
-vec3 calculatePointLight(PointLight light, Material material, vec3 normal,
-                        vec3 fragPos, vec3 viewDir) {
-    vec3 lightDir = normalize(light.position - fragPos);
-    float distance = length(light.position - fragPos);
-    float attenuation = 1.0 / (light.constant + light.linear * distance + 
-                              light.quadratic * (distance * distance));
-    
-    // 漫反射
-    float diff = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = light.color * material.diffuse * diff;
-    
-    // 镜面反射
-    vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular = light.color * material.specular * spec;
-    
-    // 环境光
-    vec3 ambient = light.ambient * material.ambient;
-    
-    return (ambient + diffuse + specular) * attenuation;
-}
+点光源衰减公式：
+```
+衰减 = 1.0 / (常数 + 线性×距离 + 二次×距离²)
 ```
 
 ### 聚光灯
-模拟手电筒等锥形光源：
+
+聚光灯发射锥形光线，具有位置、方向和锥角限制。
+
+特点：
+- 锥形照明区域
+- 内外锥角控制边缘软化
+- 适合手电筒、车灯效果
+
+示意图 (聚光灯)：
 ```
-聚光灯锥体：
-     光源位置
-      /|\
-     / | \  内锥角
-    /  |  \ 外锥角
-   /---|---\
+  光源
+   ●
+  /|\
+ / | \  照明锥体
+/  |  \
+---θ--- 锥角
 ```
 
-GLSL 实现：
+聚光灯强度计算：
+```
+角度 = 点积(光线方向, 聚光方向)
+强度 = (角度 - 外锥角) / (内锥角 - 外锥角)
+强度 = clamp(强度, 0, 1)
+```
+
+## 法线向量处理
+
+法线向量在光照计算中至关重要，但需要正确处理变换和插值才能获得准确结果。
+
+特点：
+- 必须使用模型矩阵的逆转置矩阵变换
+- 片段着色器中需要重新归一化
+- 支持法线贴图增强细节
+
+法线变换示意图：
+```
+顶点法线 → 模型矩阵逆转置 → 世界空间法线
+   ↓              ↓             ↓
+局部空间       特殊变换       光照计算
+```
+
+法线贴图效果：
+```
+无法线贴图：       有法线贴图：
+  平滑表面          细节凹凸
+  [      ]         [ /\/\ ]
+  /      \         /      \
+ |  平    |       | 凹凸   |
+  \      /         \      /
+```
+
+## 着色频率
+
+着色频率决定光照计算的粒度，影响视觉效果和性能。主要分为逐顶点着色和逐片段着色。
+
+### 逐顶点着色
+
+在顶点着色器中计算光照，结果在三角形内插值。
+
+特点：
+- 计算量小，性能高
+- 细节不足，出现马赫带
+- 适合简单场景或低性能设备
+
+示意图 (逐顶点着色)：
+```
+顶点计算光照 → 插值颜色 → 片段输出
+   v0(红)       渐变        像素
+   / \        红---绿
+ v1(绿)-v2(蓝)  \ /
+                蓝
+```
+
+### 逐片段着色
+
+在片段着色器中为每个像素计算光照。
+
+特点：
+- 视觉效果平滑准确
+- 计算量较大
+- 现代渲染的标准做法
+
+示意图 (逐片段着色)：
+```
+顶点传递数据 → 逐像素计算 → 精确光照
+  法线、位置     每个像素       平滑过渡
+```
+
+## WebGL 中的光照实现
+
+在 WebGL 中实现光照需要精心设计着色器和 JavaScript 代码，合理管理光源参数和材质属性。
+
+顶点着色器示例：
 ```glsl
-vec3 calculateSpotLight(SpotLight light, Material material, vec3 normal,
-                       vec3 fragPos, vec3 viewDir) {
-    vec3 lightDir = normalize(light.position - fragPos);
-    float distance = length(light.position - fragPos);
-    float attenuation = 1.0 / (light.constant + light.linear * distance + 
-                              light.quadratic * (distance * distance));
+attribute vec3 position;
+attribute vec3 normal;
+
+uniform mat4 modelViewProjection;
+uniform mat4 modelMatrix;
+uniform mat3 normalMatrix;
+
+varying vec3 vNormal;
+varying vec3 vPosition;
+
+void main() {
+    gl_Position = modelViewProjection * vec4(position, 1.0);
+    vNormal = normalMatrix * normal;
+    vPosition = vec3(modelMatrix * vec4(position, 1.0));
+}
+```
+
+片段着色器示例：
+```glsl
+varying vec3 vNormal;
+varying vec3 vPosition;
+
+uniform vec3 lightPosition;
+uniform vec3 lightColor;
+uniform vec3 ambientColor;
+uniform vec3 diffuseColor;
+uniform vec3 specularColor;
+uniform float shininess;
+
+void main() {
+    // 向量计算
+    vec3 normal = normalize(vNormal);
+    vec3 lightDir = normalize(lightPosition - vPosition);
+    vec3 viewDir = normalize(-vPosition);
+    vec3 reflectDir = reflect(-lightDir, normal);
     
-    // 聚光强度
-    float theta = dot(lightDir, normalize(-light.direction));
-    float epsilon = light.cutOff - light.outerCutOff;
-    float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
+    // 环境光
+    vec3 ambient = ambientColor * diffuseColor;
     
     // 漫反射
     float diff = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = light.color * material.diffuse * diff;
+    vec3 diffuse = lightColor * diff * diffuseColor;
     
-    // 镜面反射
-    vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular = light.color * material.specular * spec;
+    // 镜面反射 (Blinn-Phong)
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess);
+    vec3 specular = lightColor * spec * specularColor;
     
-    // 环境光
-    vec3 ambient = light.ambient * material.ambient;
-    
-    return (ambient + diffuse + specular) * attenuation * intensity;
+    gl_FragColor = vec4(ambient + diffuse + specular, 1.0);
 }
 ```
 
-## 高级光照技术
+## 性能优化策略
 
-### 法线映射
-使用纹理存储表面细节法线：
-```glsl
-uniform sampler2D uNormalMap;
+光照计算是渲染管线中的性能瓶颈之一，需要采用合适的优化策略。
 
-vec3 calculateNormalFromMap(vec2 texCoords, vec3 normal, vec3 position) {
-    vec3 tangentNormal = texture(uNormalMap, texCoords).xyz * 2.0 - 1.0;
-    
-    // 切线空间计算
-    vec3 Q1 = dFdx(position);
-    vec3 Q2 = dFdy(position);
-    vec2 st1 = dFdx(texCoords);
-    vec2 st2 = dFdy(texCoords);
-    
-    vec3 T = normalize(Q1 * st2.t - Q2 * st1.t);
-    vec3 B = normalize(-Q1 * st2.s + Q2 * st1.s);
-    mat3 TBN = mat3(T, B, normal);
-    
-    return normalize(TBN * tangentNormal);
-}
+特点：
+- 减少光照计算复杂度
+- 使用光照贴图预计算静态光照
+- 限制动态光源数量
+
+优化技术对比：
 ```
-
-### 视差映射
-模拟深度效果：
-```glsl
-uniform sampler2D uDepthMap;
-
-vec2 parallaxMapping(vec2 texCoords, vec3 viewDir) {
-    float height = texture(uDepthMap, texCoords).r;
-    vec2 p = viewDir.xy / viewDir.z * (height * uHeightScale);
-    return texCoords - p;
-}
-```
-
-### 高动态范围
-```glsl
-// 色调映射
-vec3 toneMapping(vec3 hdrColor) {
-    // Reinhard色调映射
-    return hdrColor / (hdrColor + vec3(1.0));
-    
-    // ACES近似
-    // return (hdrColor * (2.51 * hdrColor + 0.03)) / 
-    //        (hdrColor * (2.43 * hdrColor + 0.59) + 0.14);
-}
-```
-
-## 基于物理的渲染
-
-### 微表面模型
-```glsl
-// Cook-Torrance BRDF
-float distributionGGX(vec3 N, vec3 H, float roughness) {
-    float a = roughness * roughness;
-    float a2 = a * a;
-    float NdotH = max(dot(N, H), 0.0);
-    float NdotH2 = NdotH * NdotH;
-
-    float nom = a2;
-    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
-    denom = PI * denom * denom;
-
-    return nom / denom;
-}
-
-float geometrySchlickGGX(float NdotV, float roughness) {
-    float r = (roughness + 1.0);
-    float k = (r * r) / 8.0;
-
-    float nom = NdotV;
-    float denom = NdotV * (1.0 - k) + k;
-
-    return nom / denom;
-}
-
-float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
-    float NdotV = max(dot(N, V), 0.0);
-    float NdotL = max(dot(N, L), 0.0);
-    float ggx2 = geometrySchlickGGX(NdotV, roughness);
-    float ggx1 = geometrySchlickGGX(NdotL, roughness);
-
-    return ggx1 * ggx2;
-}
-
-vec3 fresnelSchlick(float cosTheta, vec3 F0) {
-    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
-}
-```
-
-### 完整 PBR 光照
-```glsl
-vec3 calculatePBR(Material material, vec3 normal, vec3 viewDir, 
-                 vec3 lightDir, vec3 lightColor, vec3 radiance) {
-    vec3 H = normalize(viewDir + lightDir);
-    
-    // Cook-Torrance BRDF
-    float NDF = distributionGGX(normal, H, material.roughness);
-    float G = geometrySmith(normal, viewDir, lightDir, material.roughness);
-    vec3 F = fresnelSchlick(max(dot(H, viewDir), 0.0), material.F0);
-    
-    vec3 numerator = NDF * G * F;
-    float denominator = 4.0 * max(dot(normal, viewDir), 0.0) * max(dot(normal, lightDir), 0.0);
-    vec3 specular = numerator / max(denominator, 0.001);
-    
-    vec3 kS = F;
-    vec3 kD = vec3(1.0) - kS;
-    kD *= 1.0 - material.metallic;
-    
-    float NdotL = max(dot(normal, lightDir), 0.0);
-    
-    return (kD * material.albedo / PI + specular) * radiance * NdotL;
-}
-```
-
-## 光照优化技术
-
-### 光照计算优化
-```glsl
-// 1. 提前计算常用值
-vec3 calculateOptimizedLight(Light light, Material material, vec3 normal, 
-                            vec3 fragPos, vec3 viewPos) {
-    vec3 lightVec = light.position - fragPos;
-    float distance = length(lightVec);
-    vec3 lightDir = lightVec / distance; // 避免重复归一化
-    
-    // 2. 使用近似函数
-    float attenuation = 1.0 / (distance * distance);
-    
-    // 3. 分支优化
-    float nDotL = dot(normal, lightDir);
-    if (nDotL <= 0.0) {
-        return vec3(0.0); // 背面直接返回
-    }
-    
-    // 继续计算...
-}
-```
-
-### 延迟着色
-```glsl
-// G-Buffer结构
-layout(location = 0) out vec4 gPosition;
-layout(location = 1) out vec4 gNormal;
-layout(location = 2) out vec4 gAlbedo;
-layout(location = 3) out vec4 gMaterial;
-
-void main() {
-    // 存储几何信息到G-Buffer
-    gPosition = vec4(fragPos, 1.0);
-    gNormal = vec4(normalize(normal), 1.0);
-    gAlbedo.rgb = texture(uAlbedoMap, texCoords).rgb;
-    gMaterial.r = material.roughness;
-    gMaterial.g = material.metallic;
-}
-```
-
-## 实时阴影技术
-
-### 阴影映射基础
-```glsl
-// 阴影计算
-float calculateShadow(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir) {
-    // 透视除法
-    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-    projCoords = projCoords * 0.5 + 0.5;
-    
-    float closestDepth = texture(uShadowMap, projCoords.xy).r;
-    float currentDepth = projCoords.z;
-    
-    // 阴影比较
-    float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
-    return shadow;
-}
-```
-
-### 百分比渐进软阴影
-```glsl
-float calculatePCFShadow(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir) {
-    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-    projCoords = projCoords * 0.5 + 0.5;
-    
-    float shadow = 0.0;
-    vec2 texelSize = 1.0 / textureSize(uShadowMap, 0);
-    
-    for(int x = -1; x <= 1; ++x) {
-        for(int y = -1; y <= 1; ++y) {
-            float pcfDepth = texture(uShadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
-            shadow += currentDepth - uShadowBias > pcfDepth ? 1.0 : 0.0;
-        }
-    }
-    shadow /= 9.0;
-    
-    return shadow;
-}
-```
-
-## JavaScript 端光照设置
-
-### 光照数据管理
-```javascript
-class LightManager {
-    constructor(gl, program) {
-        this.gl = gl;
-        this.program = program;
-        this.lights = [];
-    }
-    
-    addDirectionalLight(direction, color, ambient) {
-        this.lights.push({
-            type: 'directional',
-            direction: direction,
-            color: color,
-            ambient: ambient
-        });
-    }
-    
-    addPointLight(position, color, ambient, constant = 1.0, linear = 0.09, quadratic = 0.032) {
-        this.lights.push({
-            type: 'point',
-            position: position,
-            color: color,
-            ambient: ambient,
-            constant: constant,
-            linear: linear,
-            quadratic: quadratic
-        });
-    }
-    
-    updateShaderUniforms() {
-        let dirCount = 0, pointCount = 0, spotCount = 0;
-        
-        this.lights.forEach((light, index) => {
-            const prefix = this.getLightUniformPrefix(light.type, index);
-            
-            if (light.type === 'directional') {
-                this.setUniform3f(`${prefix}.direction`, light.direction);
-                dirCount++;
-            } else if (light.type === 'point') {
-                this.setUniform3f(`${prefix}.position`, light.position);
-                this.setUniform1f(`${prefix}.constant`, light.constant);
-                this.setUniform1f(`${prefix}.linear`, light.linear);
-                this.setUniform1f(`${prefix}.quadratic`, light.quadratic);
-                pointCount++;
-            }
-            
-            this.setUniform3f(`${prefix}.color`, light.color);
-            this.setUniform3f(`${prefix}.ambient`, light.ambient);
-        });
-        
-        this.gl.uniform1i(this.gl.getUniformLocation(this.program, 'uNumDirectionalLights'), dirCount);
-        this.gl.uniform1i(this.gl.getUniformLocation(this.program, 'uNumPointLights'), pointCount);
-        this.gl.uniform1i(this.gl.getUniformLocation(this.program, 'uNumSpotLights'), spotCount);
-    }
-    
-    getLightUniformPrefix(type, index) {
-        const prefixes = {
-            directional: 'uDirectionalLights',
-            point: 'uPointLights',
-            spot: 'uSpotLights'
-        };
-        return `${prefixes[type]}[${index}]`;
-    }
-    
-    setUniform3f(name, value) {
-        const location = this.gl.getUniformLocation(this.program, name);
-        this.gl.uniform3f(location, value[0], value[1], value[2]);
-    }
-}
+完整逐像素光照 → 简化光照模型 → 光照贴图 + 球谐光照
+   高质量          平衡质量性能       高性能静态场景
+   ↓               ↓               ↓
+计算密集        实时友好          预计算为主
 ```

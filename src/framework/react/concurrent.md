@@ -6,7 +6,7 @@ React 19 引入了强大的 Concurrent (并发) 特性，让应用能够保持�
 
 ## 核心并发 API
 
-### 1. use Hook
+### use Hook
 
 `use` 是一个新的 React Hook，用于读取类似 Promise 或 context 的资源值。
 
@@ -48,7 +48,7 @@ function App() {
 }
 ```
 
-### 2. Suspense
+### Suspense
 
 Suspense 允许组件在等待异步操作时“暂停”渲染，并显示降级 UI。
 
@@ -105,7 +105,7 @@ function Gallery() {
 }
 ```
 
-### 3. useDeferredValue
+### useDeferredValue
 
 `useDeferredValue` 返回一个延迟更新的值，用于延迟更新不太紧急的部分。
 
@@ -152,7 +152,7 @@ function expensiveSearch(query) {
 }
 ```
 
-### 4. startTransition
+### startTransition
 
 `startTransition` 用于将状态更新标记为非紧急过渡更新。
 
@@ -215,7 +215,7 @@ function handleUrgentAction() {
 }
 ```
 
-### 5. useTransition
+### useTransition
 
 `useTransition` 返回一个过渡状态和启动函数，用于跟踪过渡的进行状态。
 

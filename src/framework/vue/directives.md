@@ -131,7 +131,7 @@ const myDirective = {
 
 ## 实用自定义指令示例
 
-### 1。点击外部关闭指令
+### 点击外部关闭指令
 
 ```vue
 <template>
@@ -172,7 +172,7 @@ const closeDropdown = () => {
 </script>
 ```
 
-### 2。权限控制指令
+### 权限控制指令
 
 ```vue
 <template>
@@ -208,7 +208,7 @@ const vPermission = {
 </script>
 ```
 
-### 3。图片懒加载指令
+### 图片懒加载指令
 
 ```vue
 <template>
@@ -275,7 +275,7 @@ const vLazyLoad = {
 </style>
 ```
 
-### 4。复制到剪贴板指令
+### 复制到剪贴板指令
 
 ```vue
 <template>

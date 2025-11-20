@@ -30,6 +30,10 @@ const nav: ThemeConfig['nav'] = [
       { text: 'DOM', link: '/basic/dom/intro' },
       { text: 'BOM', link: '/basic/bom/engine' },
       { text: 'node', link: '/basic/node/intro' },
+      {
+        text: '算法',
+        link: '/basic/algorithm/intro',
+      },
     ],
   },
   {
@@ -69,7 +73,7 @@ const nav: ThemeConfig['nav'] = [
         text: '代码质量',
         link: '/engineering/coding/rule',
       },
-      { text: '性能与安全', link: '/engineering/performance' },
+      { text: '性能优化', link: '/engineering/performance/why' },
       {
         text: 'SEO',
         link: '/engineering/seo/basic',
@@ -89,7 +93,7 @@ const nav: ThemeConfig['nav'] = [
         link: '/full-stack/network/http',
       },
       {
-        text: '后端框架',
+        text: 'node 后端',
         link: '/full-stack/framework/node',
       },
       {
@@ -98,7 +102,7 @@ const nav: ThemeConfig['nav'] = [
       },
       {
         text: '数据库',
-        link: '/full-stack/database/mysql',
+        link: '/full-stack/database/intro',
       },
       {
         text: '运维',
@@ -149,13 +153,14 @@ const nav: ThemeConfig['nav'] = [
         link: '/special/mobile/basic/intro',
       },
       {
+        text: 'Electron',
+        link: '/special/electron/intro',
+      },
+      {
         text: '命令行开发',
         link: '/special/cli/intro',
       },
-      {
-        text: '算法',
-        link: '/special/algorithm/intro',
-      },
+      { text: 'Web 安全', link: '/special/security/intro' },
     ],
   },
   {
@@ -164,15 +169,15 @@ const nav: ThemeConfig['nav'] = [
     items: [
       {
         text: 'WebAssembly',
-        link: '/leading/webassembly',
+        link: '/leading/webassembly/basic',
       },
       {
         text: 'AI & Web',
-        link: '/leading/ai-web',
+        link: '/leading/ai-web/intro',
       },
       {
         text: 'Web3',
-        link: '/leading/web3',
+        link: '/leading/web3/intro',
       },
     ],
   },
@@ -667,9 +672,75 @@ export const sidebar: ThemeConfig['sidebar'] = {
       items: [
         { text: 'node 简介', link: '/basic/node/intro' },
         { text: 'node 安装与配置', link: '/basic/node/installation' },
+        { text: 'node 全局变量', link: '/basic/node/vars' },
         { text: 'node 事件循环', link: '/basic/node/event-loop' },
         { text: 'node 常用模块', link: '/basic/node/modules' },
         { text: 'npm 包管理器', link: '/basic/node/npm' },
+      ],
+    },
+    {
+      text: '算法',
+      items: [
+        {
+          text: '算法入门',
+          link: '/basic/algorithm/intro',
+        },
+        {
+          text: '复杂度分析',
+          link: '/basic/algorithm/complexity',
+        },
+        {
+          text: '数据结构',
+          link: '/basic/algorithm/data-struct',
+        },
+        { text: '递归与分治', link: '/basic/algorithm/divide-conquer' },
+        { text: '动态规划 DP', link: '/basic/algorithm/dp' },
+        { text: '贪心算法', link: '/basic/algorithm/greedy' },
+        { text: '回溯算法', link: '/basic/algorithm/backtracking' },
+        {
+          text: '排序算法',
+          link: '/basic/algorithm/sorting',
+        },
+        {
+          text: '搜索算法',
+          link: '/basic/algorithm/searching',
+        },
+        {
+          text: '图算法',
+          link: '/basic/algorithm/graph',
+        },
+        {
+          text: '字符串算法',
+          link: '/basic/algorithm/string',
+        },
+        {
+          text: '机器学习算法',
+          link: '/basic/algorithm/advanced/machine-learning',
+        },
+        {
+          text: '密码学算法',
+          link: '/basic/algorithm/advanced/cryptography',
+        },
+        {
+          text: '近似算法',
+          link: '/basic/algorithm/advanced/approximation',
+        },
+        {
+          text: '随机化算法',
+          link: '/basic/algorithm/advanced/randomized',
+        },
+        {
+          text: '性能测试工具',
+          link: '/basic/algorithm/performance-tools',
+        },
+        {
+          text: '可视化工具',
+          link: '/basic/algorithm/visualization',
+        },
+        {
+          text: '算法练习平台',
+          link: '/basic/algorithm/practice-platforms',
+        },
       ],
     },
   ],
@@ -814,10 +885,6 @@ export const sidebar: ThemeConfig['sidebar'] = {
         {
           text: 'nextjs 生态',
           link: '/framework/nextjs/ecosystem',
-        },
-        {
-          text: 'nextjs 服务端API',
-          link: '/framework/nextjs/api',
         },
       ],
     },
@@ -1034,19 +1101,87 @@ export const sidebar: ThemeConfig['sidebar'] = {
       ],
     },
     {
-      text: '性能与安全',
+      text: '性能优化',
       items: [
-        { text: '性能优化', link: '/engineering/performance' },
-        { text: 'Web安全', link: '/engineering/security' },
-        { text: '前端监控', link: '/engineering/monitor' },
+        {
+          text: '为什么需要性能优化',
+          link: '/engineering/performance/why',
+        },
+        {
+          text: '核心性能指标',
+          link: '/engineering/performance/core-metrics',
+        },
+        {
+          text: '网络层优化',
+          link: '/engineering/performance/network',
+        },
+        {
+          text: '资源加载优化',
+          link: '/engineering/performance/resources',
+        },
+        {
+          text: '构建优化',
+          link: '/engineering/performance/bundling',
+        },
+        {
+          text: '渲染性能优化',
+          link: '/engineering/performance/rendering',
+        },
+        {
+          text: 'JavaScript 性能优化',
+          link: '/engineering/performance/javascript',
+        },
+        {
+          text: '框架性能优化',
+          link: '/engineering/performance/framework',
+        },
+        {
+          text: '性能监控',
+          link: '/engineering/performance/monitoring',
+        },
+        {
+          text: '性能工具链',
+          link: '/engineering/performance/tooling',
+        },
       ],
     },
     {
       text: 'SEO',
       items: [
-        { text: 'SEO基础', link: '/engineering/seo/basic' },
-        { text: '服务端渲染', link: '/engineering/seo/ssr' },
-        { text: '预渲染', link: '/engineering/seo/prerender' },
+        { text: 'SEO 基础', link: '/engineering/seo/basic' },
+        { text: '关键词研究', link: '/engineering/seo/keyword-research' },
+        {
+          text: 'SEO 内容策略',
+          link: '/engineering/seo/content-strategy',
+        },
+        { text: '网站结构化', link: '/engineering/seo/web-struct' },
+        {
+          text: '索引管理与爬虫控制',
+          link: '/engineering/seo/index-crawl',
+        },
+        {
+          text: '网站渲染优化',
+          link: '/engineering/seo/renderer',
+        },
+        {
+          text: '站外优化',
+          link: '/engineering/seo/off-page',
+        },
+        {
+          text: 'SEO For Google',
+          link: '/engineering/seo/for-google',
+        },
+        {
+          text: 'SEO For Baidu',
+          link: '/engineering/seo/for-baidu',
+        },
+        {
+          text: 'SEO For AI',
+          link: '/engineering/seo/for-ai',
+        },
+        { text: 'SEO 分析与监控', link: '/engineering/seo/analytics' },
+        { text: 'SEO 工具与资源库', link: '/engineering/seo/resources' },
+        { text: 'SEO 未来趋势', link: '/engineering/seo/future' },
       ],
     },
     {
@@ -1066,7 +1201,7 @@ export const sidebar: ThemeConfig['sidebar'] = {
         },
         {
           text: '色彩与对比度',
-          link: '/engineering/accessible/keyboard',
+          link: '/engineering/accessible/color-contrast',
         },
         {
           text: 'aria',
@@ -1100,7 +1235,7 @@ export const sidebar: ThemeConfig['sidebar'] = {
       ],
     },
     {
-      text: '后端框架',
+      text: 'node 后端',
       items: [
         { text: 'node 后端基础', link: '/full-stack/framework/node' },
         { text: 'express.js', link: '/full-stack/framework/express' },
@@ -1253,30 +1388,340 @@ export const sidebar: ThemeConfig['sidebar'] = {
         { text: '热更新', link: '/special/mobile/publish/hot-update' },
       ],
     },
+    {
+      text: 'Electron',
+      items: [
+        {
+          text: 'Electron 简介',
+          link: '/special/electron/intro',
+        },
+        {
+          text: 'Electron 快速开始',
+          link: '/special/electron/start',
+        },
+        {
+          text: 'electron-vite',
+          link: '/special/electron/electron-vite',
+        },
+        {
+          text: 'Electron 进程模型',
+          link: '/special/electron/process-model',
+        },
+        {
+          text: 'Electron 主进程',
+          link: '/special/electron/main-process',
+        },
+        {
+          text: 'Electron 渲染进程',
+          link: '/special/electron/renderer-process',
+        },
+        {
+          text: 'Electron 进程通信',
+          link: '/special/electron/ipc',
+        },
+        {
+          text: 'Electron BrowserWindow',
+          link: '/special/electron/browser-window',
+        },
+        {
+          text: 'Electron Node',
+          link: '/special/electron/node-integration',
+        },
+        {
+          text: 'Electron 安全',
+          link: '/special/electron/security',
+        },
+        {
+          text: 'Electron 系统功能开发',
+          link: '/special/electron/system',
+        },
+        {
+          text: 'Electron 硬件功能开发',
+          link: '/special/electron/hardware',
+        },
+        {
+          text: 'Electron 集成前端框架',
+          link: '/special/electron/ui-framework',
+        },
+        {
+          text: 'Electron 调试',
+          link: '/special/electron/debug',
+        },
+        {
+          text: 'Electron 日志系统',
+          link: '/special/electron/log',
+        },
+        {
+          text: 'Electron 性能优化',
+          link: '/special/electron/performance',
+        },
+        {
+          text: 'Electron 打包',
+          link: '/special/electron/build',
+        },
+        {
+          text: 'Electron 发布与更新',
+          link: '/special/electron/publish',
+        },
+        {
+          text: 'Electron 集成 C++/Rust/NAPI',
+          link: '/special/electron/native',
+        },
+        {
+          text: 'Electron 集成 WebAssembly',
+          link: '/special/electron/wasm',
+        },
+        {
+          text: 'Electron 运行 Python/Go/Java',
+          link: '/special/electron/scripts',
+        },
+      ],
+    },
+    {
+      text: '命令行开发',
+      items: [
+        {
+          text: '简介',
+          link: '/special/cli/intro',
+        },
+        {
+          text: '脚本与命令',
+          link: '/special/cli/run',
+        },
+        {
+          text: '参数处理',
+          link: '/special/cli/args',
+        },
+        {
+          text: '配置管理',
+          link: '/special/cli/config',
+        },
+        {
+          text: '输入',
+          link: '/special/cli/input',
+        },
+        { text: '输出与美化', link: '/special/cli/output' },
+        {
+          text: '进程控制',
+          link: '/special/cli/progress',
+        },
+        {
+          text: '日志系统',
+          link: '/special/cli/log',
+        },
+        { text: '跨平台兼容', link: '/special/cli/cross-platform' },
+        {
+          text: '测试',
+          link: '/special/cli/test',
+        },
+        {
+          text: '构建',
+          link: '/special/cli/build',
+        },
+        {
+          text: '发布',
+          link: '/special/cli/publish',
+        },
+      ],
+    },
+    {
+      text: 'Web 安全',
+      items: [
+        {
+          text: 'Web 安全简介',
+          link: '/special/security/intro',
+        },
+        {
+          text: 'OWASP Top 10 概述',
+          link: '/special/security/owasp-top10',
+        },
+        {
+          text: '常见 Web 攻击与防护',
+          link: '/special/security/attacks',
+        },
+        {
+          text: '浏览器安全模型',
+          link: '/special/security/browser-model',
+        },
+        {
+          text: '前端代码混淆',
+          link: '/special/security/sourcemap',
+        },
+        {
+          text: '认证与授权',
+          link: '/special/security/authority',
+        },
+        {
+          text: '后端安全实践',
+          link: '/special/security/backend',
+        },
+        {
+          text: '防火墙',
+          link: '/special/security/waf',
+        },
+        {
+          text: 'API 安全',
+          link: '/special/security/api-security',
+        },
+        {
+          text: 'DDoS 防护',
+          link: '/special/security/ddos',
+        },
+        {
+          text: '云安全与权限管理（IAM）',
+          link: '/special/security/cloud-iam',
+        },
+        {
+          text: '渗透测试基础',
+          link: '/special/security/pentest',
+        },
+        {
+          text: '安全测试工具',
+          link: '/special/security/tools',
+        },
+        {
+          text: '漏洞扫描与依赖审计',
+          link: '/special/security/scanning',
+        },
+        {
+          text: '安全日志分析',
+          link: '/special/security/log-analysis',
+        },
+      ],
+    },
   ],
   '/leading/': [
     {
       text: 'WebAssembly',
       items: [
-        { text: 'WASM 基础', link: '/leading/webassembly' },
-        { text: 'Rust 与 WASM', link: '/leading/webassembly/rust' },
-        { text: '性能优化', link: '/leading/webassembly/performance' },
+        { text: 'WASM 基础', link: '/leading/webassembly/basic' },
+        {
+          text: 'WASM 设计哲学',
+          link: '/leading/webassembly/design-philosophy',
+        },
+        {
+          text: 'WASM 快速开始',
+          link: '/leading/webassembly/start',
+        },
+        {
+          text: 'WASM 与 JS 交互',
+          link: '/leading/webassembly/js-interaction',
+        },
+        { text: 'WASM 工具链', link: '/leading/webassembly/toolchain' },
+        {
+          text: 'WASM 与 Rust',
+          link: '/leading/webassembly/wasm-rust',
+        },
+        {
+          text: 'WASM 与 其他语言',
+          link: '/leading/webassembly/other-languages',
+        },
+        {
+          text: 'WASM 内部模块',
+          link: '/leading/webassembly/module-structure',
+        },
+        {
+          text: 'WASM 栈式虚拟机与指令集',
+          link: '/leading/webassembly/stack-vm-and-instructions',
+        },
+        {
+          text: 'WASM 线性内存模型',
+          link: '/leading/webassembly/linear-memory',
+        },
+        {
+          text: 'WASM 系统接口（WASI）',
+          link: '/leading/webassembly/wasi',
+        },
+        {
+          text: 'WASM 服务端',
+          link: '/leading/webassembly/server-side',
+        },
+        {
+          text: 'WASM 线程、SIMD与异常处理',
+          link: '/leading/webassembly/threads-simd-exceptions',
+        },
+        {
+          text: 'WASM 组件模型',
+          link: '/leading/webassembly/component-model',
+        },
+        {
+          text: 'WASM 垃圾回收提案',
+          link: '/leading/webassembly/gc-proposal',
+        },
+        {
+          text: 'WASM 未来展望',
+          link: '/leading/webassembly/future',
+        },
       ],
     },
     {
       text: 'AI & Web',
       items: [
-        { text: 'TensorFlow.js', link: '/leading/ai-web/tensorflow' },
-        { text: '机器学习前端', link: '/leading/ai-web/machine-learning' },
-        { text: 'AI 应用案例', link: '/leading/ai-web/cases' },
+        { text: 'AI 基础概念', link: '/leading/ai-web/intro' },
+        { text: 'AI 核心原理', link: '/leading/ai-web/principle' },
+        { text: 'AI 生态', link: '/leading/ai-web/ecosystem' },
+        { text: 'AI Prompt调优', link: '/leading/ai-web/prompt' },
+        { text: 'AI 大模型API', link: '/leading/ai-web/api' },
+        { text: 'AI Web对话开发', link: '/leading/ai-web/chat' },
+        {
+          text: 'AI 在浏览器中运行',
+          link: '/leading/ai-web/run-in-browser',
+        },
+        {
+          text: 'TensorFlow.js',
+          link: '/leading/ai-web/tensorflow',
+        },
+        {
+          text: 'ONNX',
+          link: '/leading/ai-web/onnx',
+        },
+        {
+          text: 'Transformers.js',
+          link: '/leading/ai-web/transformers',
+        },
+        {
+          text: '基于AI的Web新交互',
+          link: '/leading/ai-web/interaction',
+        },
       ],
     },
     {
       text: 'Web3',
       items: [
-        { text: '区块链基础', link: '/leading/web3' },
-        { text: '智能合约', link: '/leading/web3/smart-contract' },
-        { text: 'DApp 开发', link: '/leading/web3/dapp' },
+        { text: 'Web3 简介', link: '/leading/web3/intro' },
+        { text: '区块链基础', link: '/leading/web3/blockchain' },
+        {
+          text: '去中心化存储',
+          link: '/leading/web3/decentralized-storage',
+        },
+        { text: '密码学', link: '/leading/web3/crypto-basics' },
+        {
+          text: '零知识证明',
+          link: '/leading/web3/zero-knowledge-proofs',
+        },
+        {
+          text: '共识机制',
+          link: '/leading/web3/consensus',
+        },
+        { text: '区块链网络', link: '/leading/web3/chain-net' },
+        { text: 'Web3 安全', link: '/leading/web3/security' },
+        { text: 'Web3 前端基础', link: '/leading/web3/frontend-basic' },
+        { text: 'ethers.js', link: '/leading/web3/ethers' },
+        {
+          text: 'wagmi & viem',
+          link: '/leading/web3/wagmi-viem',
+        },
+        { text: 'DApp 开发', link: '/leading/web3/dapp-development' },
+        { text: '智能合约开发', link: '/leading/web3/smart-contracts' },
+        { text: '加密货币钱包', link: '/leading/web3/crypto-wallets' },
+        { text: 'DeFi 去中心化金融', link: '/leading/web3/defi' },
+        { text: 'NFT 技术与应用', link: '/leading/web3/nft' },
+        { text: 'DAO 治理模式', link: '/leading/web3/dao' },
+        { text: '跨链互操作性', link: '/leading/web3/cross-chain' },
+        { text: 'ZK & Layer2', link: '/leading/web3/zk-layer2' },
+        { text: '模块化区块链', link: '/leading/web3/modular-blockchain' },
+        { text: 'Web3 安全审计', link: '/leading/web3/security-audit' },
+        { text: 'Web3 未来展望', link: '/leading/web3/future-outlook' },
       ],
     },
   ],

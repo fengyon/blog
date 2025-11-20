@@ -1,595 +1,340 @@
 # WebGL 基础
 
+WebGL (Web Graphics Library) 是一种基于 OpenGL ES 的 JavaScript API，用于在 Web 浏览器中渲染交互式 2D 和 3D 图形。它通过利用 GPU 加速来实现高性能图形渲染，为 Web 开发者提供了底层的图形硬件访问能力。
+
 ## WebGL 概述
 
-### WebGL 架构
-WebGL 是基于 OpenGL ES 的 JavaScript API，在浏览器中提供硬件加速的 3D 图形渲染：
+WebGL 将 JavaScript 与 OpenGL ES 2.0 的功能相结合，允许在 HTML5 Canvas 元素中直接进行硬件加速的图形渲染。它提供了对图形管线的精细控制，是现代 Web 3D 应用的基石。
+
+特点：
+- 基于 OpenGL ES 2.0 标准
+- 直接访问 GPU 硬件加速
+- 跨平台、免插件
+- 与 HTML5 生态系统深度集成
+
+示意图 (WebGL 在 Web 中的位置)：
 ```
-JavaScript 应用
-    ↓
-WebGL API (OpenGL ES 2.0)
-    ↓
-图形驱动程序
-    ↓
-GPU 硬件
+浏览器 → Canvas元素 → WebGL上下文 → GPU驱动
+    ↓         ↓           ↓         ↓
+ HTML     绘图表面     渲染API    硬件加速
 ```
 
-### 上下文获取
+## WebGL 上下文
+
+WebGL 上下文是访问 WebGL 功能的入口点，通过 Canvas 元素获取。每个上下文维护独立的渲染状态和资源。
+
+特点：
+- 通过 canvas.getContext (‘webgl’) 获取
+- 管理渲染状态、缓冲区、纹理等资源
+- 支持 WebGL 1.0 和 WebGL 2.0
+
+上下文初始化代码：
 ```javascript
-// 获取 WebGL 上下文
 const canvas = document.getElementById('canvas');
 const gl = canvas.getContext('webgl');
-
-// 或者 WebGL2
-const gl2 = canvas.getContext('webgl2');
-
 if (!gl) {
     console.error('WebGL 不支持');
 }
 ```
 
-## 渲染管线核心概念
+状态机示意图：
+```
+WebGL上下文
+├── 绘制状态 (深度测试、混合等)
+├── 缓冲区对象 (顶点、索引)
+├── 纹理单元
+├── 着色器程序
+└── 帧缓冲区
+```
 
-### 状态机模型
-WebGL 是基于状态机的 API，通过改变状态控制渲染行为：
+## 坐标系系统
+
+WebGL 使用右手坐标系，坐标范围在裁剪空间中为 [-1，1]。理解坐标系转换是 WebGL 编程的基础。
+
+特点：
+- 标准化设备坐标：X/Y/Z 范围 [-1，1]
+- 视口变换将 NDC 映射到屏幕像素
+- 矩阵变换实现坐标系转换
+
+坐标系示意图：
+```
+裁剪空间 (NDC)：
+    Y
+    |
+-1  +---+ 1
+  / |  /|
+ /  | / |
++---+---+ X
+|   |   |
+|   +---+
+|  /   /
+| /   /
+Z    /
+-1  1
+```
+
+## 绘制基本图元
+
+WebGL 支持多种基本图元类型，包括点、线和三角形。这些图元通过顶点数据定义。
+
+特点：
+- 三角形是最常用的图元
+- 支持三角形带、扇形等优化模式
+- 点精灵用于粒子效果
+
+图元类型示意图：
+```
+点：● ● ● ●
+
+线：├───┼───┤
+
+三角形：▲  三角形带：▲▲▲  三角形扇：◑
+       / \         / \ / \ / \       / \
+      /   \       /   \   \   \     /   \
+     ───────     ───────────────   ───────
+```
+
+绘制调用代码：
 ```javascript
-// 设置状态示例
-gl.enable(gl.DEPTH_TEST);        // 开启深度测试
-gl.depthFunc(gl.LEQUAL);         // 设置深度测试函数
-gl.clearColor(0, 0, 0, 1);       // 设置清除颜色
-gl.clearDepth(1.0);              // 设置清除深度
+// 绘制三角形
+gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+// 使用索引绘制
+gl.drawElements(gl.TRIANGLES, count, gl.UNSIGNED_SHORT, 0);
 ```
 
-### 数据流架构
+## 着色器程序
+
+着色器是 WebGL 的核心，包括顶点着色器和片段着色器。它们运行在 GPU 上，控制渲染过程。
+
+特点：
+- 顶点着色器：处理每个顶点
+- 片段着色器：处理每个像素
+- 必须成对编译和链接
+
+着色器创建流程：
 ```
-CPU 数据 → 缓冲区 → 顶点着色器 → 片段着色器 → 帧缓冲区
-     ↓         ↓          ↓           ↓          ↓
-JavaScript   ArrayBuffer GLSL        GLSL      Canvas
+创建着色器 → 指定源码 → 编译 → 检查错误
+    ↓
+创建程序 → 附加着色器 → 链接 → 使用程序
 ```
 
-## 缓冲区管理
-
-### 顶点缓冲区
+简单着色器示例：
 ```javascript
-// 创建顶点数据
-const vertices = new Float32Array([
-    // x, y, z
-    -0.5, -0.5, 0.0,
-     0.5, -0.5, 0.0,
-     0.0,  0.5, 0.0
-]);
-
-// 创建并绑定缓冲区
-const vertexBuffer = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-
-// 设置顶点属性指针
-gl.vertexAttribPointer(
-    0,                    // 属性位置
-    3,                    // 每个顶点的分量数
-    gl.FLOAT,             // 数据类型
-    false,                // 是否归一化
-    0,                    // 步长
-    0                     // 偏移量
-);
-gl.enableVertexAttribArray(0);
-```
-
-### 索引缓冲区
-```javascript
-// 创建索引数据
-const indices = new Uint16Array([
-    0, 1, 2  // 三角形索引
-]);
-
-// 创建索引缓冲区
-const indexBuffer = gl.createBuffer();
-gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
-```
-
-## 着色器编程
-
-### 着色器创建与编译
-```javascript
-// 顶点着色器源码
+// 顶点着色器
 const vsSource = `
     attribute vec4 aPosition;
-    uniform mat4 uModelViewMatrix;
-    uniform mat4 uProjectionMatrix;
-    
     void main() {
-        gl_Position = uProjectionMatrix * uModelViewMatrix * aPosition;
+        gl_Position = aPosition;
     }
 `;
 
-// 片段着色器源码
+// 片段着色器
 const fsSource = `
-    precision mediump float;
-    uniform vec4 uColor;
-    
     void main() {
-        gl_FragColor = uColor;
+        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); // 红色
     }
 `;
-
-// 编译着色器函数
-function compileShader(gl, source, type) {
-    const shader = gl.createShader(type);
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        console.error('着色器编译错误:', gl.getShaderInfoLog(shader));
-        gl.deleteShader(shader);
-        return null;
-    }
-    
-    return shader;
-}
-
-// 创建着色器程序
-function createProgram(gl, vsSource, fsSource) {
-    const vertexShader = compileShader(gl, vsSource, gl.VERTEX_SHADER);
-    const fragmentShader = compileShader(gl, fsSource, gl.FRAGMENT_SHADER);
-    
-    const program = gl.createProgram();
-    gl.attachShader(program, vertexShader);
-    gl.attachShader(program, fragmentShader);
-    gl.linkProgram(program);
-    
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-        console.error('程序链接错误:', gl.getProgramInfoLog(program));
-        return null;
-    }
-    
-    return program;
-}
 ```
 
-### Uniform 和 Attribute 管理
+## 缓冲区对象
+
+缓冲区用于在 CPU 和 GPU 之间传递数据，包括顶点数据、颜色、法线等。WebGL 使用 ArrayBuffer 存储二进制数据。
+
+特点：
+- 顶点缓冲区：存储顶点位置、颜色等
+- 索引缓冲区：存储顶点索引，减少重复数据
+- 数据一次性上传，多次使用
+
+缓冲区操作示意图：
+```
+JavaScript数组 → 类型化数组 → WebGL缓冲区 → GPU内存
+   [x,y,z,...]     Float32Array     gl.bufferData()
+```
+
+缓冲区管理代码：
 ```javascript
-class ShaderProgram {
-    constructor(gl, vsSource, fsSource) {
-        this.gl = gl;
-        this.program = createProgram(gl, vsSource, fsSource);
-        this.uniforms = new Map();
-        this.attributes = new Map();
-    }
-    
-    use() {
-        this.gl.useProgram(this.program);
-    }
-    
-    getUniformLocation(name) {
-        if (!this.uniforms.has(name)) {
-            const location = this.gl.getUniformLocation(this.program, name);
-            this.uniforms.set(name, location);
-        }
-        return this.uniforms.get(name);
-    }
-    
-    getAttribLocation(name) {
-        if (!this.attributes.has(name)) {
-            const location = this.gl.getAttribLocation(this.program, name);
-            this.attributes.set(name, location);
-        }
-        return this.attributes.get(name);
-    }
-    
-    setUniform1f(name, value) {
-        this.gl.uniform1f(this.getUniformLocation(name), value);
-    }
-    
-    setUniform3f(name, x, y, z) {
-        this.gl.uniform3f(this.getUniformLocation(name), x, y, z);
-    }
-    
-    setUniformMatrix4fv(name, matrix) {
-        this.gl.uniformMatrix4fv(this.getUniformLocation(name), false, matrix);
-    }
-}
+// 创建顶点缓冲区
+const positionBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+// 设置顶点属性
+gl.vertexAttribPointer(positionAttributeLocation, 3, gl.FLOAT, false, 0, 0);
+gl.enableVertexAttribArray(positionAttributeLocation);
+```
+
+## 纹理
+
+纹理用于为 3D 模型添加表面细节，支持 2D 纹理、立方体贴图等类型。纹理数据可以来自图像、视频或 Canvas。
+
+特点：
+- 支持多种像素格式 (RGB、RGBA 等)
+- 可配置的滤波和环绕模式
+- MIPMAP 用于多级细节
+
+纹理加载流程：
+```
+图像加载 → 创建纹理 → 设置参数 → 上传数据 → 生成MIPMAP
+   ↓          ↓          ↓          ↓          ↓
+<img>    gl.createTexture() gl.texParameteri() gl.texImage2D() gl.generateMipmap()
+```
+
+纹理坐标示意图：
+```
+纹理坐标 (0-1)：
+(0,0) --- (1,0)
+  |         |
+  |  图像   |
+  |         |
+(0,1) --- (1,1)
+```
+
+## 变换矩阵
+
+矩阵用于坐标变换，包括模型、视图和投影变换。WebGL 不提供内置矩阵函数，需要开发者自己实现或使用库。
+
+特点：
+- 4x4 齐次坐标矩阵
+- 矩阵乘法实现变换组合
+- 常用库：glMatrix、Three.js 矩阵类
+
+变换流程示意图：
+```
+局部坐标 → 模型矩阵 → 世界坐标 → 视图矩阵 → 视图坐标 → 投影矩阵 → 裁剪坐标
+   ↓          ↓          ↓          ↓          ↓          ↓          ↓
+原始位置    移动旋转    场景位置    相机视角    相对相机    透视/正交   标准化坐标
+```
+
+矩阵设置代码：
+```javascript
+// 使用 glMatrix 库
+const modelViewMatrix = mat4.create();
+const projectionMatrix = mat4.create();
+
+mat4.perspective(projectionMatrix, 45 * Math.PI / 180, canvas.width / canvas.height, 0.1, 100.0);
+mat4.translate(modelViewMatrix, modelViewMatrix, [0.0, 0.0, -6.0]);
+
+// 传递给着色器
+gl.uniformMatrix4fv(matrixLocation, false, modelViewMatrix);
+```
+
+## 渲染状态
+
+WebGL 使用状态机模型管理渲染设置，包括深度测试、混合、面剔除等。正确设置状态对渲染结果至关重要。
+
+特点：
+- 状态一旦设置，持续有效直到改变
+- 状态改变可能影响性能
+- 需要合理管理状态组合
+
+常用状态设置：
+```javascript
+// 启用深度测试
+gl.enable(gl.DEPTH_TEST);
+gl.depthFunc(gl.LEQUAL);
+
+// 启用混合（透明度）
+gl.enable(gl.BLEND);
+gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+// 启用面剔除
+gl.enable(gl.CULL_FACE);
+gl.cullFace(gl.BACK);
+```
+
+状态机示意图：
+```
+WebGL状态机
+├── 深度测试: 启用/禁用
+├── 混合: 启用/禁用 + 混合函数
+├── 面剔除: 启用/禁用 + 剔除面
+├── 模板测试: 启用/禁用 + 模板操作
+└── 剪裁: 启用/禁用 + 剪裁平面
 ```
 
 ## 渲染循环
 
-### 基础渲染流程
+WebGL 应用通常使用渲染循环实现动画和交互。requestAnimationFrame 提供与显示器刷新率同步的循环机制。
+
+特点：
+- 与浏览器重绘同步
+- 标签页不可见时自动暂停
+- 提供高精度时间戳
+
+渲染循环结构：
 ```javascript
-class WebGLRenderer {
-    constructor(canvas) {
-        this.gl = canvas.getContext('webgl');
-        this.canvas = canvas;
-        this.programs = new Map();
-        this.buffers = new Map();
-        
-        this.initGL();
-    }
+function render(timestamp) {
+    // 更新场景
+    updateScene(timestamp);
     
-    initGL() {
-        const gl = this.gl;
-        
-        // 设置视口
-        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-        
-        // 启用深度测试
-        gl.enable(gl.DEPTH_TEST);
-        
-        // 设置清除颜色和深度
-        gl.clearColor(0.1, 0.1, 0.1, 1.0);
-        gl.clearDepth(1.0);
-    }
+    // 清除画布
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
-    clear() {
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-    }
+    // 渲染对象
+    renderObjects();
     
-    render() {
-        this.clear();
-        
-        // 渲染逻辑
-        this.renderScene();
-        
-        // 请求下一帧
-        requestAnimationFrame(() => this.render());
-    }
-    
-    start() {
-        this.render();
-    }
+    // 继续循环
+    requestAnimationFrame(render);
 }
+
+// 启动循环
+requestAnimationFrame(render);
 ```
 
-## 纹理系统
-
-### 纹理创建与绑定
-```javascript
-class Texture {
-    constructor(gl, options = {}) {
-        this.gl = gl;
-        this.texture = gl.createTexture();
-        this.options = {
-            wrapS: gl.CLAMP_TO_EDGE,
-            wrapT: gl.CLAMP_TO_EDGE,
-            minFilter: gl.LINEAR,
-            magFilter: gl.LINEAR,
-            format: gl.RGBA,
-            internalFormat: gl.RGBA,
-            type: gl.UNSIGNED_BYTE,
-            ...options
-        };
-    }
-    
-    loadFromImage(image) {
-        const gl = this.gl;
-        
-        gl.bindTexture(gl.TEXTURE_2D, this.texture);
-        
-        // 设置纹理参数
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, this.options.wrapS);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, this.options.wrapT);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, this.options.minFilter);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, this.options.magFilter);
-        
-        // 上传纹理数据
-        gl.texImage2D(
-            gl.TEXTURE_2D,
-            0,
-            this.options.internalFormat,
-            this.options.format,
-            this.options.type,
-            image
-        );
-        
-        // 生成mipmap（如果需要）
-        if (this.options.minFilter === gl.LINEAR_MIPMAP_LINEAR) {
-            gl.generateMipmap(gl.TEXTURE_2D);
-        }
-        
-        gl.bindTexture(gl.TEXTURE_2D, null);
-    }
-    
-    bind(unit = 0) {
-        const gl = this.gl;
-        gl.activeTexture(gl.TEXTURE0 + unit);
-        gl.bindTexture(gl.TEXTURE_2D, this.texture);
-    }
-}
+渲染流水线示意图：
+```
+清除 → 设置状态 → 绑定资源 → 绘制 → 交换缓冲区
+ ↓        ↓         ↓        ↓        ↓
+gl.clear() 状态设置 纹理/缓冲区 gl.drawArrays() 隐式完成
 ```
 
-### 纹理加载工具
+## 错误处理
+
+WebGL 提供多种错误检查和调试机制，帮助开发者识别和解决问题。
+
+特点：
+- gl.getError() 获取错误代码
+- 上下文丢失事件处理
+- 着色器编译错误信息
+
+错误处理代码：
 ```javascript
-function loadTexture(gl, url, options = {}) {
-    return new Promise((resolve, reject) => {
-        const texture = new Texture(gl, options);
-        const image = new Image();
-        
-        image.onload = () => {
-            texture.loadFromImage(image);
-            resolve(texture);
-        };
-        
-        image.onerror = reject;
-        image.src = url;
-    });
+// 检查 WebGL 错误
+const error = gl.getError();
+if (error !== gl.NO_ERROR) {
+    console.error('WebGL 错误:', error);
 }
-```
 
-## 帧缓冲区与离屏渲染
-
-### 帧缓冲区创建
-```javascript
-class FrameBuffer {
-    constructor(gl, width, height) {
-        this.gl = gl;
-        this.width = width;
-        this.height = height;
-        
-        this.createFramebuffer();
-    }
-    
-    createFramebuffer() {
-        const gl = this.gl;
-        
-        // 创建帧缓冲区
-        this.framebuffer = gl.createFramebuffer();
-        gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
-        
-        // 创建颜色附件纹理
-        this.colorTexture = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, this.colorTexture);
-        gl.texImage2D(
-            gl.TEXTURE_2D, 0, gl.RGBA, 
-            this.width, this.height, 0, 
-            gl.RGBA, gl.UNSIGNED_BYTE, null
-        );
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        
-        // 创建深度附件
-        this.depthBuffer = gl.createRenderbuffer();
-        gl.bindRenderbuffer(gl.RENDERBUFFER, this.depthBuffer);
-        gl.renderbufferStorage(
-            gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, 
-            this.width, this.height
-        );
-        
-        // 附加到帧缓冲区
-        gl.framebufferTexture2D(
-            gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, 
-            gl.TEXTURE_2D, this.colorTexture, 0
-        );
-        gl.framebufferRenderbuffer(
-            gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, 
-            gl.RENDERBUFFER, this.depthBuffer
-        );
-        
-        // 检查帧缓冲区状态
-        if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
-            console.error('帧缓冲区不完整');
-        }
-        
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    }
-    
-    bind() {
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
-        this.gl.viewport(0, 0, this.width, this.height);
-    }
-    
-    unbind() {
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
-    }
+// 检查着色器编译状态
+if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    console.error('着色器编译错误:', gl.getShaderInfoLog(shader));
 }
-```
 
-## 高级渲染特性
-
-### 混合与透明度
-```javascript
-function setupBlending(gl, blendFunc = null) {
-    gl.enable(gl.BLEND);
-    
-    if (blendFunc) {
-        gl.blendFunc(blendFunc.src, blendFunc.dst);
-    } else {
-        // 标准alpha混合
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-    }
-    
-    // 可选：设置混合方程
-    gl.blendEquation(gl.FUNC_ADD);
-}
-```
-
-### 面剔除
-```javascript
-function setupFaceCulling(gl, cullFace = gl.BACK, frontFace = gl.CCW) {
-    gl.enable(gl.CULL_FACE);
-    gl.cullFace(cullFace);
-    gl.frontFace(frontFace);
-}
+// 处理上下文丢失
+canvas.addEventListener('webglcontextlost', (event) => {
+    event.preventDefault();
+    // 保存状态，准备恢复
+});
 ```
 
 ## 性能优化
 
-### 缓冲区更新策略
-```javascript
-class DynamicBuffer {
-    constructor(gl, target, usage = gl.DYNAMIC_DRAW) {
-        this.gl = gl;
-        this.target = target;
-        this.usage = usage;
-        this.buffer = gl.createBuffer();
-        this.size = 0;
-    }
-    
-    setData(data) {
-        const gl = this.gl;
-        gl.bindBuffer(this.target, this.buffer);
-        
-        if (data.byteLength <= this.size) {
-            // 子数据更新
-            gl.bufferSubData(this.target, 0, data);
-        } else {
-            // 重新分配缓冲区
-            gl.bufferData(this.target, data, this.usage);
-            this.size = data.byteLength;
-        }
-    }
-}
+WebGL 性能优化涉及减少绘制调用、合理使用缓冲区和纹理、优化着色器等多个方面。
+
+优化策略示意图：
+```
+性能问题 → 分析瓶颈 → 应用优化 → 测试效果
+    ↓          ↓          ↓         ↓
+帧率低      CPU/GPU     批处理    验证改进
+          负载不均    减少状态改变
 ```
 
-### 绘制调用优化
+常见优化技巧：
 ```javascript
-class BatchRenderer {
-    constructor(gl) {
-        this.gl = gl;
-        this.batches = new Map();
-    }
-    
-    addToBatch(key, geometry, material) {
-        if (!this.batches.has(key)) {
-            this.batches.set(key, {
-                geometries: [],
-                material: material
-            });
-        }
-        this.batches.get(key).geometries.push(geometry);
-    }
-    
-    render() {
-        for (const [key, batch] of this.batches) {
-            // 设置材质
-            this.setupMaterial(batch.material);
-            
-            // 合并几何数据
-            const mergedGeometry = this.mergeGeometries(batch.geometries);
-            
-            // 单次绘制调用
-            this.renderMergedGeometry(mergedGeometry);
-        }
-        
-        this.batches.clear();
-    }
-}
-```
-
-## 错误处理与调试
-
-### WebGL 错误检查
-```javascript
-function checkGLError(gl, operation) {
-    const error = gl.getError();
-    if (error !== gl.NO_ERROR) {
-        console.error(`WebGL 错误在 ${operation}:`, getGLErrorString(gl, error));
-    }
-}
-
-function getGLErrorString(gl, error) {
-    const errorMap = {
-        [gl.INVALID_ENUM]: 'INVALID_ENUM',
-        [gl.INVALID_VALUE]: 'INVALID_VALUE',
-        [gl.INVALID_OPERATION]: 'INVALID_OPERATION',
-        [gl.INVALID_FRAMEBUFFER_OPERATION]: 'INVALID_FRAMEBUFFER_OPERATION',
-        [gl.OUT_OF_MEMORY]: 'OUT_OF_MEMORY',
-        [gl.CONTEXT_LOST_WEBGL]: 'CONTEXT_LOST_WEBGL'
-    };
-    return errorMap[error] || `未知错误: ${error}`;
-}
-
-// 使用示例
-gl.drawArrays(gl.TRIANGLES, 0, 3);
-checkGLError(gl, 'drawArrays');
-```
-
-### 调试信息输出
-```javascript
-function getGLInfo(gl) {
-    return {
-        vendor: gl.getParameter(gl.VENDOR),
-        renderer: gl.getParameter(gl.RENDERER),
-        version: gl.getParameter(gl.VERSION),
-        shadingLanguageVersion: gl.getParameter(gl.SHADING_LANGUAGE_VERSION),
-        maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE),
-        maxTextureUnits: gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS)
-    };
-}
-
-console.log('WebGL 信息:', getGLInfo(gl));
-```
-
-## 完整示例
-
-### 简单三角形渲染
-```javascript
-class SimpleTriangle {
-    constructor(canvas) {
-        this.gl = canvas.getContext('webgl');
-        this.canvas = canvas;
-        this.init();
-    }
-    
-    init() {
-        // 初始化WebGL状态
-        this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-        this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
-        
-        // 创建着色器程序
-        this.program = this.createProgram();
-        
-        // 创建几何数据
-        this.setupGeometry();
-        
-        // 开始渲染循环
-        this.render();
-    }
-    
-    createProgram() {
-        const vsSource = `
-            attribute vec4 aPosition;
-            void main() {
-                gl_Position = aPosition;
-            }
-        `;
-        
-        const fsSource = `
-            precision mediump float;
-            void main() {
-                gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-            }
-        `;
-        
-        return createProgram(this.gl, vsSource, fsSource);
-    }
-    
-    setupGeometry() {
-        const vertices = new Float32Array([
-            -0.5, -0.5, 0.0,
-             0.5, -0.5, 0.0,
-             0.0,  0.5, 0.0
-        ]);
-        
-        this.vertexBuffer = this.gl.createBuffer();
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, vertices, this.gl.STATIC_DRAW);
-        
-        const positionLocation = this.gl.getAttribLocation(this.program, 'aPosition');
-        this.gl.vertexAttribPointer(positionLocation, 3, this.gl.FLOAT, false, 0, 0);
-        this.gl.enableVertexAttribArray(positionLocation);
-    }
-    
-    render() {
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-        
-        this.gl.useProgram(this.program);
-        this.gl.drawArrays(this.gl.TRIANGLES, 0, 3);
-        
-        requestAnimationFrame(() => this.render());
-    }
-}
-
-// 使用
-const canvas = document.getElementById('canvas');
-const triangle = new SimpleTriangle(canvas);
+// 1. 批处理绘制调用
+// 2. 使用索引绘制减少顶点数据
+// 3. 纹理图集减少纹理切换
+// 4. 合理的 MIPMAP 级别
+// 5. 避免在渲染循环中分配内存
 ```

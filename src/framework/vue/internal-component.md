@@ -1,6 +1,4 @@
-下面是一篇关于 Vue 内置组件的博客，介绍了其主要组件、作用，并提供了 `script setup` 风格的代码示例。
-
-# Vue 内置组件详解与 `script setup` 风格实战
+# Vue 内置组件
 
 Vue 提供了一系列强大的**内置组件**，它们无需注册即可在模板中直接使用。这些组件能够帮助开发者高效地处理**动态组件切换**、**过渡动画**、**组件缓存**、**DOM 渲染位置**和**异步依赖**等常见场景。结合 Vue 3 的 `script setup` 语法，代码会更加简洁。
 
@@ -21,7 +19,7 @@ Vue 的主要内置组件包括：
 
 以下示例均使用 Vue 3 的 `script setup` 语法。
 
-### 1。`Transition` 组件
+### `Transition` 组件
 
 `Transition` 组件通过自动应用 CSS 过渡类名，为元素或组件的进入/离开阶段添加动画。
 
@@ -68,7 +66,7 @@ const show = ref(true)
 </style>
 ```
 
-### 2。`TransitionGroup` 组件
+### `TransitionGroup` 组件
 
 `TransitionGroup` 用于对 `v-for` 列表中的元素或组件同时进行过渡处理，特别擅长处理元素位置变化的动画。
 
@@ -124,7 +122,7 @@ function removeItem(itemId) {
 </style>
 ```
 
-### 3。`KeepAlive` 组件
+### `KeepAlive` 组件
 
 `KeepAlive` 是一个抽象组件，用于在动态切换多个组件时，缓存非活动组件的实例，从而保留其状态或避免重新渲染。
 
@@ -171,7 +169,7 @@ const currentTabComponent = computed(
 </script>
 ```
 
-### 4。`Teleport` 组件
+### `Teleport` 组件
 
 `Teleport` 可以将组件的一部分模板“传送”到该组件 DOM 层级之外的其他位置，常用于处理模态框、提示框等需要突破父容器布局限制的场景。
 
@@ -223,7 +221,7 @@ const modalOpen = ref(false)
 </style>
 ```
 
-### 5。`Suspense` 组件 (实验性组件)
+### `Suspense` 组件 (实验性组件)
 
 `Suspense` 组件可以优雅地处理异步组件 (或具有 `async setup` 的组件) 的加载状态，在异步依赖解析完成前显示一个回退内容。
 
@@ -256,7 +254,7 @@ const AsyncComponent = defineAsyncComponent(() =>
 </script>
 ```
 
-### 6。动态组件：`component` 与 `:is`
+### 动态组件：`component` 与 `:is`
 
 `component` 是一个抽象的元组件，通过绑定 `:is` 属性，可以动态地渲染不同的组件。
 

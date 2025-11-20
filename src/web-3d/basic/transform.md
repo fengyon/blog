@@ -1,535 +1,342 @@
 # 变换与矩阵
 
-## 变换基础概念
+3D 变换是计算机图形学的核心数学基础，它通过矩阵运算实现对物体的移动、旋转、缩放等操作。在 Web 3D 开发中，理解变换矩阵的原理和应用对于创建动态、交互式的 3D 场景至关重要。
 
-### 线性变换
-保持向量加法和标量乘法的变换：
+## 变换基础
+
+3D 变换是通过数学运算改变物体位置、方向和大小的过程。矩阵作为线性代数的工具，为这些变换提供了统一而高效的表示方法。
+
+特点：
+- 使用 4×4 齐次坐标矩阵表示所有变换
+- 支持变换的组合和逆运算
+- 硬件加速优化，适合实时渲染
+
+示意图 (基本变换类型)：
 ```
-变换前：    变换后：
-  A          A'
-   \          \
-    \          \
-     B---C      B'---C'
-```
+平移：移动位置
+   O    →    O
+  / \       / \
+   |         |
 
-### 齐次坐标
-使用 4 维向量表示 3D 点和向量：
-- 点：(x，y，z，1)
-- 向量：(x，y，z，0)
+旋转：改变方向
+   ↑    →    →
+  / \       / \
+   |         |
 
-```javascript
-// 齐次坐标表示
-const point = [x, y, z, 1];    // 点
-const vector = [x, y, z, 0];   // 向量
-```
-
-## 基本变换矩阵
-
-### 单位矩阵
-不进行任何变换的基准矩阵：
-```
-[1, 0, 0, 0]
-[0, 1, 0, 0]
-[0, 0, 1, 0]
-[0, 0, 0, 1]
+缩放：改变大小
+   O    →   BIG O
+  / \       /   \
+   |         |
 ```
 
-```javascript
-// 创建单位矩阵
-const identityMatrix = mat4.create();  // [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]
+## 齐次坐标
+
+齐次坐标使用四个分量 (x，y，z，w) 表示三维空间中的点，其中 w 分量用于区分点和向量，并支持透视变换。
+
+特点：
+- 点表示为 (x，y，z，1)，向量表示为 (x，y，z，0)
+- 统一处理仿射变换和投影变换
+- w 分量支持透视除法
+
+示意图 (齐次坐标转换)：
+```
+3D 点： (x, y, z) → 齐次坐标： (x, y, z, 1)
+3D 向量：(x, y, z) → 齐次坐标： (x, y, z, 0)
+
+透视除法： (x, y, z, w) → (x/w, y/w, z/w)
 ```
 
-### 平移变换
-改变物体位置，保持形状和方向不变：
-```
-平移前：    平移后：
-  △          △
-  |          |
-  |    →     |
-  |          |
-```
+## 平移变换
+
+平移变换改变物体的位置，在三维空间中沿 X、Y、Z 轴移动。平移矩阵是一个单位矩阵加上位移分量。
+
+特点：
+- 保持物体形状和方向不变
+- 可逆操作，逆矩阵为反向平移
+- 与其他变换可交换顺序
+
 平移矩阵：
 ```
-[1, 0, 0, tx]
-[0, 1, 0, ty]
-[0, 0, 1, tz]
-[0, 0, 0, 1]
+[ 1 0 0 Tx ]
+[ 0 1 0 Ty ]
+[ 0 0 1 Tz ]
+[ 0 0 0 1  ]
 ```
 
-```javascript
-// 创建平移矩阵
-const translationMatrix = mat4.create();
-mat4.translate(translationMatrix, identityMatrix, [2.0, 1.0, -3.0]);
-
-// 手动构建平移矩阵
-function createTranslationMatrix(tx, ty, tz) {
-  return [
-    1, 0, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 1, 0,
-    tx, ty, tz, 1
-  ];
-}
+示意图 (沿 X 轴平移)：
+```
+平移前：    平移后：
+  Y           Y
+  |           |
+  |           |
+ []         []
+  |           |
+--+-- X     --+-- X
 ```
 
-### 旋转变换
+## 旋转变换
 
-#### 绕 X 轴旋转
-```
-绕X轴旋转：
-   y            y
-   |            |
-   |    →      /
-   |          /
-   +--- x    +--- x
-  /         /
- z         z
-```
+旋转变换改变物体的方向，围绕特定轴旋转指定角度。每个坐标轴都有对应的旋转矩阵。
+
+特点：
+- 保持物体形状和大小不变
+- 旋转顺序影响最终结果 (不可交换)
+- 使用弧度制表示角度
 
 X 轴旋转矩阵：
 ```
-[1, 0, 0, 0]
-[0, cos, -sin, 0]
-[0, sin, cos, 0]
-[0, 0, 0, 1]
-```
-
-#### 绕 Y 轴旋转
-```
-绕Y轴旋转：
-   y            y
-   |            |
-   |    →       |
-   |            |
-   +--- x    x--+
-  /            /
- z            z
+[ 1  0    0    0 ]
+[ 0 cosθ -sinθ 0 ]
+[ 0 sinθ  cosθ 0 ]
+[ 0  0    0    1 ]
 ```
 
 Y 轴旋转矩阵：
 ```
-[cos, 0, sin, 0]
-[0, 1, 0, 0]
-[-sin, 0, cos, 0]
-[0, 0, 0, 1]
-```
-
-#### 绕 Z 轴旋转
-```
-绕Z轴旋转：
-   y            x
-   |           /
-   |    →     /
-   |         /
-   +--- x   +--- y
-  /         
- z         
+[ cosθ  0  sinθ 0 ]
+[  0    1   0   0 ]
+[-sinθ  0  cosθ 0 ]
+[  0    0   0   1 ]
 ```
 
 Z 轴旋转矩阵：
 ```
-[cos, -sin, 0, 0]
-[sin, cos, 0, 0]
-[0, 0, 1, 0]
-[0, 0, 0, 1]
+[ cosθ -sinθ 0 0 ]
+[ sinθ  cosθ 0 0 ]
+[  0     0   1 0 ]
+[  0     0   0 1 ]
 ```
 
-```javascript
-// 创建旋转矩阵
-const rotationMatrix = mat4.create();
-
-// 绕X轴旋转45度
-mat4.rotateX(rotationMatrix, identityMatrix, Math.PI / 4);
-
-// 绕Y轴旋转30度
-mat4.rotateY(rotationMatrix, identityMatrix, Math.PI / 6);
-
-// 绕Z轴旋转60度
-mat4.rotateZ(rotationMatrix, identityMatrix, Math.PI / 3);
-
-// 手动构建绕X轴旋转矩阵
-function createRotationXMatrix(angle) {
-  const c = Math.cos(angle);
-  const s = Math.sin(angle);
-  return [
-    1, 0, 0, 0,
-    0, c, -s, 0,
-    0, s, c, 0,
-    0, 0, 0, 1
-  ];
-}
+示意图 (绕 Z 轴旋转)：
+```
+旋转前：    旋转后：
+   ↑          ↗
+  / \        / \
+   |          |
 ```
 
-### 缩放变换
-改变物体大小，可非均匀缩放：
-```
-均匀缩放：    非均匀缩放：
-  △            △
-  |\           |\
-  | \    →     | \
-  |__\         |  \
-               |___\
-```
+## 缩放变换
+
+缩放变换改变物体的大小，可以沿各轴均匀或非均匀缩放。缩放矩阵是对角矩阵，对角线元素为缩放因子。
+
+特点：
+- 可以统一缩放或非均匀缩放
+- 缩放因子为负值时产生镜像效果
+- 零缩放因子会使物体坍缩
+
 缩放矩阵：
 ```
-[sx, 0, 0, 0]
-[0, sy, 0, 0]
-[0, 0, sz, 0]
-[0, 0, 0, 1]
+[ Sx 0  0  0 ]
+[ 0  Sy 0  0 ]
+[ 0  0  Sz 0 ]
+[ 0  0  0  1 ]
 ```
 
-```javascript
-// 创建缩放矩阵
-const scaleMatrix = mat4.create();
-mat4.scale(scaleMatrix, identityMatrix, [2.0, 1.5, 0.5]); // 非均匀缩放
-
-// 手动构建缩放矩阵
-function createScaleMatrix(sx, sy, sz) {
-  return [
-    sx, 0, 0, 0,
-    0, sy, 0, 0,
-    0, 0, sz, 0,
-    0, 0, 0, 1
-  ];
-}
+示意图 (Y 轴缩放)：
+```
+原始大小：   Y轴放大：
+   O          O
+  /|\        /|\
+   |          |
+   |          |
+   |          |
+              |
 ```
 
-## 变换组合与顺序
+## 组合变换
 
-### 变换顺序重要性
-矩阵乘法不满足交换律，顺序影响最终结果：
+多个变换可以通过矩阵乘法组合成单个变换矩阵。变换顺序很重要，因为矩阵乘法不满足交换律。
+
+特点：
+- 从右到左应用变换：M = T × R × S
+- 预计算组合矩阵提高性能
+- 支持复杂的动画和层次变换
+
+变换顺序示意图：
 ```
-先平移后旋转：     先旋转后平移：
-  移动物体          旋转物体
-  然后旋转          然后移动
-    △               △
-    |               |
-    |    ≠          |
-   /               /
-  /               /
-```
-
-### 矩阵乘法
-```javascript
-// 组合变换：先缩放，再旋转，最后平移
-const modelMatrix = mat4.create();
-mat4.translate(modelMatrix, modelMatrix, [2, 1, 0]);
-mat4.rotateY(modelMatrix, modelMatrix, Math.PI / 4);
-mat4.scale(modelMatrix, modelMatrix, [1, 2, 1]);
-
-// 等效的手动组合
-const translation = createTranslationMatrix(2, 1, 0);
-const rotation = createRotationYMatrix(Math.PI / 4);
-const scale = createScaleMatrix(1, 2, 1);
-
-const combinedMatrix = mat4.create();
-mat4.multiply(combinedMatrix, translation, rotation);
-mat4.multiply(combinedMatrix, combinedMatrix, scale);
+局部坐标 → 缩放 → 旋转 → 平移 → 世界坐标
+      S        R       T
+      ↓        ↓       ↓
+      [局部到世界矩阵] = T × R × S
 ```
 
-### 局部与全局变换
-```javascript
-// 局部坐标系变换（相对于自身）
-function localTransform(object, localTranslation, localRotation) {
-  const modelMatrix = mat4.create();
-  
-  // 应用局部变换
-  mat4.translate(modelMatrix, modelMatrix, localTranslation);
-  mat4.rotateY(modelMatrix, modelMatrix, localRotation);
-  
-  return modelMatrix;
-}
+矩阵乘法示意图：
+```
+[T] × [R] × [S] × [顶点] = [变换后的顶点]
 
-// 全局坐标系变换（相对于世界）
-function globalTransform(object, worldPosition, worldOrientation) {
-  const modelMatrix = mat4.create();
-  
-  // 先定位到世界位置，再应用方向
-  mat4.translate(modelMatrix, modelMatrix, worldPosition);
-  mat4.multiply(modelMatrix, modelMatrix, worldOrientation);
-  
-  return modelMatrix;
-}
+注意：从右向左应用
+S 先应用，然后是 R，最后是 T
 ```
 
-## 视图变换矩阵
+## 模型矩阵
 
-### 相机变换
-将世界坐标转换到相机坐标系：
-```javascript
-// 创建视图矩阵
-function createViewMatrix(eye, target, up) {
-  const viewMatrix = mat4.create();
-  mat4.lookAt(viewMatrix, eye, target, up);
-  return viewMatrix;
-}
+模型矩阵将物体从局部坐标系变换到世界坐标系，是平移、旋转、缩放变换的组合。
 
-// 手动实现lookAt
-function lookAtManual(eye, target, up) {
-  const z = vec3.normalize(vec3.create(), vec3.subtract(vec3.create(), eye, target));
-  const x = vec3.normalize(vec3.create(), vec3.cross(vec3.create(), up, z));
-  const y = vec3.normalize(vec3.create(), vec3.cross(vec3.create(), z, x));
-  
-  return [
-    x[0], x[1], x[2], -vec3.dot(x, eye),
-    y[0], y[1], y[2], -vec3.dot(y, eye),
-    z[0], z[1], z[2], -vec3.dot(z, eye),
-    0, 0, 0, 1
-  ];
-}
+特点：
+- 定义物体在世界空间中的位置和方向
+- 每个物体有自己独立的模型矩阵
+- 支持层次化变换 (父子关系)
+
+示意图 (模型变换流程)：
+```
+局部坐标系 → 模型矩阵 → 世界坐标系
+   O           O
+  /|\         /|\
+   |           |
+              ↑
+          在世界位置
 ```
 
-## 投影变换矩阵
+## 视图矩阵
+
+视图矩阵 (观察矩阵) 将世界坐标系变换到视图坐标系，以相机为参考点。视图矩阵是相机变换的逆矩阵。
+
+特点：
+- 相机位于原点，看向 Z 轴负方向
+- 支持相机移动和旋转
+- 便于后续的投影计算
+
+视图矩阵构造：
+```
+[ Rx  Ry  Rz  -dot(R, position) ]
+[ Ux  Uy  Uz  -dot(U, position) ]
+[ Dx  Dy  Dz  -dot(D, position) ]
+[ 0   0   0          1         ]
+
+其中 R, U, D 为相机的右、上、前向量
+```
+
+示意图 (视图变换)：
+```
+世界坐标系：    视图坐标系：
+   Y             Y
+   |             |
+   |   C         |   Z(观察方向)
+   |  /          |  /
+   | /           | /
+   +--- X        +--- X
+相机 C 在世界中   相机在原点
+```
+
+## 投影矩阵
+
+投影矩阵将视图坐标系变换到裁剪坐标系，主要分为透视投影和正交投影两种类型。
 
 ### 透视投影
-```javascript
-// 透视投影矩阵
-function createPerspectiveProjection(fov, aspect, near, far) {
-  const projMatrix = mat4.create();
-  mat4.perspective(projMatrix, fov, aspect, near, far);
-  return projMatrix;
-}
 
-// 手动构建透视投影矩阵
-function perspectiveManual(fov, aspect, near, far) {
-  const f = 1.0 / Math.tan(fov / 2);
-  const rangeInv = 1.0 / (near - far);
-  
-  return [
-    f / aspect, 0, 0, 0,
-    0, f, 0, 0,
-    0, 0, (near + far) * rangeInv, -1,
-    0, 0, 2 * near * far * rangeInv, 0
-  ];
-}
+透视投影模拟人眼视觉效果，产生近大远小的透视效果。
+
+特点：
+- 创建深度感和真实感
+- 视锥体为平头锥体
+- 适合大多数 3D 应用场景
+
+透视投影矩阵：
+```
+[ 2n/(r-l)  0        (r+l)/(r-l)     0    ]
+[ 0        2n/(t-b)  (t+b)/(t-b)     0    ]
+[ 0         0       -(f+n)/(f-n)  -2fn/(f-n)]
+[ 0         0           -1           0    ]
+```
+
+示意图 (透视投影)：
+```
+   眼睛
+   / \
+  /   \   视锥体
+ /     \
+/       \
+--------- 近平面
+\       /
+ \     /   远平面
+  \   /
+   \ /
 ```
 
 ### 正交投影
-```javascript
-// 正交投影矩阵
-function createOrthographicProjection(left, right, bottom, top, near, far) {
-  const projMatrix = mat4.create();
-  mat4.ortho(projMatrix, left, right, bottom, top, near, far);
-  return projMatrix;
-}
 
-// 手动构建正交投影矩阵
-function orthoManual(left, right, bottom, top, near, far) {
-  const lr = 1.0 / (left - right);
-  const bt = 1.0 / (bottom - top);
-  const nf = 1.0 / (near - far);
-  
-  return [
-    -2 * lr, 0, 0, 0,
-    0, -2 * bt, 0, 0,
-    0, 0, 2 * nf, 0,
-    (left + right) * lr, (top + bottom) * bt, (far + near) * nf, 1
-  ];
-}
+正交投影保持物体大小不变，无视距离影响，常用于工程绘图和 2.5D 游戏。
+
+特点：
+- 平行投影，无透视变形
+- 视锥体为长方体
+- 保持测量精度
+
+正交投影矩阵：
+```
+[ 2/(r-l)  0        0      -(r+l)/(r-l) ]
+[ 0       2/(t-b)   0      -(t+b)/(t-b) ]
+[ 0        0       -2/(f-n)  -(f+n)/(f-n)]
+[ 0        0        0          1        ]
 ```
 
-## 法线变换矩阵
-
-### 法线矩阵计算
-法线向量需要特殊变换，使用模型视图矩阵的逆转置：
-```javascript
-// 计算法线矩阵
-function createNormalMatrix(modelViewMatrix) {
-  const normalMatrix = mat3.create();
-  
-  // 从4x4矩阵提取3x3部分
-  const m3 = mat3.fromMat4(mat3.create(), modelViewMatrix);
-  
-  // 计算逆转置
-  mat3.invert(normalMatrix, m3);
-  mat3.transpose(normalMatrix, normalMatrix);
-  
-  return normalMatrix;
-}
-
-// 使用glMatrix简化版本
-function createNormalMatrixGL(modelViewMatrix) {
-  const normalMatrix = mat3.create();
-  mat3.normalFromMat4(normalMatrix, modelViewMatrix);
-  return normalMatrix;
-}
+示意图 (正交投影)：
+```
+视锥体：
++-------+
+|       |
+|       | → 平行投影
+|       |
++-------+
 ```
 
-## 矩阵运算与性能
+## 法线变换
 
-### 矩阵乘法优化
-```javascript
-// 手动4x4矩阵乘法（理解原理）
-function multiplyMat4(a, b) {
-  const result = new Float32Array(16);
-  
-  for (let i = 0; i < 4; i++) {
-    for (let j = 0; j < 4; j++) {
-      result[i * 4 + j] = 
-        a[i * 4 + 0] * b[0 * 4 + j] +
-        a[i * 4 + 1] * b[1 * 4 + j] +
-        a[i * 4 + 2] * b[2 * 4 + j] +
-        a[i * 4 + 3] * b[3 * 4 + j];
-    }
-  }
-  
-  return result;
-}
+变换物体时，法线向量需要特殊处理。法线变换矩阵是模型矩阵的逆转置矩阵，以保持法线与表面的垂直关系。
+
+特点：
+- 保持法线与表面的垂直性
+- 使用模型矩阵的逆转置矩阵
+- 对于只包含旋转的变换，可直接使用模型矩阵
+
+法线变换矩阵：
+```
+法线变换矩阵 = transpose(inverse(Model矩阵))
 ```
 
-### 矩阵求逆
-```javascript
-// 使用glMatrix进行矩阵求逆
-const matrix = mat4.create();
-mat4.rotateX(matrix, matrix, Math.PI / 4);
-
-const inverseMatrix = mat4.create();
-mat4.invert(inverseMatrix, matrix);
-
-// 验证：矩阵 × 逆矩阵 = 单位矩阵
-const identity = mat4.create();
-mat4.multiply(identity, matrix, inverseMatrix);
+示意图 (法线变换)：
+```
+变换前：    变换后：
+   ↑           ↗
+  / \         / \
+表面 → 法线   表面 → 法线
+   ⊥           ⊥
 ```
 
-## 变换层级系统
+## 矩阵栈与层次变换
 
-### 父子变换关系
-```javascript
-class TransformNode {
-  constructor() {
-    this.localMatrix = mat4.create();
-    this.worldMatrix = mat4.create();
-    this.children = [];
-    this.parent = null;
-  }
-  
-  // 更新世界矩阵
-  updateWorldMatrix(parentWorldMatrix = null) {
-    if (parentWorldMatrix) {
-      mat4.multiply(this.worldMatrix, parentWorldMatrix, this.localMatrix);
-    } else {
-      mat4.copy(this.worldMatrix, this.localMatrix);
-    }
-    
-    // 更新所有子节点
-    for (const child of this.children) {
-      child.updateWorldMatrix(this.worldMatrix);
-    }
-  }
-  
-  // 添加局部变换
-  translate(x, y, z) {
-    mat4.translate(this.localMatrix, this.localMatrix, [x, y, z]);
-  }
-  
-  rotateY(angle) {
-    mat4.rotateY(this.localMatrix, this.localMatrix, angle);
-  }
-  
-  scale(x, y, z) {
-    mat4.scale(this.localMatrix, this.localMatrix, [x, y, z]);
-  }
-}
+复杂场景中，物体通常以层次结构组织。矩阵栈管理父子关系的组合变换。
+
+特点：
+- 支持骨骼动画和场景图
+- 通过 push/pop 操作管理变换状态
+- 提高复杂场景的变换效率
+
+示意图 (矩阵栈操作)：
+```
+push()      | 当前矩阵 |   push()    | 父矩阵 |
+当前矩阵 →  |----------| → 应用变换 → |--------|
+            |          |             |子矩阵 |
+pop() ← ... ←          ← ... ← ... ← 
 ```
 
-## 变换动画
+## WebGL 中的矩阵实现
 
-### 矩阵插值
+在 WebGL 和 Three.js 中，矩阵操作通过 JavaScript 库实现，如 glMatrix 或 Three.js 的 Matrix4 类。
+
+特点：
+- 使用 Float32Array 优化性能
+- 提供矩阵运算的实用函数
+- 与 GPU 着色器紧密集成
+
+示例代码结构：
 ```javascript
-// 矩阵插值（用于动画）
-function interpolateMat4(result, start, end, t) {
-  for (let i = 0; i < 16; i++) {
-    result[i] = start[i] + (end[i] - start[i]) * t;
-  }
-}
+// 创建模型矩阵
+const modelMatrix = mat4.create();
+mat4.translate(modelMatrix, modelMatrix, [x, y, z]);
+mat4.rotateY(modelMatrix, modelMatrix, angle);
+mat4.scale(modelMatrix, modelMatrix, [sx, sy, sz]);
 
-// 使用四元数进行旋转插值（更平滑）
-function interpolateRotation(result, startQuat, endQuat, t) {
-  const interpolatedQuat = quat.create();
-  quat.slerp(interpolatedQuat, startQuat, endQuat, t);
-  mat4.fromQuat(result, interpolatedQuat);
-}
-```
-
-## 着色器中的矩阵变换
-
-### 顶点着色器
-```glsl
-// 完整的变换管线
-attribute vec3 aPosition;
-attribute vec3 aNormal;
-
-uniform mat4 uModelMatrix;
-uniform mat4 uViewMatrix;
-uniform mat4 uProjectionMatrix;
-uniform mat3 uNormalMatrix;
-
-varying vec3 vPosition;
-varying vec3 vNormal;
-
-void main() {
-  // 位置变换
-  vec4 worldPosition = uModelMatrix * vec4(aPosition, 1.0);
-  vec4 viewPosition = uViewMatrix * worldPosition;
-  gl_Position = uProjectionMatrix * viewPosition;
-  
-  // 法线变换
-  vNormal = normalize(uNormalMatrix * aNormal);
-  vPosition = worldPosition.xyz;
-}
-```
-
-### 矩阵传递
-```javascript
-// 设置着色器uniform
-function setMatrixUniforms(gl, program, modelMatrix, viewMatrix, projectionMatrix) {
-  // 计算MVP矩阵
-  const mvpMatrix = mat4.create();
-  mat4.multiply(mvpMatrix, projectionMatrix, viewMatrix);
-  mat4.multiply(mvpMatrix, mvpMatrix, modelMatrix);
-  
-  // 计算法线矩阵
-  const modelViewMatrix = mat4.create();
-  mat4.multiply(modelViewMatrix, viewMatrix, modelMatrix);
-  const normalMatrix = mat3.create();
-  mat3.normalFromMat4(normalMatrix, modelViewMatrix);
-  
-  // 传递到着色器
-  gl.uniformMatrix4fv(gl.getUniformLocation(program, 'uModelMatrix'), false, modelMatrix);
-  gl.uniformMatrix4fv(gl.getUniformLocation(program, 'uViewMatrix'), false, viewMatrix);
-  gl.uniformMatrix4fv(gl.getUniformLocation(program, 'uProjectionMatrix'), false, projectionMatrix);
-  gl.uniformMatrix4fv(gl.getUniformLocation(program, 'uMVPMatrix'), false, mvpMatrix);
-  gl.uniformMatrix3fv(gl.getUniformLocation(program, 'uNormalMatrix'), false, normalMatrix);
-}
-```
-
-## 变换调试与可视化
-
-### 变换辅助显示
-```javascript
-// 显示变换矩阵信息
-function debugTransform(label, matrix) {
-  console.log(`${label}:`);
-  for (let i = 0; i < 4; i++) {
-    console.log(
-      matrix[i * 4].toFixed(3),
-      matrix[i * 4 + 1].toFixed(3),
-      matrix[i * 4 + 2].toFixed(3),
-      matrix[i * 4 + 3].toFixed(3)
-    );
-  }
-}
-
-// 提取变换信息
-function extractTransformInfo(matrix) {
-  const position = vec3.create();
-  const scale = vec3.create();
-  const rotation = quat.create();
-  
-  mat4.getTranslation(position, matrix);
-  mat4.getScaling(scale, matrix);
-  mat4.getRotation(rotation, matrix);
-  
-  return { position, scale, rotation };
-}
+// 传递给着色器
+gl.uniformMatrix4fv(modelMatrixLocation, false, modelMatrix);
 ```

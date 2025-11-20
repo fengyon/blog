@@ -329,7 +329,7 @@ const handleLogout = () => {
 
 ## 最佳实践
 
-### 1。使用类型别名和接口
+### 使用类型别名和接口
 
 ```typescript
 // types/user.ts
@@ -350,7 +350,7 @@ export interface ApiResponse<T> {
 }
 ```
 
-### 2。创建可重用的组合式函数
+### 创建可重用的组合式函数
 
 ```typescript
 // composables/useCounter.ts

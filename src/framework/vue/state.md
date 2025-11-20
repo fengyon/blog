@@ -62,7 +62,7 @@ const increment = () => {
 
 ### 跨组件共享状态
 
-#### 1。Props 和 Events
+#### Props 和 Events
 
 ```vue
 <!-- 父组件 -->
@@ -94,7 +94,7 @@ defineEmits(['update'])
 </script>
 ```
 
-#### 2. Provide / Inject
+#### Provide / Inject
 
 ```vue
 <!-- 祖先组件 -->
@@ -161,7 +161,7 @@ app.mount('#app')
 
 ### 创建 Store
 
-#### 1. Option Store
+#### Option Store
 
 ```javascript
 // stores/counter.js
@@ -193,7 +193,7 @@ export const useCounterStore = defineStore('counter', {
 })
 ```
 
-#### 2. Setup Store
+#### Setup Store
 
 ```javascript
 // stores/user.js
@@ -314,7 +314,7 @@ export const useCartStore = defineStore('cart', {
 
 ## 最佳实践
 
-### 1。状态结构设计
+### 状态结构设计
 
 ```javascript
 // 良好的状态结构
@@ -342,7 +342,7 @@ const state = () => ({
 })
 ```
 
-### 2。组合式 Store
+### 组合式 Store
 
 ```javascript
 // stores/composables/useApi.js

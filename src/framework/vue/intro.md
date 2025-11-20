@@ -90,7 +90,7 @@ Vue3 是 Vue 的一次彻底重构，它主要解决了以下几个长期存在�
 
 ## Vue3 的核心优势
 
-### 1。Composition API —— 更灵活的逻辑组织
+### Composition API —— 更灵活的逻辑组织
 
 Vue3 引入了 **Composition API**，允许开发者以函数方式组织组件逻辑。
 优点包括：
@@ -118,7 +118,7 @@ export default {
 }
 ```
 
-### 2。更快的响应式系统
+### 更快的响应式系统
 
 Vue3 使用 **Proxy** 实现响应式追踪，不再依赖 `Object.defineProperty`。
 优势包括：
@@ -129,7 +129,7 @@ Vue3 使用 **Proxy** 实现响应式追踪，不再依赖 `Object.definePropert
 
 ---
 
-### 3。更小、更快、更现代化
+### 更小、更快、更现代化
 
 - **打包体积减少约 40%**；
 - **渲染性能提升约 50%**；
@@ -138,7 +138,7 @@ Vue3 使用 **Proxy** 实现响应式追踪，不再依赖 `Object.definePropert
 
 ---
 
-### 4。更好的 TypeScript 支持
+### 更好的 TypeScript 支持
 
 Vue3 核心使用 TypeScript 编写，带来了：
 
@@ -148,7 +148,7 @@ Vue3 核心使用 TypeScript 编写，带来了：
 
 ---
 
-### 5。生态全面升级
+### 生态全面升级
 
 - 状态管理：Vuex → **Pinia** (轻量、类型友好)
 - 构建工具：Vue CLI → **Vite** (极速冷启动)

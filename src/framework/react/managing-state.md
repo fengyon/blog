@@ -1,6 +1,6 @@
 # React 状态管理方案大全
 
-## 1。内置状态管理
+## 内置状态管理
 
 ### useState
 
@@ -73,7 +73,7 @@ function Counter() {
 }
 ```
 
-## 2。上下文 API
+## 上下文 API
 
 ### React Context
 
@@ -126,7 +126,7 @@ function App() {
 }
 ```
 
-## 3。第三方状态管理库
+## 第三方状态管理库
 
 ### Redux Toolkit
 
@@ -481,7 +481,7 @@ subscribe(state, () => {
 })
 ```
 
-## 4。服务端状态管理
+## 服务端状态管理
 
 ### React Query / TanStack Query
 
@@ -612,7 +612,7 @@ function Profile() {
 }
 ```
 
-## 5。表单状态管理
+## 表单状态管理
 
 ### React Hook Form
 

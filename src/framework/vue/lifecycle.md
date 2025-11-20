@@ -358,7 +358,7 @@ Keep-alive 组件特殊流程：
 
 ## 最佳实践与注意事项
 
-### 1。避免在 `onUpdated` 中修改状态
+### 避免在 `onUpdated` 中修改状态
 
 ```vue
 <script setup>
@@ -376,7 +376,7 @@ const computedCount = computed(() => {
 </script>
 ```
 
-### 2。合理使用异步操作
+### 合理使用异步操作
 
 ```vue
 <script setup>
@@ -395,7 +395,7 @@ onMounted(async () => {
 </script>
 ```
 
-### 3。清理副作用
+### 清理副作用
 
 ```vue
 <script setup>

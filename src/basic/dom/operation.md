@@ -62,7 +62,7 @@ const next = element.nextSibling // 下一个兄弟节点
 const prev = element.previousSibling // 上一个兄弟节点
 ```
 
-## 2。内容修改
+## 内容修改
 
 ### innerHTML
 
@@ -103,7 +103,7 @@ console.log(demo.textContent) // "文本内容 隐藏文本"
 console.log(demo.innerText) // "文本内容"
 ```
 
-## 3。属性操作
+## 属性操作
 
 ### 基本属性操作
 
@@ -145,7 +145,7 @@ element.title = '新标题'
 element.src = 'image.jpg'
 ```
 
-## 4。样式控制
+## 样式控制
 
 ### className
 
@@ -197,7 +197,7 @@ const computedStyle = window.getComputedStyle(element)
 const color = computedStyle.color
 ```
 
-## 5。创建新元素
+## 创建新元素
 
 ### createElement
 
@@ -232,7 +232,7 @@ function createListItem(text) {
 const listItem = createListItem('项目内容')
 ```
 
-## 6。添加节点
+## 添加节点
 
 ### appendChild
 
@@ -276,7 +276,7 @@ element.insertAdjacentHTML('beforeend', '<div>在末尾插入</div>') // 元素�
 element.insertAdjacentHTML('afterend', '<div>在后面插入</div>') // 元素之后
 ```
 
-## 7。删除节点
+## 删除节点
 
 ### removeChild
 
@@ -320,7 +320,7 @@ while (element.firstChild) {
 element.replaceChildren()
 ```
 
-## 8。替换与克隆节点
+## 替换与克隆节点
 
 ### replaceChild
 

@@ -1,1270 +1,1228 @@
 # 内存管理
 
-## 内存管理基础
+## 内存管理的重要性
 
-### WebGL 内存架构
+在 Web 3D 应用中，内存管理直接关系到应用性能、稳定性和用户体验。不当的内存使用会导致页面卡顿、崩溃，特别是在移动设备和低配置硬件上。
+
 ```
-WebGL 内存层次:
-JavaScript 堆内存 ←→ GPU 显存 ←→ 系统内存
-     ↓                    ↓           ↓
-对象引用           纹理/缓冲区     驱动程序管理
-垃圾回收           GPU资源        内存交换
+内存问题演进过程
+正常状态 → 内存泄漏 → 内存膨胀 → 性能下降 → 应用崩溃
+    ↓          ↓          ↓          ↓          ↓
+ 稳定运行  对象未释放  资源积累  帧率下降  程序终止
+```
+
+## Web 3D 内存架构
+
+### 内存组成结构
+
+Web 3D 应用内存主要由以下几个部分组成：
+
+```
+应用内存组成
+JavaScript 堆内存
+├── Three.js 对象实例
+├── 几何体数据 (CPU 侧)
+├── 材质配置信息
+└── 应用逻辑数据
+
+GPU 内存
+├── 顶点缓冲区 (VBO)
+├── 纹理数据
+├── 帧缓冲区 (FBO)
+├── 着色器程序
+└── 索引缓冲区 (IBO)
+
+系统内存
+├── 图像解码缓存
+├── 音频缓冲区
+└── 其他资源缓存
 ```
 
 ### 内存生命周期
+
+```javascript
+class MemoryLifecycle {
+  constructor() {
+    this.memoryStates = new Map();
+  }
+  
+  trackObject(object) {
+    const lifecycle = {
+      created: performance.now(),
+      references: 1,
+      size: this.calculateObjectSize(object),
+      type: object.constructor.name
+    };
+    
+    this.memoryStates.set(object, lifecycle);
+    return lifecycle;
+  }
+  
+  addReference(object) {
+    const lifecycle = this.memoryStates.get(object);
+    if (lifecycle) {
+      lifecycle.references++;
+    }
+  }
+  
+  removeReference(object) {
+    const lifecycle = this.memoryStates.get(object);
+    if (lifecycle) {
+      lifecycle.references--;
+      
+      if (lifecycle.references === 0) {
+        this.scheduleForCleanup(object);
+      }
+    }
+  }
+  
+  scheduleForCleanup(object) {
+    // 延迟清理，避免频繁的垃圾回收
+    setTimeout(() => {
+      if (this.memoryStates.get(object)?.references === 0) {
+        this.disposeObject(object);
+      }
+    }, 1000);
+  }
+  
+  disposeObject(object) {
+    if (object.dispose && typeof object.dispose === 'function') {
+      object.dispose();
+    }
+    this.memoryStates.delete(object);
+  }
+}
 ```
-资源创建 → 使用中 → 未使用 → 垃圾回收
-    ↓         ↓        ↓         ↓
-分配内存   频繁访问   缓存池    手动释放
-上传GPU   状态绑定   等待复用   dispose()
+
+## 几何体内存管理
+
+### 几何体内存结构
+
+Three.js 几何体在内存中的典型结构：
+
+```
+BufferGeometry 内存布局
+├── attributes (属性缓冲区)
+│   ├── position: Float32Array (顶点位置)
+│   ├── normal: Float32Array (法线向量)
+│   ├── uv: Float32Array (纹理坐标)
+│   └── color: Float32Array (顶点颜色)
+├── index: Uint16Array/Uint32Array (顶点索引)
+└── 元数据 (边界框、边界球等)
+```
+
+### 几何体优化策略
+
+```javascript
+class GeometryManager {
+  constructor() {
+    this.geometries = new Map();
+    this.referenceCounts = new Map();
+  }
+  
+  createOptimizedGeometry(originalGeometry) {
+    // 移除重复顶点
+    const mergedGeometry = this.mergeVertices(originalGeometry);
+    
+    // 量化顶点数据
+    const quantizedGeometry = this.quantizeGeometry(mergedGeometry);
+    
+    // 压缩索引数据
+    const compressedGeometry = this.compressIndices(quantizedGeometry);
+    
+    return compressedGeometry;
+  }
+  
+  mergeVertices(geometry) {
+    // 使用 Three.js 的合并顶点工具
+    const mergedGeometry = geometry.clone();
+    mergedGeometry.mergeVertices();
+    return mergedGeometry;
+  }
+  
+  quantizeGeometry(geometry, precision = 1000) {
+    // 量化顶点数据以减少内存占用
+    const positionAttribute = geometry.getAttribute('position');
+    const array = positionAttribute.array;
+    
+    for (let i = 0; i < array.length; i++) {
+      // 将浮点数转换为定点数
+      array[i] = Math.round(array[i] * precision) / precision;
+    }
+    
+    positionAttribute.needsUpdate = true;
+    return geometry;
+  }
+  
+  compressIndices(geometry) {
+    const indexAttribute = geometry.getIndex();
+    if (!indexAttribute) return geometry;
+    
+    const array = indexAttribute.array;
+    
+    // 检查是否可以使用更小的数据类型
+    const maxIndex = Math.max(...array);
+    if (maxIndex < 65535) {
+      // 使用 Uint16Array 代替 Uint32Array
+      const newArray = new Uint16Array(array);
+      geometry.setIndex(new THREE.BufferAttribute(newArray, 1));
+    }
+    
+    return geometry;
+  }
+  
+  // 几何体实例化
+  createInstancedGeometry(baseGeometry, instanceCount) {
+    const instancedGeometry = new THREE.InstancedBufferGeometry();
+    
+    // 复制基础几何体的属性
+    instancedGeometry.copy(baseGeometry);
+    
+    // 添加实例化属性
+    const instanceMatrix = new THREE.InstancedBufferAttribute(
+      new Float32Array(instanceCount * 16), 16
+    );
+    instancedGeometry.setAttribute('instanceMatrix', instanceMatrix);
+    
+    return instancedGeometry;
+  }
+}
+```
+
+### 几何体内存池
+
+```javascript
+class GeometryPool {
+  constructor() {
+    this.pools = new Map();
+    this.usedGeometries = new Set();
+  }
+  
+  getGeometry(type, parameters) {
+    const key = this.getGeometryKey(type, parameters);
+    
+    if (!this.pools.has(key)) {
+      this.pools.set(key, []);
+    }
+    
+    const pool = this.pools.get(key);
+    let geometry;
+    
+    if (pool.length > 0) {
+      geometry = pool.pop();
+    } else {
+      geometry = this.createGeometry(type, parameters);
+    }
+    
+    this.usedGeometries.add(geometry);
+    return geometry;
+  }
+  
+  returnGeometry(geometry) {
+    if (this.usedGeometries.has(geometry)) {
+      this.usedGeometries.delete(geometry);
+      
+      // 重置几何体状态
+      this.resetGeometry(geometry);
+      
+      const key = this.getGeometryKeyFromInstance(geometry);
+      if (this.pools.has(key)) {
+        this.pools.get(key).push(geometry);
+      }
+    }
+  }
+  
+  createGeometry(type, parameters) {
+    switch (type) {
+      case 'box':
+        return new THREE.BoxGeometry(...parameters);
+      case 'sphere':
+        return new THREE.SphereGeometry(...parameters);
+      case 'plane':
+        return new THREE.PlaneGeometry(...parameters);
+      default:
+        throw new Error(`Unknown geometry type: ${type}`);
+    }
+  }
+  
+  getGeometryKey(type, parameters) {
+    return `${type}_${parameters.join('_')}`;
+  }
+  
+  getGeometryKeyFromInstance(geometry) {
+    // 根据几何体特征生成键值
+    if (geometry instanceof THREE.BoxGeometry) {
+      const params = geometry.parameters;
+      return `box_${params.width}_${params.height}_${params.depth}`;
+    }
+    // 其他几何体类型的处理...
+  }
+  
+  resetGeometry(geometry) {
+    // 重置几何体的变换和自定义属性
+    geometry.position.set(0, 0, 0);
+    geometry.rotation.set(0, 0, 0);
+    geometry.scale.set(1, 1, 1);
+    
+    // 清除自定义属性
+    geometry.userData = {};
+  }
+  
+  cleanup() {
+    // 清理长时间未使用的几何体
+    const now = performance.now();
+    const maxAge = 60000; // 1分钟
+    
+    for (const [key, pool] of this.pools) {
+      for (let i = pool.length - 1; i >= 0; i--) {
+        const geometry = pool[i];
+        if (now - geometry.userData.lastUsed > maxAge) {
+          geometry.dispose();
+          pool.splice(i, 1);
+        }
+      }
+    }
+  }
+}
+```
+
+## 纹理内存管理
+
+### 纹理内存优化
+
+纹理通常是 Web 3D 应用中最大的内存消耗者：
+
+```javascript
+class TextureManager {
+  constructor() {
+    this.textures = new Map();
+    this.textureCache = new Map();
+    this.memoryBudget = 256 * 1024 * 1024; // 256MB 纹理内存预算
+    this.currentMemoryUsage = 0;
+  }
+  
+  async loadTexture(url, options = {}) {
+    const cacheKey = this.getTextureCacheKey(url, options);
+    
+    // 检查缓存
+    if (this.textureCache.has(cacheKey)) {
+      return this.textureCache.get(cacheKey);
+    }
+    
+    // 检查内存预算
+    if (!this.checkMemoryBudget(options.estimatedSize)) {
+      await this.freeMemory(options.estimatedSize);
+    }
+    
+    const texture = await this.loadTextureInternal(url, options);
+    
+    // 计算实际内存使用量
+    const memoryUsage = this.calculateTextureMemory(texture);
+    this.currentMemoryUsage += memoryUsage;
+    
+    texture.userData.memoryUsage = memoryUsage;
+    texture.userData.lastUsed = performance.now();
+    
+    this.textureCache.set(cacheKey, texture);
+    return texture;
+  }
+  
+  calculateTextureMemory(texture) {
+    const { width, height } = texture.image || texture;
+    let bytesPerPixel = 4; // 默认 RGBA
+    
+    if (texture.format === THREE.RGBFormat) bytesPerPixel = 3;
+    if (texture.format === THREE.RGBAFormat) bytesPerPixel = 4;
+    if (texture.format === THREE.LuminanceFormat) bytesPerPixel = 1;
+    
+    return width * height * bytesPerPixel;
+  }
+  
+  checkMemoryBudget(requiredSize) {
+    return this.currentMemoryUsage + requiredSize <= this.memoryBudget;
+  }
+  
+  async freeMemory(requiredSize) {
+    const textures = Array.from(this.textureCache.values())
+      .sort((a, b) => a.userData.lastUsed - b.userData.lastUsed);
+    
+    let freedMemory = 0;
+    
+    for (const texture of textures) {
+      if (freedMemory >= requiredSize) break;
+      
+      // 释放最久未使用的纹理
+      this.currentMemoryUsage -= texture.userData.memoryUsage;
+      freedMemory += texture.userData.memoryUsage;
+      
+      texture.dispose();
+      
+      // 从缓存中移除
+      for (const [key, cachedTexture] of this.textureCache) {
+        if (cachedTexture === texture) {
+          this.textureCache.delete(key);
+          break;
+        }
+      }
+    }
+  }
+  
+  getTextureCacheKey(url, options) {
+    return `${url}_${JSON.stringify(options)}`;
+  }
+  
+  async loadTextureInternal(url, options) {
+    return new Promise((resolve, reject) => {
+      const loader = new THREE.TextureLoader();
+      
+      loader.load(
+        url,
+        (texture) => {
+          // 应用优化设置
+          this.optimizeTexture(texture, options);
+          resolve(texture);
+        },
+        undefined,
+        reject
+      );
+    });
+  }
+  
+  optimizeTexture(texture, options) {
+    // 启用 MIP 映射
+    texture.generateMipmaps = true;
+    texture.minFilter = THREE.LinearMipmapLinearFilter;
+    
+    // 设置适当的包装模式
+    texture.wrapS = options.wrapS || THREE.ClampToEdgeWrapping;
+    texture.wrapT = options.wrapT || THREE.ClampToEdgeWrapping;
+    
+    // 压缩纹理如果支持
+    if (options.compressed && this.supportsTextureCompression()) {
+      this.compressTexture(texture);
+    }
+    
+    // 限制最大尺寸
+    if (options.maxSize) {
+      this.limitTextureSize(texture, options.maxSize);
+    }
+  }
+  
+  supportsTextureCompression() {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl');
+    return !!(gl.getExtension('WEBGL_compressed_texture_astc') ||
+              gl.getExtension('WEBGL_compressed_texture_s3tc'));
+  }
+}
+```
+
+### 纹理压缩与格式选择
+
+```
+纹理格式内存对比
+格式             质量     内存占用   兼容性
+RGBA (未压缩)   最高      100%      所有设备
+RGB            高        75%       所有设备
+ASTC 4x4       高        25%       现代设备
+S3TC/DXT5      中        25%       PC/部分移动设备
+PVRTC 4bpp     中        25%       iOS 设备
+```
+
+```javascript
+class TextureCompressor {
+  constructor() {
+    this.supportedFormats = this.detectSupportedFormats();
+  }
+  
+  detectSupportedFormats() {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl');
+    const formats = [];
+    
+    if (gl.getExtension('WEBGL_compressed_texture_astc')) {
+      formats.push('astc');
+    }
+    if (gl.getExtension('WEBGL_compressed_texture_s3tc')) {
+      formats.push('s3tc');
+    }
+    if (gl.getExtension('WEBGL_compressed_texture_etc')) {
+      formats.push('etc');
+    }
+    if (gl.getExtension('WEBGL_compressed_texture_pvrtc')) {
+      formats.push('pvrtc');
+    }
+    
+    return formats;
+  }
+  
+  getOptimalFormat(quality = 'medium') {
+    const formatPreferences = {
+      high: ['astc', 's3tc', 'etc', 'pvrtc', 'rgba'],
+      medium: ['s3tc', 'etc', 'pvrtc', 'astc', 'rgb'],
+      low: ['pvrtc', 'etc', 's3tc', 'astc', 'rgb']
+    };
+    
+    const preferences = formatPreferences[quality];
+    return preferences.find(format => this.supportedFormats.includes(format)) || 'rgba';
+  }
+  
+  async compressTexture(texture, format) {
+    if (format === 'rgba') return texture; // 无需压缩
+    
+    // 在实际项目中，这里会调用压缩服务或使用预压缩的纹理
+    // 返回压缩后的纹理对象
+    return texture;
+  }
+}
+```
+
+## 材质内存管理
+
+### 材质共享与重用
+
+```javascript
+class MaterialManager {
+  constructor() {
+    this.materialTemplates = new Map();
+    this.materialInstances = new Map();
+    this.materialVariants = new Map();
+  }
+  
+  createMaterialTemplate(type, baseParameters) {
+    const template = {
+      type,
+      baseParameters,
+      instances: new Set(),
+      variantCache: new Map()
+    };
+    
+    this.materialTemplates.set(type, template);
+    return template;
+  }
+  
+  getMaterial(type, variantParameters = {}) {
+    const template = this.materialTemplates.get(type);
+    if (!template) {
+      throw new Error(`Material template not found: ${type}`);
+    }
+    
+    // 检查变体缓存
+    const variantKey = this.getVariantKey(variantParameters);
+    if (template.variantCache.has(variantKey)) {
+      return template.variantCache.get(variantKey);
+    }
+    
+    // 创建新变体
+    const parameters = { ...template.baseParameters, ...variantParameters };
+    const material = this.createMaterialInstance(template.type, parameters);
+    
+    template.variantCache.set(variantKey, material);
+    template.instances.add(material);
+    
+    this.materialInstances.set(material, {
+      template,
+      variantKey,
+      referenceCount: 0
+    });
+    
+    return material;
+  }
+  
+  createMaterialInstance(type, parameters) {
+    switch (type) {
+      case 'standard':
+        return new THREE.MeshStandardMaterial(parameters);
+      case 'physical':
+        return new THREE.MeshPhysicalMaterial(parameters);
+      case 'basic':
+        return new THREE.MeshBasicMaterial(parameters);
+      default:
+        throw new Error(`Unknown material type: ${type}`);
+    }
+  }
+  
+  getVariantKey(parameters) {
+    return JSON.stringify(parameters);
+  }
+  
+  addReference(material) {
+    const info = this.materialInstances.get(material);
+    if (info) {
+      info.referenceCount++;
+    }
+  }
+  
+  removeReference(material) {
+    const info = this.materialInstances.get(material);
+    if (info) {
+      info.referenceCount--;
+      
+      if (info.referenceCount === 0) {
+        this.scheduleMaterialCleanup(material);
+      }
+    }
+  }
+  
+  scheduleMaterialCleanup(material) {
+    // 延迟清理，避免频繁创建销毁
+    setTimeout(() => {
+      const info = this.materialInstances.get(material);
+      if (info && info.referenceCount === 0) {
+        this.disposeMaterial(material);
+      }
+    }, 5000); // 5秒后清理
+  }
+  
+  disposeMaterial(material) {
+    const info = this.materialInstances.get(material);
+    if (info) {
+      // 从模板中移除
+      info.template.instances.delete(material);
+      info.template.variantCache.delete(info.variantKey);
+      
+      // 销毁材质
+      material.dispose();
+      this.materialInstances.delete(material);
+    }
+  }
+  
+  // 批量材质更新
+  updateMaterialParameters(type, parameterUpdates) {
+    const template = this.materialTemplates.get(type);
+    if (!template) return;
+    
+    // 更新所有实例
+    template.instances.forEach(material => {
+      Object.assign(material, parameterUpdates);
+      material.needsUpdate = true;
+    });
+  }
+}
+```
+
+## 场景图内存管理
+
+### 对象生命周期管理
+
+```javascript
+class SceneGraphManager {
+  constructor(scene) {
+    this.scene = scene;
+    this.objectRegistry = new Map();
+    this.dependencyGraph = new Map();
+  }
+  
+  addObject(object, parent = this.scene) {
+    parent.add(object);
+    
+    // 注册对象及其依赖
+    this.registerObject(object);
+    
+    // 建立依赖关系
+    this.buildDependencyGraph(object);
+    
+    return object;
+  }
+  
+  registerObject(object) {
+    const objectInfo = {
+      object,
+      references: 1,
+      dependencies: new Set(),
+      dependents: new Set(),
+      memoryUsage: this.calculateObjectMemory(object)
+    };
+    
+    this.objectRegistry.set(object, objectInfo);
+    
+    // 递归注册子对象
+    object.traverse(child => {
+      if (child !== object) {
+        this.registerObject(child);
+      }
+    });
+  }
+  
+  calculateObjectMemory(object) {
+    let memory = 0;
+    
+    if (object.geometry) {
+      memory += this.calculateGeometryMemory(object.geometry);
+    }
+    
+    if (object.material) {
+      memory += this.calculateMaterialMemory(object.material);
+    }
+    
+    // 其他内存计算...
+    return memory;
+  }
+  
+  calculateGeometryMemory(geometry) {
+    let memory = 0;
+    
+    // 计算属性缓冲区内存
+    for (const name in geometry.attributes) {
+      const attribute = geometry.attributes[name];
+      memory += attribute.array.byteLength;
+    }
+    
+    // 计算索引缓冲区内存
+    if (geometry.index) {
+      memory += geometry.index.array.byteLength;
+    }
+    
+    return memory;
+  }
+  
+  calculateMaterialMemory(material) {
+    // 材质本身内存较小，主要计算纹理内存
+    let memory = 0;
+    
+    const textures = [
+      material.map,
+      material.normalMap,
+      material.roughnessMap,
+      material.metalnessMap,
+      material.envMap
+    ];
+    
+    textures.forEach(texture => {
+      if (texture && texture.userData?.memoryUsage) {
+        memory += texture.userData.memoryUsage;
+      }
+    });
+    
+    return memory;
+  }
+  
+  buildDependencyGraph(object) {
+    const dependencies = new Set();
+    
+    // 收集几何体和材质依赖
+    if (object.geometry) {
+      dependencies.add(object.geometry);
+    }
+    
+    if (object.material) {
+      if (Array.isArray(object.material)) {
+        object.material.forEach(mat => dependencies.add(mat));
+      } else {
+        dependencies.add(object.material);
+      }
+    }
+    
+    // 收集纹理依赖
+    this.collectTextureDependencies(object, dependencies);
+    
+    this.dependencyGraph.set(object, dependencies);
+    
+    // 更新依赖对象的被依赖关系
+    dependencies.forEach(dep => {
+      const depInfo = this.objectRegistry.get(dep);
+      if (depInfo) {
+        depInfo.dependents.add(object);
+      }
+    });
+  }
+  
+  collectTextureDependencies(object, dependencies) {
+    const material = object.material;
+    if (!material) return;
+    
+    const materials = Array.isArray(material) ? material : [material];
+    
+    materials.forEach(mat => {
+      const textureProperties = ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'envMap'];
+      
+      textureProperties.forEach(prop => {
+        if (mat[prop]) {
+          dependencies.add(mat[prop]);
+        }
+      });
+    });
+  }
+  
+  removeObject(object) {
+    const objectInfo = this.objectRegistry.get(object);
+    if (!objectInfo) return;
+    
+    objectInfo.references--;
+    
+    if (objectInfo.references === 0) {
+      this.disposeObjectTree(object);
+    }
+  }
+  
+  disposeObjectTree(object) {
+    const objectInfo = this.objectRegistry.get(object);
+    if (!objectInfo) return;
+    
+    // 从父级移除
+    if (object.parent) {
+      object.parent.remove(object);
+    }
+    
+    // 处理依赖关系
+    const dependencies = this.dependencyGraph.get(object) || new Set();
+    
+    dependencies.forEach(dep => {
+      const depInfo = this.objectRegistry.get(dep);
+      if (depInfo) {
+        depInfo.dependents.delete(object);
+        
+        // 如果没有其他依赖者，安排清理
+        if (depInfo.dependents.size === 0) {
+          this.scheduleResourceCleanup(dep);
+        }
+      }
+    });
+    
+    // 递归处理子对象
+    object.traverse(child => {
+      if (child !== object) {
+        this.removeObject(child);
+      }
+    });
+    
+    // 清理对象本身
+    this.objectRegistry.delete(object);
+    this.dependencyGraph.delete(object);
+  }
+  
+  scheduleResourceCleanup(resource) {
+    // 延迟清理资源
+    setTimeout(() => {
+      const info = this.objectRegistry.get(resource);
+      if (info && info.dependents.size === 0) {
+        this.disposeResource(resource);
+      }
+    }, 3000);
+  }
+  
+  disposeResource(resource) {
+    if (resource.dispose && typeof resource.dispose === 'function') {
+      resource.dispose();
+    }
+    this.objectRegistry.delete(resource);
+    this.dependencyGraph.delete(resource);
+  }
+}
 ```
 
 ## 内存监控与分析
 
-### 内存使用追踪
+### 实时内存监控
+
 ```javascript
 class MemoryMonitor {
-    constructor() {
-        this.trackedResources = new Map();
-        this.memoryUsage = {
-            geometries: 0,
-            textures: 0,
-            programs: 0,
-            total: 0
-        };
-        this.peakUsage = 0;
-        
-        this.setupMemoryTracking();
+  constructor() {
+    this.metrics = {
+      totalJSHeap: 0,
+      usedJSHeap: 0,
+      jsHeapLimit: 0,
+      gpuMemory: 0,
+      objectCount: 0,
+      geometryMemory: 0,
+      textureMemory: 0
+    };
+    
+    this.history = [];
+    this.maxHistorySize = 300; // 保存300个采样点
+    
+    this.startMonitoring();
+  }
+  
+  startMonitoring() {
+    // 定期采样内存状态
+    setInterval(() => {
+      this.sampleMemory();
+    }, 1000);
+  }
+  
+  sampleMemory() {
+    // 获取 JavaScript 堆内存
+    if (performance.memory) {
+      this.metrics.totalJSHeap = performance.memory.totalJSHeapSize;
+      this.metrics.usedJSHeap = performance.memory.usedJSHeapSize;
+      this.metrics.jsHeapLimit = performance.memory.jsHeapLimit;
     }
     
-    setupMemoryTracking() {
-        // 定期检查内存使用情况
-        setInterval(() => this.updateMemoryStats(), 1000);
+    // 估算 GPU 内存
+    this.metrics.gpuMemory = this.estimateGPUMemory();
+    
+    // 记录历史
+    this.history.push({
+      timestamp: performance.now(),
+      ...this.metrics
+    });
+    
+    if (this.history.length > this.maxHistorySize) {
+      this.history.shift();
     }
     
-    trackGeometry(key, geometry) {
-        const size = this.calculateGeometrySize(geometry);
-        this.trackedResources.set(key, {
-            type: 'geometry',
-            size: size,
-            geometry: geometry,
-            lastUsed: Date.now()
-        });
-        this.memoryUsage.geometries += size;
-        this.updateTotal();
+    // 检查内存泄漏
+    this.checkMemoryLeaks();
+  }
+  
+  estimateGPUMemory() {
+    let memory = 0;
+    
+    // 遍历场景估算 GPU 内存
+    this.scene.traverse(object => {
+      if (object.geometry) {
+        memory += this.calculateGeometryGPUMemory(object.geometry);
+      }
+      
+      if (object.material) {
+        memory += this.calculateMaterialGPUMemory(object.material);
+      }
+    });
+    
+    return memory;
+  }
+  
+  calculateGeometryGPUMemory(geometry) {
+    let memory = 0;
+    
+    for (const name in geometry.attributes) {
+      const attribute = geometry.attributes[name];
+      memory += attribute.array.byteLength;
     }
     
-    trackTexture(key, texture) {
-        const size = this.calculateTextureSize(texture);
-        this.trackedResources.set(key, {
-            type: 'texture',
-            size: size,
-            texture: texture,
-            lastUsed: Date.now()
-        });
-        this.memoryUsage.textures += size;
-        this.updateTotal();
+    if (geometry.index) {
+      memory += geometry.index.array.byteLength;
     }
     
-    calculateGeometrySize(geometry) {
-        let size = 0;
-        
-        // 顶点数据
-        if (geometry.attributes.position) {
-            size += geometry.attributes.position.array.byteLength;
+    return memory;
+  }
+  
+  calculateMaterialGPUMemory(material) {
+    let memory = 0;
+    
+    const materials = Array.isArray(material) ? material : [material];
+    
+    materials.forEach(mat => {
+      const textures = [mat.map, mat.normalMap, mat.roughnessMap, mat.metalnessMap, mat.envMap];
+      
+      textures.forEach(texture => {
+        if (texture && texture.image) {
+          const width = texture.image.width || texture.image.videoWidth;
+          const height = texture.image.height || texture.image.videoHeight;
+          
+          let bytesPerPixel = 4; // RGBA
+          if (texture.format === THREE.RGBFormat) bytesPerPixel = 3;
+          if (texture.format === THREE.LuminanceFormat) bytesPerPixel = 1;
+          
+          memory += width * height * bytesPerPixel;
+          
+          // MIP maps 占用额外 1/3 内存
+          if (texture.generateMipmaps) {
+            memory += (width * height * bytesPerPixel) / 3;
+          }
         }
-        if (geometry.attributes.normal) {
-            size += geometry.attributes.normal.array.byteLength;
-        }
-        if (geometry.attributes.uv) {
-            size += geometry.attributes.uv.array.byteLength;
-        }
-        
-        // 索引数据
-        if (geometry.index) {
-            size += geometry.index.array.byteLength;
-        }
-        
-        return size;
+      });
+    });
+    
+    return memory;
+  }
+  
+  checkMemoryLeaks() {
+    if (this.history.length < 10) return;
+    
+    const recent = this.history.slice(-10);
+    const oldest = this.history.slice(0, 10);
+    
+    const recentAvg = this.calculateAverage(recent);
+    const oldestAvg = this.calculateAverage(oldest);
+    
+    // 如果内存使用持续增长，可能存在内存泄漏
+    const growthRate = (recentAvg.usedJSHeap - oldestAvg.usedJSHeap) / oldestAvg.usedJSHeap;
+    
+    if (growthRate > 0.1) { // 增长超过10%
+      this.triggerMemoryWarning('Possible memory leak detected');
+    }
+  }
+  
+  calculateAverage(samples) {
+    const sum = samples.reduce((acc, sample) => ({
+      usedJSHeap: acc.usedJSHeap + sample.usedJSHeap,
+      gpuMemory: acc.gpuMemory + sample.gpuMemory
+    }), { usedJSHeap: 0, gpuMemory: 0 });
+    
+    return {
+      usedJSHeap: sum.usedJSHeap / samples.length,
+      gpuMemory: sum.gpuMemory / samples.length
+    };
+  }
+  
+  triggerMemoryWarning(message) {
+    console.warn(`Memory Warning: ${message}`);
+    
+    // 触发内存清理
+    if (typeof this.onMemoryWarning === 'function') {
+      this.onMemoryWarning(this.metrics);
+    }
+  }
+  
+  getMemoryReport() {
+    const current = this.metrics;
+    const peak = this.findPeakMemory();
+    
+    return {
+      current,
+      peak,
+      trends: this.analyzeMemoryTrends(),
+      recommendations: this.generateRecommendations()
+    };
+  }
+  
+  findPeakMemory() {
+    return this.history.reduce((peak, sample) => ({
+      usedJSHeap: Math.max(peak.usedJSHeap, sample.usedJSHeap),
+      gpuMemory: Math.max(peak.gpuMemory, sample.gpuMemory)
+    }), { usedJSHeap: 0, gpuMemory: 0 });
+  }
+  
+  analyzeMemoryTrends() {
+    if (this.history.length < 2) return {};
+    
+    const recent = this.history.slice(-5);
+    const trend = {
+      jsHeap: this.calculateTrend(recent.map(h => h.usedJSHeap)),
+      gpuMemory: this.calculateTrend(recent.map(h => h.gpuMemory))
+    };
+    
+    return trend;
+  }
+  
+  calculateTrend(values) {
+    if (values.length < 2) return 'stable';
+    
+    const first = values[0];
+    const last = values[values.length - 1];
+    const change = (last - first) / first;
+    
+    if (change > 0.05) return 'increasing';
+    if (change < -0.05) return 'decreasing';
+    return 'stable';
+  }
+  
+  generateRecommendations() {
+    const recommendations = [];
+    
+    if (this.metrics.usedJSHeap > this.metrics.jsHeapLimit * 0.8) {
+      recommendations.push('JavaScript heap near limit. Consider reducing object count.');
     }
     
-    calculateTextureSize(texture) {
-        if (!texture.image) return 0;
-        
-        const width = texture.image.width || 1;
-        const height = texture.image.height || 1;
-        
-        // 估算纹理内存 (RGBA * 4 bytes)
-        let bytesPerPixel = 4;
-        if (texture.format === THREE.RGBFormat) bytesPerPixel = 3;
-        if (texture.type === THREE.FloatType) bytesPerPixel *= 4;
-        
-        return width * height * bytesPerPixel;
+    if (this.metrics.textureMemory > 200 * 1024 * 1024) {
+      recommendations.push('High texture memory usage. Consider using texture compression.');
     }
     
-    updateTotal() {
-        this.memoryUsage.total = 
-            this.memoryUsage.geometries + 
-            this.memoryUsage.textures + 
-            this.memoryUsage.programs;
-        
-        this.peakUsage = Math.max(this.peakUsage, this.memoryUsage.total);
+    if (this.metrics.geometryMemory > 100 * 1024 * 1024) {
+      recommendations.push('High geometry memory usage. Consider using LOD or geometry compression.');
     }
     
-    getMemoryStats() {
-        return {
-            current: this.memoryUsage.total,
-            peak: this.peakUsage,
-            breakdown: { ...this.memoryUsage },
-            resourceCount: this.trackedResources.size
-        };
-    }
-    
-    findMemoryHogs(limit = 10) {
-        return Array.from(this.trackedResources.entries())
-            .sort((a, b) => b[1].size - a[1].size)
-            .slice(0, limit)
-            .map(([key, resource]) => ({
-                key,
-                type: resource.type,
-                size: resource.size,
-                lastUsed: resource.lastUsed
-            }));
-    }
+    return recommendations;
+  }
 }
 ```
 
-### 性能内存分析
-```javascript
-class MemoryProfiler {
-    constructor() {
-        this.snapshots = [];
-        this.leakDetector = new LeakDetector();
-    }
-    
-    takeSnapshot(label) {
-        if (window.performance && performance.memory) {
-            const memory = performance.memory;
-            const snapshot = {
-                label,
-                timestamp: Date.now(),
-                usedJSHeapSize: memory.usedJSHeapSize,
-                totalJSHeapSize: memory.totalJSHeapSize,
-                jsHeapSizeLimit: memory.jsHeapSizeLimit
-            };
-            
-            this.snapshots.push(snapshot);
-            return snapshot;
-        }
-        return null;
-    }
-    
-    analyzeMemoryGrowth() {
-        if (this.snapshots.length < 2) return null;
-        
-        const growth = [];
-        for (let i = 1; i < this.snapshots.length; i++) {
-            const current = this.snapshots[i];
-            const previous = this.snapshots[i - 1];
-            
-            const growthAmount = current.usedJSHeapSize - previous.usedJSHeapSize;
-            const growthTime = current.timestamp - previous.timestamp;
-            
-            growth.push({
-                period: `${previous.label} → ${current.label}`,
-                growth: growthAmount,
-                rate: growthAmount / (growthTime / 1000), // bytes per second
-                duration: growthTime
-            });
-        }
-        
-        return growth;
-    }
-    
-    detectMemoryLeaks() {
-        return this.leakDetector.analyze(this.snapshots);
-    }
-    
-    generateReport() {
-        const growth = this.analyzeMemoryGrowth();
-        const leaks = this.detectMemoryLeaks();
-        
-        return {
-            summary: {
-                totalSnapshots: this.snapshots.length,
-                totalDuration: this.snapshots.length > 0 ? 
-                    this.snapshots[this.snapshots.length - 1].timestamp - this.snapshots[0].timestamp : 0,
-                averageGrowth: growth ? growth.reduce((sum, g) => sum + g.growth, 0) / growth.length : 0
-            },
-            growthAnalysis: growth,
-            leakDetection: leaks
-        };
-    }
-}
+## 自动化内存管理
 
-class LeakDetector {
-    analyze(snapshots) {
-        const leaks = [];
-        const threshold = 1024 * 1024; // 1MB 增长阈值
-        
-        for (let i = 2; i < snapshots.length; i++) {
-            const trend = this.calculateTrend(snapshots.slice(0, i + 1));
-            if (trest.growth > threshold && trend.confidence > 0.8) {
-                leaks.push({
-                    detectedAt: snapshots[i].label,
-                    estimatedLeakSize: trend.growth,
-                    confidence: trend.confidence
-                });
-            }
-        }
-        
-        return leaks;
+### 智能垃圾回收
+
+```javascript
+class SmartGarbageCollector {
+  constructor(scene, memoryMonitor) {
+    this.scene = scene;
+    this.memoryMonitor = memoryMonitor;
+    this.cleanupThresholds = {
+      jsHeap: 0.8,    // 80% of heap limit
+      gpuMemory: 300 * 1024 * 1024, // 300MB
+      inactivityTime: 30000 // 30 seconds
+    };
+    
+    this.inactiveObjects = new Map();
+    this.startCleanupCycle();
+  }
+  
+  startCleanupCycle() {
+    setInterval(() => {
+      this.performCleanup();
+    }, 10000); // 每10秒检查一次
+  }
+  
+  performCleanup() {
+    const memoryState = this.memoryMonitor.getMemoryReport();
+    
+    // 检查是否需要紧急清理
+    if (this.needsEmergencyCleanup(memoryState)) {
+      this.emergencyCleanup();
+      return;
     }
     
-    calculateTrend(snapshots) {
-        // 简单线性回归分析内存增长趋势
-        const n = snapshots.length;
-        let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
-        
-        snapshots.forEach((snapshot, index) => {
-            const x = index;
-            const y = snapshot.usedJSHeapSize;
-            sumX += x;
-            sumY += y;
-            sumXY += x * y;
-            sumX2 += x * x;
-        });
-        
-        const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-        const growth = slope * n; // 总增长量
-        
-        // 计算趋势置信度
-        const meanY = sumY / n;
-        let ssTot = 0, ssRes = 0;
-        
-        snapshots.forEach((snapshot, index) => {
-            const y = snapshot.usedJSHeapSize;
-            const yPred = slope * index + (sumY / n - slope * sumX / n);
-            ssTot += Math.pow(y - meanY, 2);
-            ssRes += Math.pow(y - yPred, 2);
-        });
-        
-        const confidence = 1 - (ssRes / ssTot);
-        
-        return { growth, confidence };
+    // 常规清理
+    if (this.shouldPerformCleanup(memoryState)) {
+      this.standardCleanup();
     }
+    
+    // 清理长时间未使用的对象
+    this.cleanupInactiveObjects();
+  }
+  
+  needsEmergencyCleanup(memoryState) {
+    return memoryState.current.usedJSHeap > this.cleanupThresholds.jsHeap * memoryState.current.jsHeapLimit;
+  }
+  
+  shouldPerformCleanup(memoryState) {
+    return memoryState.current.usedJSHeap > this.cleanupThresholds.jsHeap * 0.7 * memoryState.current.jsHeapLimit ||
+           memoryState.current.gpuMemory > this.cleanupThresholds.gpuMemory * 0.8;
+  }
+  
+  emergencyCleanup() {
+    console.warn('Performing emergency memory cleanup');
+    
+    // 1. 释放所有缓存
+    this.clearAllCaches();
+    
+    // 2. 移除不可见对象
+    this.removeInvisibleObjects();
+    
+    // 3. 降低渲染质量
+    this.reduceRenderQuality();
+    
+    // 4. 强制垃圾回收 (如果环境支持)
+    this.forceGarbageCollection();
+  }
+  
+  standardCleanup() {
+    console.log('Performing standard memory cleanup');
+    
+    // 1. 清理长时间未使用的纹理
+    this.cleanupUnusedTextures();
+    
+    // 2. 合并小几何体
+    this.mergeSmallGeometries();
+    
+    // 3. 释放未引用的材质
+    this.cleanupUnusedMaterials();
+  }
+  
+  cleanupInactiveObjects() {
+    const now = performance.now();
+    
+    for (const [object, lastUsed] of this.inactiveObjects) {
+      if (now - lastUsed > this.cleanupThresholds.inactivityTime) {
+        this.disposeObject(object);
+        this.inactiveObjects.delete(object);
+      }
+    }
+  }
+  
+  markObjectInactive(object) {
+    this.inactiveObjects.set(object, performance.now());
+  }
+  
+  markObjectActive(object) {
+    this.inactiveObjects.delete(object);
+  }
+  
+  clearAllCaches() {
+    // 清理所有缓存系统
+    if (THREE.Cache) {
+      THREE.Cache.clear();
+    }
+    
+    // 清理自定义缓存
+    this.textureManager?.textureCache.clear();
+    this.geometryPool?.cleanup();
+  }
+  
+  removeInvisibleObjects() {
+    const objectsToRemove = [];
+    
+    this.scene.traverse(object => {
+      if (!object.visible && object.userData?.disposable) {
+        objectsToRemove.push(object);
+      }
+    });
+    
+    objectsToRemove.forEach(object => {
+      this.scene.remove(object);
+      this.disposeObject(object);
+    });
+  }
+  
+  reduceRenderQuality() {
+    // 降低渲染质量以节省内存
+    this.renderer.setPixelRatio(1);
+    this.renderer.shadowMap.enabled = false;
+    
+    // 降低纹理质量
+    this.scene.traverse(object => {
+      if (object.material) {
+        const materials = Array.isArray(object.material) ? object.material : [object.material];
+        
+        materials.forEach(material => {
+          if (material.map) {
+            material.map.anisotropy = 1;
+          }
+        });
+      }
+    });
+  }
+  
+  forceGarbageCollection() {
+    // 在某些环境中可以触发垃圾回收
+    if (window.gc) {
+      window.gc();
+    }
+  }
+  
+  cleanupUnusedTextures() {
+    const now = performance.now();
+    const maxAge = 60000; // 1分钟
+    
+    this.textureManager?.textureCache.forEach((texture, key) => {
+      if (now - texture.userData.lastUsed > maxAge) {
+        this.textureManager.freeTexture(texture);
+      }
+    });
+  }
+  
+  mergeSmallGeometries() {
+    // 合并小的静态几何体以减少绘制调用和内存占用
+    const smallGeometries = [];
+    
+    this.scene.traverse(object => {
+      if (object.isMesh && 
+          object.geometry && 
+          object.geometry.attributes.position.count < 100 &&
+          object.static) {
+        smallGeometries.push(object);
+      }
+    });
+    
+    if (smallGeometries.length > 10) {
+      this.mergeGeometryGroup(smallGeometries);
+    }
+  }
+  
+  disposeObject(object) {
+    if (object.geometry) {
+      object.geometry.dispose();
+    }
+    
+    if (object.material) {
+      const materials = Array.isArray(object.material) ? object.material : [object.material];
+      materials.forEach(material => material.dispose());
+    }
+    
+    if (object.dispose && typeof object.dispose === 'function') {
+      object.dispose();
+    }
+  }
 }
 ```
-
-## 资源生命周期管理
-
-### 智能资源管理器
-```javascript
-class ResourceManager {
-    constructor() {
-        this.resources = new Map();
-        this.referenceCounts = new Map();
-        this.disposalQueue = new Set();
-        this.autoCleanup = true;
-        
-        this.setupCleanupInterval();
-    }
-    
-    registerResource(key, resource, type) {
-        const resourceInfo = {
-            resource,
-            type,
-            size: this.estimateSize(resource, type),
-            createdAt: Date.now(),
-            lastAccessed: Date.now(),
-            accessCount: 0
-        };
-        
-        this.resources.set(key, resourceInfo);
-        this.referenceCounts.set(key, 1);
-        
-        return key;
-    }
-    
-    acquireReference(key) {
-        if (this.referenceCounts.has(key)) {
-            const count = this.referenceCounts.get(key);
-            this.referenceCounts.set(key, count + 1);
-            
-            const resourceInfo = this.resources.get(key);
-            resourceInfo.lastAccessed = Date.now();
-            resourceInfo.accessCount++;
-            
-            // 从处置队列中移除
-            this.disposalQueue.delete(key);
-        }
-        return this.resources.get(key)?.resource;
-    }
-    
-    releaseReference(key) {
-        if (this.referenceCounts.has(key)) {
-            const count = this.referenceCounts.get(key) - 1;
-            this.referenceCounts.set(key, count);
-            
-            if (count === 0) {
-                if (this.autoCleanup) {
-                    this.scheduleDisposal(key);
-                }
-            }
-        }
-    }
-    
-    scheduleDisposal(key) {
-        this.disposalQueue.add(key);
-    }
-    
-    forceDispose(key) {
-        if (this.resources.has(key)) {
-            const resourceInfo = this.resources.get(key);
-            this.disposeResource(resourceInfo.resource, resourceInfo.type);
-            
-            this.resources.delete(key);
-            this.referenceCounts.delete(key);
-            this.disposalQueue.delete(key);
-        }
-    }
-    
-    disposeResource(resource, type) {
-        try {
-            if (resource.dispose && typeof resource.dispose === 'function') {
-                resource.dispose();
-            } else {
-                // 手动释放不同类型的资源
-                switch (type) {
-                    case 'geometry':
-                        this.disposeGeometry(resource);
-                        break;
-                    case 'texture':
-                        this.disposeTexture(resource);
-                        break;
-                    case 'material':
-                        this.disposeMaterial(resource);
-                        break;
-                }
-            }
-        } catch (error) {
-            console.warn('Error disposing resource:', error);
-        }
-    }
-    
-    disposeGeometry(geometry) {
-        if (geometry.attributes) {
-            Object.values(geometry.attributes).forEach(attribute => {
-                if (attribute.array && attribute.array.buffer) {
-                    // 清除数组引用
-                    attribute.array = null;
-                }
-            });
-        }
-        if (geometry.index) {
-            geometry.index.array = null;
-        }
-    }
-    
-    disposeTexture(texture) {
-        if (texture.image) {
-            texture.image = null;
-        }
-    }
-    
-    setupCleanupInterval() {
-        setInterval(() => this.cleanup(), 30000); // 每30秒清理一次
-    }
-    
-    cleanup() {
-        const now = Date.now();
-        const cleanupThreshold = 60000; // 1分钟
-        
-        for (const key of this.disposalQueue) {
-            const resourceInfo = this.resources.get(key);
-            if (resourceInfo && now - resourceInfo.lastAccessed > cleanupThreshold) {
-                this.forceDispose(key);
-            }
-        }
-    }
-    
-    estimateSize(resource, type) {
-        switch (type) {
-            case 'geometry':
-                return this.estimateGeometrySize(resource);
-            case 'texture':
-                return this.estimateTextureSize(resource);
-            case 'material':
-                return 1024; // 固定估计值
-            default:
-                return 0;
-        }
-    }
-    
-    getResourceStats() {
-        let totalSize = 0;
-        const typeStats = {};
-        
-        for (const [key, info] of this.resources) {
-            totalSize += info.size;
-            typeStats[info.type] = (typeStats[info.type] || 0) + info.size;
-        }
-        
-        return {
-            totalResources: this.resources.size,
-            totalSize,
-            typeStats,
-            referencedResources: Array.from(this.referenceCounts.values())
-                .filter(count => count > 0).length,
-            queuedForDisposal: this.disposalQueue.size
-        };
-    }
-}
-```
-
-### 对象池系统
-```javascript
-class ObjectPool {
-    constructor(createFn, resetFn = null, initialSize = 10) {
-        this.createFn = createFn;
-        this.resetFn = resetFn;
-        this.available = [];
-        this.inUse = new Set();
-        
-        this.initialize(initialSize);
-    }
-    
-    initialize(size) {
-        for (let i = 0; i < size; i++) {
-            this.available.push(this.createFn());
-        }
-    }
-    
-    acquire() {
-        let obj;
-        
-        if (this.available.length > 0) {
-            obj = this.available.pop();
-        } else {
-            obj = this.createFn();
-        }
-        
-        this.inUse.add(obj);
-        return obj;
-    }
-    
-    release(obj) {
-        if (this.inUse.has(obj)) {
-            if (this.resetFn) {
-                this.resetFn(obj);
-            }
-            
-            this.inUse.delete(obj);
-            this.available.push(obj);
-        }
-    }
-    
-    releaseAll() {
-        for (const obj of this.inUse) {
-            if (this.resetFn) {
-                this.resetFn(obj);
-            }
-            this.available.push(obj);
-        }
-        this.inUse.clear();
-    }
-    
-    preallocate(count) {
-        const needed = count - (this.available.length + this.inUse.size);
-        if (needed > 0) {
-            for (let i = 0; i < needed; i++) {
-                this.available.push(this.createFn());
-            }
-        }
-    }
-    
-    getStats() {
-        return {
-            available: this.available.length,
-            inUse: this.inUse.size,
-            total: this.available.length + this.inUse.size
-        };
-    }
-}
-
-// 专用对象池
-class GeometryPool extends ObjectPool {
-    constructor(geometryTemplate, initialSize = 10) {
-        super(
-            () => geometryTemplate.clone(),
-            (geometry) => {
-                // 重置几何体状态
-                geometry.position.set(0, 0, 0);
-                geometry.rotation.set(0, 0, 0);
-                geometry.scale.set(1, 1, 1);
-                geometry.visible = true;
-            },
-            initialSize
-        );
-    }
-}
-
-class MaterialPool extends ObjectPool {
-    constructor(materialTemplate, initialSize = 5) {
-        super(
-            () => materialTemplate.clone(),
-            (material) => {
-                // 重置材质状态
-                material.opacity = materialTemplate.opacity;
-                material.transparent = materialTemplate.transparent;
-            },
-            initialSize
-        );
-    }
-}
-```
-
-## GPU 内存管理
-
-### WebGL 资源管理
-```javascript
-class WebGLResourceManager {
-    constructor(gl) {
-        this.gl = gl;
-        this.buffers = new Map();
-        this.textures = new Map();
-        this.programs = new Map();
-        this.framebuffers = new Map();
-        this.renderbuffers = new Map();
-        
-        this.setupResourceTracking();
-    }
-    
-    setupResourceTracking() {
-        // 包装 WebGL 函数以跟踪资源
-        this.wrapGLCreationFunctions();
-    }
-    
-    wrapGLCreationFunctions() {
-        const originalCreateBuffer = this.gl.createBuffer;
-        this.gl.createBuffer = () => {
-            const buffer = originalCreateBuffer.call(this.gl);
-            this.trackBuffer(buffer);
-            return buffer;
-        };
-        
-        const originalCreateTexture = this.gl.createTexture;
-        this.gl.createTexture = () => {
-            const texture = originalCreateTexture.call(this.gl);
-            this.trackTexture(texture);
-            return texture;
-        };
-        
-        const originalCreateProgram = this.gl.createProgram;
-        this.gl.createProgram = () => {
-            const program = originalCreateProgram.call(this.gl);
-            this.trackProgram(program);
-            return program;
-        };
-    }
-    
-    trackBuffer(buffer) {
-        this.buffers.set(buffer, {
-            size: 0,
-            usage: null,
-            lastUsed: Date.now()
-        });
-    }
-    
-    trackTexture(texture) {
-        this.textures.set(texture, {
-            width: 0,
-            height: 0,
-            format: null,
-            size: 0,
-            lastUsed: Date.now()
-        });
-    }
-    
-    updateBufferData(buffer, data, usage) {
-        if (this.buffers.has(buffer)) {
-            const info = this.buffers.get(buffer);
-            info.size = data.byteLength;
-            info.usage = usage;
-            info.lastUsed = Date.now();
-        }
-    }
-    
-    updateTextureData(texture, width, height, format, type) {
-        if (this.textures.has(texture)) {
-            const info = this.textures.get(texture);
-            info.width = width;
-            info.height = height;
-            info.format = format;
-            
-            // 估算纹理大小
-            let bytesPerPixel = 4;
-            if (format === this.gl.RGB) bytesPerPixel = 3;
-            if (type === this.gl.FLOAT) bytesPerPixel *= 4;
-            
-            info.size = width * height * bytesPerPixel;
-            info.lastUsed = Date.now();
-        }
-    }
-    
-    cleanupUnusedResources(ageThreshold = 60000) { // 1分钟
-        const now = Date.now();
-        
-        // 清理缓冲区
-        for (const [buffer, info] of this.buffers) {
-            if (now - info.lastUsed > ageThreshold) {
-                this.gl.deleteBuffer(buffer);
-                this.buffers.delete(buffer);
-            }
-        }
-        
-        // 清理纹理
-        for (const [texture, info] of this.textures) {
-            if (now - info.lastUsed > ageThreshold) {
-                this.gl.deleteTexture(texture);
-                this.textures.delete(texture);
-            }
-        }
-    }
-    
-    getGPUMemoryUsage() {
-        let total = 0;
-        const breakdown = {
-            buffers: 0,
-            textures: 0,
-            programs: 0
-        };
-        
-        for (const info of this.buffers.values()) {
-            total += info.size;
-            breakdown.buffers += info.size;
-        }
-        
-        for (const info of this.textures.values()) {
-            total += info.size;
-            breakdown.textures += info.size;
-        }
-        
-        return { total, breakdown };
-    }
-    
-    // 内存压力处理
-    handleMemoryPressure() {
-        const memoryUsage = this.getGPUMemoryUsage();
-        
-        if (memoryUsage.total > this.getMemoryBudget()) {
-            this.aggressiveCleanup();
-        }
-    }
-    
-    getMemoryBudget() {
-        // 基于设备能力的启发式内存预算
-        if (this.isLowEndDevice()) {
-            return 128 * 1024 * 1024; // 128MB
-        }
-        return 512 * 1024 * 1024; // 512MB
-    }
-    
-    isLowEndDevice() {
-        // 简单的设备能力检测
-        const canvas = this.gl.canvas;
-        const maxSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
-        return maxSize < 4096;
-    }
-    
-    aggressiveCleanup() {
-        // 更激进的清理策略
-        const now = Date.now();
-        const shortThreshold = 10000; // 10秒
-        
-        for (const [buffer, info] of this.buffers) {
-            if (now - info.lastUsed > shortThreshold) {
-                this.gl.deleteBuffer(buffer);
-                this.buffers.delete(buffer);
-            }
-        }
-        
-        for (const [texture, info] of this.textures) {
-            if (now - info.lastUsed > shortThreshold && !info.isEssential) {
-                this.gl.deleteTexture(texture);
-                this.textures.delete(texture);
-            }
-        }
-    }
-}
-```
-
-## 缓存策略
-
-### 智能缓存系统
-```javascript
-class SmartCache {
-    constructor(maxSize = 100 * 1024 * 1024) { // 100MB
-        this.maxSize = maxSize;
-        this.currentSize = 0;
-        this.items = new Map();
-        this.accessQueue = [];
-        this.hitCount = 0;
-        this.missCount = 0;
-    }
-    
-    set(key, value, size, metadata = {}) {
-        // 如果缓存已满，移除最旧的项
-        while (this.currentSize + size > this.maxSize && this.items.size > 0) {
-            this.evictOldest();
-        }
-        
-        this.items.set(key, {
-            value,
-            size,
-            metadata,
-            lastAccessed: Date.now(),
-            accessCount: 0
-        });
-        
-        this.currentSize += size;
-        this.maintainAccessQueue(key);
-    }
-    
-    get(key) {
-        if (this.items.has(key)) {
-            const item = this.items.get(key);
-            item.lastAccessed = Date.now();
-            item.accessCount++;
-            this.hitCount++;
-            
-            this.maintainAccessQueue(key);
-            return item.value;
-        }
-        
-        this.missCount++;
-        return null;
-    }
-    
-    maintainAccessQueue(key) {
-        // 从队列中移除现有项
-        this.accessQueue = this.accessQueue.filter(k => k !== key);
-        // 添加到队列末尾
-        this.accessQueue.push(key);
-    }
-    
-    evictOldest() {
-        if (this.accessQueue.length > 0) {
-            const oldestKey = this.accessQueue.shift();
-            this.evict(oldestKey);
-        }
-    }
-    
-    evict(key) {
-        if (this.items.has(key)) {
-            const item = this.items.get(key);
-            this.currentSize -= item.size;
-            this.items.delete(key);
-            
-            // 如果资源有清理方法，调用它
-            if (item.value && typeof item.value.dispose === 'function') {
-                item.value.dispose();
-            }
-        }
-    }
-    
-    evictByPattern(pattern) {
-        for (const [key, item] of this.items) {
-            if (key.match(pattern)) {
-                this.evict(key);
-            }
-        }
-    }
-    
-    preload(keys, loadFn) {
-        keys.forEach(key => {
-            if (!this.items.has(key)) {
-                const { value, size } = loadFn(key);
-                this.set(key, value, size);
-            }
-        });
-    }
-    
-    getStats() {
-        const hitRate = this.hitCount / (this.hitCount + this.missCount) || 0;
-        
-        return {
-            size: this.currentSize,
-            maxSize: this.maxSize,
-            items: this.items.size,
-            hitRate: hitRate,
-            hitCount: this.hitCount,
-            missCount: this.missCount,
-            efficiency: this.calculateEfficiency()
-        };
-    }
-    
-    calculateEfficiency() {
-        let weightedAccess = 0;
-        let totalSize = 0;
-        
-        for (const item of this.items.values()) {
-            weightedAccess += item.accessCount * item.size;
-            totalSize += item.size;
-        }
-        
-        return totalSize > 0 ? weightedAccess / totalSize : 0;
-    }
-    
-    // 基于使用模式的智能预取
-    analyzeAccessPattern() {
-        const patterns = {};
-        
-        for (const [key, item] of this.items) {
-            const pattern = this.extractPattern(key);
-            if (!patterns[pattern]) {
-                patterns[pattern] = {
-                    totalAccess: 0,
-                    totalSize: 0,
-                    count: 0
-                };
-            }
-            
-            patterns[pattern].totalAccess += item.accessCount;
-            patterns[pattern].totalSize += item.size;
-            patterns[pattern].count++;
-        }
-        
-        return patterns;
-    }
-    
-    extractPattern(key) {
-        // 从key中提取模式，例如 "texture_512x512" → "texture_*x*"
-        return key.replace(/\d+/g, '*');
-    }
-}
-```
-
-### 分层缓存系统
-```javascript
-class LayeredCache {
-    constructor() {
-        this.layers = new Map();
-        this.accessHistory = [];
-        this.setupDefaultLayers();
-    }
-    
-    setupDefaultLayers() {
-        // L1: 高频小资源 (内存缓存)
-        this.addLayer('L1', {
-            maxSize: 10 * 1024 * 1024, // 10MB
-            evictionPolicy: 'LRU',
-            priority: 1
-        });
-        
-        // L2: 中频中等资源
-        this.addLayer('L2', {
-            maxSize: 50 * 1024 * 1024, // 50MB
-            evictionPolicy: 'LFU',
-            priority: 2
-        });
-        
-        // L3: 低频大资源 (可能存储在IndexedDB)
-        this.addLayer('L3', {
-            maxSize: 200 * 1024 * 1024, // 200MB
-            evictionPolicy: 'SIZE',
-            priority: 3
-        });
-    }
-    
-    addLayer(name, config) {
-        this.layers.set(name, {
-            cache: new SmartCache(config.maxSize),
-            config: config,
-            stats: {
-                hits: 0,
-                misses: 0
-            }
-        });
-    }
-    
-    set(key, value, size, metadata = {}) {
-        const accessPattern = this.analyzeAccessPattern(key);
-        const targetLayer = this.selectLayer(size, accessPattern);
-        
-        targetLayer.cache.set(key, value, size, metadata);
-        this.recordAccess(key, size);
-    }
-    
-    get(key) {
-        // 从L1开始逐层查找
-        for (const [layerName, layer] of this.getLayersByPriority()) {
-            const value = layer.cache.get(key);
-            if (value !== null) {
-                layer.stats.hits++;
-                
-                // 如果找到且在较低层级，考虑提升到更高层级
-                if (layer.config.priority > 1) {
-                    this.considerPromotion(key, layerName);
-                }
-                
-                return value;
-            }
-            layer.stats.misses++;
-        }
-        
-        return null;
-    }
-    
-    getLayersByPriority() {
-        return Array.from(this.layers.entries())
-            .sort((a, b) => a[1].config.priority - b[1].config.priority);
-    }
-    
-    selectLayer(size, accessPattern) {
-        // 基于大小和访问模式选择合适层级
-        const layers = this.getLayersByPriority();
-        
-        for (const [name, layer] of layers) {
-            if (size <= layer.cache.maxSize * 0.1) { // 不超过层级容量的10%
-                return layer;
-            }
-        }
-        
-        // 如果都放不下，返回最大层级
-        return layers[layers.length - 1][1];
-    }
-    
-    considerPromotion(key, currentLayer) {
-        const layer = this.layers.get(currentLayer);
-        const item = layer.cache.items.get(key);
-        
-        if (item && item.accessCount > 5) { // 访问次数阈值
-            const higherLayer = this.getNextHigherLayer(currentLayer);
-            if (higherLayer) {
-                // 移动到更高层级
-                higherLayer.cache.set(key, item.value, item.size, item.metadata);
-                layer.cache.evict(key);
-            }
-        }
-    }
-    
-    getNextHigherLayer(currentLayer) {
-        const currentPriority = this.layers.get(currentLayer).config.priority;
-        for (const [name, layer] of this.layers) {
-            if (layer.config.priority === currentPriority - 1) {
-                return layer;
-            }
-        }
-        return null;
-    }
-    
-    analyzeAccessPattern(key) {
-        const history = this.accessHistory.filter(access => access.key === key);
-        const recentAccess = history.slice(-10); // 最近10次访问
-        
-        return {
-            frequency: recentAccess.length,
-            recency: Date.now() - (recentAccess[0]?.timestamp || 0),
-            pattern: this.extractAccessPattern(history)
-        };
-    }
-    
-    recordAccess(key, size) {
-        this.accessHistory.push({
-            key,
-            size,
-            timestamp: Date.now()
-        });
-        
-        // 保持历史记录大小
-        if (this.accessHistory.length > 1000) {
-            this.accessHistory = this.accessHistory.slice(-500);
-        }
-    }
-    
-    getCacheStats() {
-        const stats = {
-            layers: {},
-            overall: {
-                hits: 0,
-                misses: 0,
-                hitRate: 0,
-                totalSize: 0
-            }
-        };
-        
-        for (const [name, layer] of this.layers) {
-            const layerStats = layer.cache.getStats();
-            stats.layers[name] = {
-                ...layerStats,
-                hits: layer.stats.hits,
-                misses: layer.stats.misses
-            };
-            
-            stats.overall.hits += layer.stats.hits;
-            stats.overall.misses += layer.stats.misses;
-            stats.overall.totalSize += layerStats.size;
-        }
-        
-        const totalAccess = stats.overall.hits + stats.overall.misses;
-        stats.overall.hitRate = totalAccess > 0 ? stats.overall.hits / totalAccess : 0;
-        
-        return stats;
-    }
-}
-```
-
-## 内存优化策略
-
-### 垃圾回收优化
-```javascript
-class GarbageCollectionOptimizer {
-    constructor() {
-        this.gcTriggers = new Set();
-        this.gcAvoidanceZones = new Set();
-        this.lastGCTime = 0;
-        this.gcCount = 0;
-        
-        this.setupGCMonitoring();
-    }
-    
-    setupGCMonitoring() {
-        if (window.gc) {
-            // 在开发环境中可以手动触发GC进行测试
-            this.manualGC = window.gc;
-        }
-        
-        // 监听可能触发GC的操作
-        this.monitorGCPotential();
-    }
-    
-    monitorGCPotential() {
-        let largeAllocationCount = 0;
-        const originalPush = Array.prototype.push;
-        
-        // 监控大数组操作
-        Array.prototype.push = function(...args) {
-            if (this.length + args.length > 10000) {
-                largeAllocationCount++;
-                if (largeAllocationCount > 10) {
-                    GarbageCollectionOptimizer.instance.recordGCPotential('large_array_allocation');
-                }
-            }
-            return originalPush.apply(this, args);
-        };
-    }
-    
-    recordGCPotential(reason) {
-        this.gcTriggers.add({
-            reason,
-            timestamp: Date.now(),
-            stack: new Error().stack
-        });
-    }
-    
-    enterGCAvoidanceZone() {
-        const zone = {
-            id: Math.random().toString(36).substr(2, 9),
-            startTime: Date.now(),
-            allowedAllocations: 0
-        };
-        
-        this.gcAvoidanceZones.add(zone);
-        return zone.id;
-    }
-    
-    exitGCAvoidanceZone(zoneId) {
-        for (const zone of this.gcAvoidanceZones) {
-            if (zone.id === zoneId) {
-                this.gcAvoidanceZones.delete(zone);
-                break;
-            }
-        }
-    }
-    
-    shouldAvoidGC() {
-        return this.gcAvoidanceZones.size > 0;
-    }
-    
-    // 手动内存整理
-    defragment() {
-        console.log('Starting memory defragmentation...');
-        
-        // 强制GC（如果可用）
-        if (this.manualGC) {
-            this.manualGC();
-        }
-        
-        // 整理对象池
-        this.defragmentObjectPools();
-        
-        // 清理缓存
-        this.defragmentCaches();
-        
-        console.log('Memory defragmentation completed');
-    }
-    
-    defragmentObjectPools() {
-        // 释放未使用的对象池实例
-        for (const pool of ObjectPool.instances || []) {
-            if (pool.getStats().available > pool.getStats().inUse * 2) {
-                // 释放一半的可用对象
-                const toRelease = Math.floor(pool.available.length / 2);
-                pool.available.length = pool.available.length - toRelease;
-            }
-        }
-    }
-    
-    defragmentCaches() {
-        // 清理低效的缓存项
-        for (const cache of SmartCache.instances || []) {
-            const stats = cache.getStats();
-            if (stats.efficiency < 0.1) { // 效率阈值
-                cache.evictByPattern(/.*/); // 清理所有项
-            }
-        }
-    }
-    
-    generateMemoryReport() {
-        const report = {
-            gcTriggers: Array.from(this.gcTriggers),
-            avoidanceZones: this.gcAvoidanceZones.size,
-            lastGCTime: this.lastGCTime,
-            gcCount: this.gcCount,
-            memoryState: this.getMemoryState()
-        };
-        
-        return report;
-    }
-    
-    getMemoryState() {
-        if (window.performance && performance.memory) {
-            const memory = performance.memory;
-            return {
-                used: memory.usedJSHeapSize,
-                total: memory.totalJSHeapSize,
-                limit: memory.jsHeapSizeLimit,
-                usagePercentage: (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100
-            };
-        }
-        return null;
-    }
-}
-
-// 单例模式
-GarbageCollectionOptimizer.instance = new GarbageCollectionOptimizer();
-```
-
-### 内存预算系统
-```javascript
-class MemoryBudgetSystem {
-    constructor() {
-        this.budgets = new Map();
-        this.currentUsage = new Map();
-        this.overBudgetHandlers = new Map();
-        
-        this.setupDefaultBudgets();
-    }
-    
-    setupDefaultBudgets() {
-        // 设置默认内存预算
-        this.setBudget('geometries', 50 * 1024 * 1024); // 50MB
-        this.setBudget('textures', 100 * 1024 * 1024); // 100MB
-        this.setBudget('materials', 10 * 1024 * 1024); // 10MB
-        this.setBudget('total', 256 * 1024 * 1024); // 256MB
-    }
-    
-    setBudget(category, budget) {
-        this.budgets.set(category, budget);
-        this.currentUsage.set(category, 0);
-    }
-    
-    allocate(category, size) {
-        const current = this.currentUsage.get(category) || 0;
-        const budget = this.budgets.get(category);
-        
-        if (current + size > budget) {
-            this.handleOverBudget(category, current + size, budget);
-            return false;
-        }
-        
-        this.currentUsage.set(category, current + size);
-        return true;
-    }
-    
-    release(category, size) {
-        const current = this.currentUsage.get(category) || 0;
-        this.currentUsage.set(category, Math.max(0, current - size));
-    }
-    
-    handleOverBudget(category, requested, budget) {
-        const handler = this.overBudgetHandlers.get(category);
-        if (handler) {
-            handler(requested, budget);
-        } else {
-            this.defaultOverBudgetHandler(category, requested, budget);
-        }
-    }
-    
-    defaultOverBudgetHandler(category, requested, budget) {
-        console.warn(`Memory budget exceeded for ${category}: ${requested} > ${budget}`);
-        
-        // 自动尝试释放内存
-        this.attemptMemoryRecovery(category);
-    }
-    
-    attemptMemoryRecovery(category) {
-        switch (category) {
-            case 'geometries':
-                this.releaseUnusedGeometries();
-                break;
-            case 'textures':
-                this.compressTextures();
-                break;
-            case 'total':
-                this.aggressiveCleanup();
-                break;
-        }
-    }
-    
-    releaseUnusedGeometries() {
-        // 释放长时间未使用的几何体
-        const geometryManager = ResourceManager.getInstance();
-        const stats = geometryManager.getResourceStats();
-        
-        for (const [key, info] of geometryManager.resources) {
-            if (info.type === 'geometry' && Date.now() - info.lastAccessed > 30000) {
-                geometryManager.forceDispose(key);
-            }
-        }
-    }
-    
-    compressTextures() {
-        // 降低纹理质量以节省内存
-        const textureManager = TextureManager.getInstance();
-        textureManager.compressTextures(0.5); // 50% 质量
-    }
-    
-    setOverBudgetHandler(category, handler) {
-        this.overBudgetHandlers.set(category, handler);
-    }
-    
-    getBudgetStatus() {
-        const status = {};
-        
-        for (const [category, budget] of this.budgets) {
-            const usage = this.currentUsage.get(category) || 0;
-            status[category] = {
-                usage,
-                budget,
-                percentage: (usage / budget) * 100,
-                remaining: budget - usage
-            };
-        }
-        
-        return status;
-    }
-    
-    isUnderBudget(category, margin = 0.1) {
-        const status = this.get

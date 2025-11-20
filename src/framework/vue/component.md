@@ -1,6 +1,6 @@
 # Vue3 组件开发指南
 
-## 1。Component 的概念
+## Component 的概念
 
 在 Vue3 中，组件是可复用的 Vue 实例，具有自己的模板、逻辑和样式。组件是 Vue 应用的基本构建块，允许我们将 UI 拆分为独立、可复用的部分。
 
@@ -14,7 +14,7 @@
 </template>
 ```
 
-## 2。如何定义一个 Vue Component
+## 如何定义一个 Vue Component
 
 ### 使用 Composition API 定义组件
 
@@ -72,7 +72,7 @@ export default {
 }
 ```
 
-## 3. Component Props
+## Component Props
 
 ### 如何接收 Props
 
@@ -157,7 +157,7 @@ defineExpose({
 </script>
 ```
 
-## 4. Component Slots
+## Component Slots
 
 ### 基本插槽
 
@@ -236,7 +236,7 @@ defineProps({
 </template>
 ```
 
-## 5。组件如何复用
+## 组件如何复用
 
 ### 使用 Composables 实现逻辑复用
 
@@ -305,7 +305,7 @@ const users = ref([
 </script>
 ```
 
-## 6。组件引用 (useTemplateRef)
+## 组件引用 (useTemplateRef)
 
 ### 模板引用基础用法
 

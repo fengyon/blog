@@ -1,1141 +1,772 @@
 # 渲染优化
 
-## 性能分析基础
+## 性能瓶颈分析
 
-### 性能指标监控
-```javascript
-class PerformanceMonitor {
-    constructor() {
-        this.frameTimes = [];
-        this.fps = 0;
-        this.frameCount = 0;
-        this.lastTime = performance.now();
-        
-        this.setupMonitoring();
-    }
-    
-    setupMonitoring() {
-        // 使用 Performance API 监控
-        if (performance.mark) {
-            performance.mark('render-start');
-        }
-    }
-    
-    beginFrame() {
-        this.frameStart = performance.now();
-    }
-    
-    endFrame() {
-        const frameTime = performance.now() - this.frameStart;
-        this.frameTimes.push(frameTime);
-        
-        // 保持最近60帧数据
-        if (this.frameTimes.length > 60) {
-            this.frameTimes.shift();
-        }
-        
-        // 计算FPS
-        this.frameCount++;
-        const currentTime = performance.now();
-        if (currentTime - this.lastTime >= 1000) {
-            this.fps = Math.round((this.frameCount * 1000) / (currentTime - this.lastTime));
-            this.frameCount = 0;
-            this.lastTime = currentTime;
-        }
-    }
-    
-    getStats() {
-        const avgFrameTime = this.frameTimes.reduce((a, b) => a + b, 0) / this.frameTimes.length;
-        return {
-            fps: this.fps,
-            frameTime: avgFrameTime,
-            frameTimeStd: this.calculateStdDev(),
-            budget: (1000 / 60) - avgFrameTime // 60FPS预算剩余
-        };
-    }
-    
-    calculateStdDev() {
-        const avg = this.frameTimes.reduce((a, b) => a + b, 0) / this.frameTimes.length;
-        const squareDiffs = this.frameTimes.map(value => Math.pow(value - avg, 2));
-        return Math.sqrt(squareDiffs.reduce((a, b) => a + b, 0) / this.frameTimes.length);
-    }
-}
+Web 3D 应用性能瓶颈主要出现在以下几个关键环节：
+
 ```
+渲染管线瓶颈点
+CPU 侧瓶颈              GPU 侧瓶颈
+├── JavaScript 逻辑       ├── 顶点处理
+├── 场景图遍历            ├── 图元装配
+├── 矩阵计算              ├── 光栅化
+├── 物理计算              └── 像素着色
+└── 动画更新
 
-### WebGL 状态分析
-```javascript
-class WebGLProfiler {
-    constructor(gl) {
-        this.gl = gl;
-        this.drawCallCount = 0;
-        this.triangleCount = 0;
-        this.textureUploadSize = 0;
-        
-        this.wrapGLFunctions();
-    }
-    
-    wrapGLFunctions() {
-        // 包装绘制调用
-        const originalDrawArrays = this.gl.drawArrays;
-        this.gl.drawArrays = (...args) => {
-            this.drawCallCount++;
-            this.countTriangles('drawArrays', args);
-            return originalDrawArrays.apply(this.gl, args);
-        };
-        
-        const originalDrawElements = this.gl.drawElements;
-        this.gl.drawElements = (...args) => {
-            this.drawCallCount++;
-            this.countTriangles('drawElements', args);
-            return originalDrawElements.apply(this.gl, args);
-        };
-        
-        // 包装纹理上传
-        const originalTexImage2D = this.gl.texImage2D;
-        this.gl.texImage2D = (...args) => {
-            if (args.length >= 7 && args[6]) {
-                this.textureUploadSize += this.calculateTextureSize(args);
-            }
-            return originalTexImage2D.apply(this.gl, args);
-        };
-    }
-    
-    countTriangles(method, args) {
-        if (method === 'drawArrays') {
-            const mode = args[0];
-            const count = args[2];
-            this.triangleCount += this.verticesToTriangles(mode, count);
-        } else if (method === 'drawElements') {
-            const mode = args[0];
-            const count = args[2];
-            this.triangleCount += this.verticesToTriangles(mode, count);
-        }
-    }
-    
-    verticesToTriangles(mode, count) {
-        switch (mode) {
-            case this.gl.TRIANGLES: return count / 3;
-            case this.gl.TRIANGLE_STRIP: return count - 2;
-            case this.gl.TRIANGLE_FAN: return count - 2;
-            default: return 0;
-        }
-    }
-    
-    calculateTextureSize(args) {
-        // 估算纹理内存占用
-        const [target, level, internalFormat, width, height, border, format, type, pixels] = args;
-        
-        let bytesPerPixel = 4; // 默认RGBA
-        if (format === this.gl.RGB) bytesPerPixel = 3;
-        if (type === this.gl.FLOAT) bytesPerPixel *= 4;
-        
-        return width * height * bytesPerPixel;
-    }
-    
-    resetFrame() {
-        this.drawCallCount = 0;
-        this.triangleCount = 0;
-        this.textureUploadSize = 0;
-    }
-    
-    getStats() {
-        return {
-            drawCalls: this.drawCallCount,
-            triangles: this.triangleCount,
-            textureUpload: this.textureUploadSize
-        };
-    }
-}
+内存瓶颈
+├── 几何体数据
+├── 纹理资源
+├── 着色器程序
+└── 帧缓冲区
 ```
 
 ## 几何体优化
 
-### 几何体压缩
+### 顶点数据优化
+
+减少顶点数量是提升性能最直接有效的方法：
+
 ```javascript
-class GeometryCompressor {
-    static compressGeometry(geometry) {
-        const compressed = {
-            positions: this.quantizePositions(geometry.attributes.position.array),
-            normals: this.quantizeNormals(geometry.attributes.normal.array),
-            uvs: this.quantizeUVs(geometry.attributes.uv.array),
-            indices: geometry.index ? Array.from(geometry.index.array) : null
-        };
-        
-        return compressed;
+// 原始高精度球体 (65536 个顶点)
+const highPolySphere = new THREE.SphereGeometry(1, 64, 64);
+
+// 优化后的球体 (8192 个顶点)
+const optimizedSphere = new THREE.SphereGeometry(1, 32, 32);
+
+// 极简球体 (768 个顶点，适合远距离物体)
+const lowPolySphere = new THREE.SphereGeometry(1, 16, 16);
+```
+
+### 几何体合并
+
+合并多个几何体减少绘制调用：
+
+```javascript
+// 单个几何体合并
+const geometries = [];
+for (let i = 0; i < 100; i++) {
+  const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+  geometry.translate(Math.random() * 10, Math.random() * 10, Math.random() * 10);
+  geometries.push(geometry);
+}
+
+const mergedGeometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
+const material = new THREE.MeshStandardMaterial({ color: 0xffffff });
+const mergedMesh = new THREE.Mesh(mergedGeometry, material);
+scene.add(mergedMesh);
+```
+
+### 实例化渲染
+
+对于大量相同物体，使用实例化渲染：
+
+```javascript
+const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+const material = new THREE.MeshStandardMaterial({ color: 0xffffff });
+const instanceCount = 1000;
+
+const instancedMesh = new THREE.InstancedMesh(geometry, material, instanceCount);
+
+const matrix = new THREE.Matrix4();
+const color = new THREE.Color();
+
+for (let i = 0; i < instanceCount; i++) {
+  // 设置每个实例的位置和旋转
+  matrix.setPosition(
+    Math.random() * 20 - 10,
+    Math.random() * 20 - 10,
+    Math.random() * 20 - 10
+  );
+  
+  // 随机旋转
+  matrix.makeRotationFromEuler(
+    new THREE.Euler(
+      Math.random() * Math.PI,
+      Math.random() * Math.PI,
+      Math.random() * Math.PI
+    )
+  );
+  
+  instancedMesh.setMatrixAt(i, matrix);
+  
+  // 设置每个实例的颜色
+  color.setHex(Math.random() * 0xffffff);
+  instancedMesh.setColorAt(i, color);
+}
+
+scene.add(instancedMesh);
+```
+
+## 材质与纹理优化
+
+### 材质重用
+
+避免创建过多材质实例：
+
+```javascript
+// 不好的做法：每个网格创建新材质
+const createInefficientScene = () => {
+  for (let i = 0; i < 100; i++) {
+    const material = new THREE.MeshStandardMaterial({ 
+      color: Math.random() * 0xffffff 
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
+  }
+};
+
+// 优化做法：重用材质
+const createOptimizedScene = () => {
+  const materials = [
+    new THREE.MeshStandardMaterial({ color: 0xff0000 }),
+    new THREE.MeshStandardMaterial({ color: 0x00ff00 }),
+    new THREE.MeshStandardMaterial({ color: 0x0000ff })
+  ];
+  
+  for (let i = 0; i < 100; i++) {
+    const material = materials[i % materials.length];
+    const mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
+  }
+};
+```
+
+### 纹理优化策略
+
+```
+纹理优化层级
+原始纹理 (4096x4096, 16MB)
+    ↓ 降采样
+中等纹理 (2048x2048, 4MB) 
+    ↓ 压缩
+压缩纹理 (2048x2048, 1MB)
+    ↓ 图集化
+纹理图集 (多个小纹理合并)
+```
+
+```javascript
+// 纹理压缩与MIP映射
+const textureLoader = new THREE.TextureLoader();
+const texture = textureLoader.load('texture.jpg', (texture) => {
+  // 启用MIP映射
+  texture.generateMipmaps = true;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  
+  // 设置适当的各向异性过滤
+  texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  
+  // 压缩纹理格式
+  if (renderer.extensions.get('WEBGL_compressed_texture_astc')) {
+    // 使用ASTC压缩格式
+    texture.format = THREE.RGBA_ASTC_4x4_Format;
+  }
+});
+
+// 纹理图集
+const atlasLoader = new THREE.TextureLoader();
+const atlas = atlasLoader.load('texture-atlas.jpg');
+
+// 为不同物体使用图集的不同区域
+const material1 = new THREE.MeshStandardMaterial({
+  map: atlas,
+  transparent: true
+});
+
+// 通过UV变换使用图集的不同部分
+geometry.attributes.uv.array = calculateUVsForAtlasRegion(0, 0, 0.5, 0.5);
+```
+
+## 渲染技术优化
+
+### 细节层级 (LOD)
+
+根据距离动态切换模型精度：
+
+```javascript
+const lod = new THREE.LOD();
+
+// 高细节模型 (近距离)
+const highDetailGeometry = new THREE.SphereGeometry(1, 32, 32);
+const highDetailMesh = new THREE.Mesh(highDetailGeometry, material);
+lod.addLevel(highDetailMesh, 0);
+
+// 中等细节模型 (中距离)
+const mediumDetailGeometry = new THREE.SphereGeometry(1, 16, 16);
+const mediumDetailMesh = new THREE.Mesh(mediumDetailGeometry, material);
+lod.addLevel(mediumDetailMesh, 50);
+
+// 低细节模型 (远距离)
+const lowDetailGeometry = new THREE.SphereGeometry(1, 8, 8);
+const lowDetailMesh = new THREE.Mesh(lowDetailGeometry, material);
+lod.addLevel(lowDetailMesh, 100);
+
+scene.add(lod);
+```
+
+### 视锥体裁剪
+
+自动剔除视野外物体：
+
+```javascript
+// Three.js 默认启用视锥体裁剪
+// 手动优化：对静态物体进行空间分割
+
+class SpatialGrid {
+  constructor(cellSize) {
+    this.cellSize = cellSize;
+    this.grid = new Map();
+  }
+  
+  addObject(object, position) {
+    const cellKey = this.getCellKey(position);
+    if (!this.grid.has(cellKey)) {
+      this.grid.set(cellKey, []);
+    }
+    this.grid.get(cellKey).push(object);
+  }
+  
+  getVisibleObjects(camera) {
+    const visibleCells = this.getCellsInFrustum(camera);
+    const visibleObjects = [];
+    
+    for (const cellKey of visibleCells) {
+      const objects = this.grid.get(cellKey);
+      if (objects) {
+        visibleObjects.push(...objects);
+      }
     }
     
-    static quantizePositions(positions, precision = 1024) {
-        // 找到边界框
-        const min = new THREE.Vector3(Infinity, Infinity, Infinity);
-        const max = new THREE.Vector3(-Infinity, -Infinity, -Infinity);
-        
-        for (let i = 0; i < positions.length; i += 3) {
-            min.x = Math.min(min.x, positions[i]);
-            min.y = Math.min(min.y, positions[i + 1]);
-            min.z = Math.min(min.z, positions[i + 2]);
-            max.x = Math.max(max.x, positions[i]);
-            max.y = Math.max(max.y, positions[i + 1]);
-            max.z = Math.max(max.z, positions[i + 2]);
-        }
-        
-        const range = new THREE.Vector3().subVectors(max, min);
-        const quantized = new Uint16Array(positions.length);
-        
-        for (let i = 0; i < positions.length; i += 3) {
-            quantized[i] = Math.round((positions[i] - min.x) / range.x * precision);
-            quantized[i + 1] = Math.round((positions[i + 1] - min.y) / range.y * precision);
-            quantized[i + 2] = Math.round((positions[i + 2] - min.z) / range.z * precision);
-        }
-        
-        return {
-            data: quantized,
-            min: [min.x, min.y, min.z],
-            range: [range.x, range.y, range.z],
-            precision: precision
-        };
-    }
+    return visibleObjects;
+  }
+  
+  getCellsInFrustum(camera) {
+    // 计算相机视锥体与网格的交集
+    const frustum = new THREE.Frustum();
+    const matrix = new THREE.Matrix4().multiplyMatrices(
+      camera.projectionMatrix, 
+      camera.matrixWorldInverse
+    );
+    frustum.setFromProjectionMatrix(matrix);
     
-    static quantizeNormals(normals) {
-        // 将法线从 Float32 转换为 Int8
-        const quantized = new Int8Array(normals.length);
-        for (let i = 0; i < normals.length; i++) {
-            quantized[i] = Math.round(normals[i] * 127);
-        }
-        return quantized;
-    }
-    
-    static quantizeUVs(uvs) {
-        // UV 坐标通常不需要高精度
-        const quantized = new Uint16Array(uvs.length);
-        for (let i = 0; i < uvs.length; i += 2) {
-            quantized[i] = Math.round(uvs[i] * 65535);
-            quantized[i + 1] = Math.round(uvs[i + 1] * 65535);
-        }
-        return quantized;
-    }
+    // 返回相交的网格单元键值
+    return this.calculateIntersectingCells(frustum);
+  }
 }
 ```
 
-### 细节层次 (LOD)
+### 遮挡剔除
+
 ```javascript
-class LODSystem {
-    constructor() {
-        this.lodLevels = new Map();
-        this.distanceThresholds = [10, 25, 50, 100];
+class OcclusionCulling {
+  constructor(renderer, camera) {
+    this.renderer = renderer;
+    this.camera = camera;
+    this.occlusionQuery = null;
+  }
+  
+  async isObjectVisible(object) {
+    // 使用硬件遮挡查询
+    if (!this.occlusionQuery) {
+      this.occlusionQuery = this.renderer.createOcclusionQuery();
     }
     
-    createLODForObject(object, lodConfig) {
-        const lodGroup = new THREE.LOD();
-        
-        lodConfig.levels.forEach((level, index) => {
-            const geometry = this.createSimplifiedGeometry(
-                object.geometry, 
-                level.simplification
-            );
-            
-            const mesh = new THREE.Mesh(geometry, object.material);
-            lodGroup.addLevel(mesh, this.distanceThresholds[index]);
-        });
-        
-        this.lodLevels.set(object, lodGroup);
-        return lodGroup;
-    }
+    this.renderer.beginOcclusionQuery(this.occlusionQuery);
     
-    createSimplifiedGeometry(originalGeometry, factor) {
-        if (factor >= 0.8) return originalGeometry.clone();
-        
-        const geometry = originalGeometry.clone();
-        const positionAttribute = geometry.getAttribute('position');
-        
-        if (factor <= 0.3) {
-            // 对于高度简化，使用更激进的方法
-            return this.aggressiveSimplify(geometry, factor);
-        }
-        
-        // 简化顶点数据
-        const simplifiedPositions = [];
-        const vertexMap = new Map();
-        
-        for (let i = 0; i < positionAttribute.count; i++) {
-            if (Math.random() > factor) continue; // 随机采样
-            
-            const x = positionAttribute.getX(i);
-            const y = positionAttribute.getY(i);
-            const z = positionAttribute.getZ(i);
-            
-            const key = `${x.toFixed(2)},${y.toFixed(2)},${z.toFixed(2)}`;
-            if (!vertexMap.has(key)) {
-                vertexMap.set(key, simplifiedPositions.length / 3);
-                simplifiedPositions.push(x, y, z);
-            }
-        }
-        
-        // 创建新的简化几何体
-        const simplifiedGeometry = new THREE.BufferGeometry();
-        simplifiedGeometry.setAttribute(
-            'position',
-            new THREE.Float32BufferAttribute(simplifiedPositions, 3)
-        );
-        
-        return simplifiedGeometry;
-    }
+    // 渲染对象的简化边界框
+    this.renderBoundingBox(object);
     
-    aggressiveSimplify(geometry, factor) {
-        // 使用边界球简化
-        const boundingSphere = new THREE.Sphere();
-        geometry.boundingSphere = boundingSphere;
-        
-        // 创建非常简化的几何体表示
-        const simplified = new THREE.SphereGeometry(
-            boundingSphere.radius * 0.5,
-            Math.max(4, Math.round(8 * factor)),
-            Math.max(2, Math.round(4 * factor))
-        );
-        
-        return simplified;
-    }
+    this.renderer.endOcclusionQuery();
     
-    updateLOD(cameraPosition) {
-        for (const [object, lodGroup] of this.lodLevels) {
-            const distance = cameraPosition.distanceTo(lodGroup.position);
-            lodGroup.update(distance);
-        }
-    }
-}
-```
-
-## 渲染状态优化
-
-### 绘制调用合并
-```javascript
-class BatchRenderer {
-    constructor(gl) {
-        this.gl = gl;
-        this.batches = new Map();
-        this.mergedGeometries = new Map();
-    }
-    
-    addToBatch(key, geometry, material, matrix) {
-        if (!this.batches.has(key)) {
-            this.batches.set(key, {
-                geometries: [],
-                material: material,
-                matrices: []
-            });
-        }
-        
-        const batch = this.batches.get(key);
-        batch.geometries.push(geometry);
-        batch.matrices.push(matrix);
-    }
-    
-    mergeBatch(key) {
-        const batch = this.batches.get(key);
-        if (!batch || batch.geometries.length === 0) return null;
-        
-        if (batch.geometries.length === 1) {
-            // 单个几何体，不需要合并
-            return {
-                geometry: batch.geometries[0],
-                material: batch.material,
-                matrices: batch.matrices
-            };
-        }
-        
-        // 合并多个几何体
-        const mergedGeometry = this.mergeGeometries(batch.geometries);
-        this.mergedGeometries.set(key, mergedGeometry);
-        
-        return {
-            geometry: mergedGeometry,
-            material: batch.material,
-            matrices: batch.matrices
-        };
-    }
-    
-    mergeGeometries(geometries) {
-        const merged = new THREE.BufferGeometry();
-        const positions = [];
-        const normals = [];
-        const uvs = [];
-        const indices = [];
-        
-        let vertexOffset = 0;
-        
-        geometries.forEach(geometry => {
-            // 合并顶点数据
-            const posAttr = geometry.getAttribute('position');
-            const normalAttr = geometry.getAttribute('normal');
-            const uvAttr = geometry.getAttribute('uv');
-            
-            for (let i = 0; i < posAttr.count; i++) {
-                positions.push(posAttr.getX(i), posAttr.getY(i), posAttr.getZ(i));
-                if (normalAttr) {
-                    normals.push(normalAttr.getX(i), normalAttr.getY(i), normalAttr.getZ(i));
-                }
-                if (uvAttr) {
-                    uvs.push(uvAttr.getX(i), uvAttr.getY(i));
-                }
-            }
-            
-            // 合并索引数据
-            if (geometry.index) {
-                for (let i = 0; i < geometry.index.count; i++) {
-                    indices.push(geometry.index.getX(i) + vertexOffset);
-                }
-            }
-            
-            vertexOffset += posAttr.count;
-        });
-        
-        merged.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-        if (normals.length > 0) {
-            merged.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
-        }
-        if (uvs.length > 0) {
-            merged.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
-        }
-        if (indices.length > 0) {
-            merged.setIndex(indices);
-        }
-        
-        return merged;
-    }
-    
-    renderBatch(batchData) {
-        const { geometry, material, matrices } = batchData;
-        
-        // 设置几何体和材质
-        this.setupGeometry(geometry);
-        this.setupMaterial(material);
-        
-        if (matrices.length === 1) {
-            // 单个实例
-            this.updateModelMatrix(matrices[0]);
-            this.gl.drawElements(this.gl.TRIANGLES, geometry.index.count, this.gl.UNSIGNED_SHORT, 0);
-        } else {
-            // 实例化渲染
-            this.renderInstanced(geometry, matrices);
-        }
-    }
-    
-    renderInstanced(geometry, matrices) {
-        // 使用实例化数组渲染多个实例
-        const matrixBuffer = this.gl.createBuffer();
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, matrixBuffer);
-        
-        const matrixData = new Float32Array(matrices.length * 16);
-        matrices.forEach((matrix, index) => {
-            matrixData.set(matrix.elements, index * 16);
-        });
-        
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, matrixData, this.gl.STATIC_DRAW);
-        
-        // 设置实例化属性
-        for (let i = 0; i < 4; i++) {
-            const location = this.getAttribLocation(`instanceMatrix_${i}`);
-            this.gl.enableVertexAttribArray(location);
-            this.gl.vertexAttribPointer(location, 4, this.gl.FLOAT, false, 64, i * 16);
-            this.gl.vertexAttribDivisor(location, 1);
-        }
-        
-        // 实例化绘制
-        this.gl.drawElementsInstanced(
-            this.gl.TRIANGLES,
-            geometry.index.count,
-            this.gl.UNSIGNED_SHORT,
-            0,
-            matrices.length
-        );
-    }
-}
-```
-
-### 状态管理优化
-```javascript
-class RenderStateManager {
-    constructor(gl) {
-        this.gl = gl;
-        this.currentState = {
-            program: null,
-            vertexArray: null,
-            textureUnits: new Array(8).fill(null),
-            blend: false,
-            depthTest: false,
-            cullFace: false
-        };
-        
-        this.stateChanges = 0;
-    }
-    
-    useProgram(program) {
-        if (this.currentState.program !== program) {
-            this.gl.useProgram(program);
-            this.currentState.program = program;
-            this.stateChanges++;
-        }
-    }
-    
-    bindVertexArray(vao) {
-        if (this.currentState.vertexArray !== vao) {
-            this.gl.bindVertexArray(vao);
-            this.currentState.vertexArray = vao;
-            this.stateChanges++;
-        }
-    }
-    
-    bindTexture(unit, texture) {
-        if (this.currentState.textureUnits[unit] !== texture) {
-            this.gl.activeTexture(this.gl.TEXTURE0 + unit);
-            this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-            this.currentState.textureUnits[unit] = texture;
-            this.stateChanges++;
-        }
-    }
-    
-    setBlend(enable) {
-        if (this.currentState.blend !== enable) {
-            if (enable) {
-                this.gl.enable(this.gl.BLEND);
-            } else {
-                this.gl.disable(this.gl.BLEND);
-            }
-            this.currentState.blend = enable;
-            this.stateChanges++;
-        }
-    }
-    
-    setDepthTest(enable) {
-        if (this.currentState.depthTest !== enable) {
-            if (enable) {
-                this.gl.enable(this.gl.DEPTH_TEST);
-            } else {
-                this.gl.disable(this.gl.DEPTH_TEST);
-            }
-            this.currentState.depthTest = enable;
-            this.stateChanges++;
-        }
-    }
-    
-    setCullFace(enable) {
-        if (this.currentState.cullFace !== enable) {
-            if (enable) {
-                this.gl.enable(this.gl.CULL_FACE);
-            } else {
-                this.gl.disable(this.gl.CULL_FACE);
-            }
-            this.currentState.cullFace = enable;
-            this.stateChanges++;
-        }
-    }
-    
-    resetFrameStats() {
-        this.stateChanges = 0;
-    }
-    
-    getStats() {
-        return {
-            stateChanges: this.stateChanges
-        };
-    }
-}
-```
-
-## 纹理优化
-
-### 纹理压缩与流式加载
-```javascript
-class TextureOptimizer {
-    constructor(gl) {
-        this.gl = gl;
-        this.textureCache = new Map();
-        this.compressedFormats = this.detectCompressedFormats();
-    }
-    
-    detectCompressedFormats() {
-        const formats = {};
-        const ext = this.gl.getExtension('WEBGL_compressed_texture_s3tc') ||
-                   this.gl.getExtension('WEBGL_compressed_texture_etc') ||
-                   this.gl.getExtension('WEBGL_compressed_texture_pvrtc');
-        
-        if (ext) {
-            if (ext.COMPRESSED_RGB_S3TC_DXT1_EXT) {
-                formats.dxt1 = ext.COMPRESSED_RGB_S3TC_DXT1_EXT;
-            }
-            if (ext.COMPRESSED_RGBA_S3TC_DXT5_EXT) {
-                formats.dxt5 = ext.COMPRESSED_RGBA_S3TC_DXT5_EXT;
-            }
-        }
-        
-        return formats;
-    }
-    
-    async loadCompressedTexture(url, format = 'dxt1') {
-        const cacheKey = `${url}_${format}`;
-        if (this.textureCache.has(cacheKey)) {
-            return this.textureCache.get(cacheKey);
-        }
-        
-        try {
-            const response = await fetch(url);
-            const arrayBuffer = await response.arrayBuffer();
-            
-            const texture = this.gl.createTexture();
-            this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-            
-            // 解析压缩纹理数据（假设为已知格式）
-            const textureData = this.parseCompressedTexture(arrayBuffer, format);
-            
-            this.gl.compressedTexImage2D(
-                this.gl.TEXTURE_2D,
-                0,
-                this.compressedFormats[format],
-                textureData.width,
-                textureData.height,
-                0,
-                textureData.data
-            );
-            
-            this.setTextureParameters();
-            
-            this.textureCache.set(cacheKey, texture);
-            return texture;
-            
-        } catch (error) {
-            console.error('Failed to load compressed texture:', error);
-            return this.loadFallbackTexture(url);
-        }
-    }
-    
-    setTextureParameters() {
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR_MIPMAP_LINEAR);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.REPEAT);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.REPEAT);
-    }
-    
-    createMipmaps(texture, levels = 4) {
-        this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-        this.gl.generateMipmap(this.gl.TEXTURE_2D);
-        
-        // 手动设置各层级的细节级别
-        for (let i = 1; i <= levels; i++) {
-            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAX_LEVEL, i);
-        }
-    }
-    
-    // 纹理图集
-    createTextureAtlas(textures, atlasSize = 2048) {
-        const canvas = document.createElement('canvas');
-        canvas.width = atlasSize;
-        canvas.height = atlasSize;
-        const ctx = canvas.getContext('2d');
-        
-        const atlas = {
-            texture: this.gl.createTexture(),
-            regions: new Map(),
-            currentX: 0,
-            currentY: 0,
-            rowHeight: 0
-        };
-        
-        this.gl.bindTexture(this.gl.TEXTURE_2D, atlas.texture);
-        
-        // 打包纹理到图集
-        textures.forEach((texture, name) => {
-            const region = this.packTexture(ctx, texture, atlas);
-            atlas.regions.set(name, region);
-        });
-        
-        // 上传图集纹理
-        this.gl.texImage2D(
-            this.gl.TEXTURE_2D, 0, this.gl.RGBA,
-            this.gl.RGBA, this.gl.UNSIGNED_BYTE, canvas
-        );
-        
-        this.setTextureParameters();
-        
-        return atlas;
-    }
-    
-    packTexture(ctx, texture, atlas) {
-        const img = texture.image;
-        const scale = Math.min(
-            (atlas.width - atlas.currentX) / img.width,
-            (atlas.height - atlas.currentY) / img.height
-        );
-        
-        const width = img.width * scale;
-        const height = img.height * scale;
-        
-        // 检查是否需要换行
-        if (atlas.currentX + width > atlas.width) {
-            atlas.currentX = 0;
-            atlas.currentY += atlas.rowHeight;
-            atlas.rowHeight = 0;
-        }
-        
-        ctx.drawImage(img, atlas.currentX, atlas.currentY, width, height);
-        
-        const region = {
-            x: atlas.currentX,
-            y: atlas.currentY,
-            width: width,
-            height: height,
-            u0: atlas.currentX / atlas.width,
-            v0: atlas.currentY / atlas.height,
-            u1: (atlas.currentX + width) / atlas.width,
-            v1: (atlas.currentY + height) / atlas.height
-        };
-        
-        atlas.currentX += width;
-        atlas.rowHeight = Math.max(atlas.rowHeight, height);
-        
-        return region;
-    }
+    // 检查查询结果
+    const visiblePixels = await this.renderer.getOcclusionQueryResult(this.occlusionQuery);
+    return visiblePixels > 0;
+  }
+  
+  renderBoundingBox(object) {
+    const box = new THREE.Box3().setFromObject(object);
+    const helper = new THREE.Box3Helper(box, 0xffffff);
+    this.renderer.render(helper, this.camera);
+    helper.dispose();
+  }
 }
 ```
 
 ## 着色器优化
 
-### 着色器复杂度管理
+### 着色器复杂度控制
+
+```
+着色器优化策略
+高复杂度着色器 → 简化版本
+├── PBR 材质 → Phong 材质
+├── 动态光照 → 烘焙光照
+├── 实时阴影 → 预计算阴影
+└── 复杂后处理 → 选择性启用
+```
+
 ```javascript
-class ShaderOptimizer {
-    static analyzeShaderComplexity(shaderSource) {
-        const analysis = {
-            instructionCount: 0,
-            textureSamples: 0,
-            branching: 0,
-            loops: 0,
-            functions: 0
-        };
-        
-        const lines = shaderSource.split('\n');
-        
-        lines.forEach(line => {
-            const trimmed = line.trim();
-            
-            // 统计指令
-            if (trimmed.includes('=') && trimmed.includes('+')) {
-                analysis.instructionCount++;
-            }
-            
-            // 统计纹理采样
-            if (trimmed.includes('texture') || trimmed.includes('texture2D')) {
-                analysis.textureSamples++;
-            }
-            
-            // 统计分支
-            if (trimmed.includes('if') || trimmed.includes('else')) {
-                analysis.branching++;
-            }
-            
-            // 统计循环
-            if (trimmed.includes('for') || trimmed.includes('while')) {
-                analysis.loops++;
-            }
-            
-            // 统计函数调用
-            if (trimmed.match(/[a-zA-Z_][a-zA-Z0-9_]*\(/)) {
-                analysis.functions++;
-            }
-        });
-        
-        return analysis;
-    }
-    
-    static optimizeShader(shaderSource, targetComplexity = 'medium') {
-        let optimized = shaderSource;
-        
-        switch (targetComplexity) {
-            case 'low':
-                optimized = this.applyLowComplexityOptimizations(optimized);
-                break;
-            case 'medium':
-                optimized = this.applyMediumComplexityOptimizations(optimized);
-                break;
-            case 'high':
-                // 保持原样或应用高级优化
-                break;
-        }
-        
-        return optimized;
-    }
-    
-    static applyLowComplexityOptimizations(shaderSource) {
-        let optimized = shaderSource;
-        
-        // 移除复杂的光照计算
-        optimized = optimized.replace(
-            /vec3\s+calculate[a-zA-Z]*Lighting\([^)]*\)\s*{[^}]*}/g,
-            'vec3 calculateSimpleLighting(vec3 normal, vec3 lightDir) { return vec3(1.0); }'
-        );
-        
-        // 简化数学运算
-        optimized = optimized.replace(/pow\([^,]+,\s*[0-9.]+\)/g, '1.0');
-        optimized = optimized.replace(/sqrt\([^)]+\)/g, '1.0');
-        
-        // 移除不必要的分支
-        optimized = optimized.replace(/if\s*\([^)]+\)\s*{[^}]*}/g, '');
-        
-        return optimized;
-    }
-    
-    static applyMediumComplexityOptimizations(shaderSource) {
-        let optimized = shaderSource;
-        
-        // 减少纹理采样次数
-        optimized = optimized.replace(/texture2D\([^,]+,\s*[^)]+\)/g, (match) => {
-            // 为重复采样添加缓存
-            return match;
-        });
-        
-        // 优化数学运算
-        optimized = optimized.replace(/1\.0\s*\*\s*/g, '');
-        optimized = optimized.replace(/\s*\*\s*1\.0/g, '');
-        
-        return optimized;
-    }
-    
-    static precomputeShaderUniforms(shaderSource, uniforms) {
-        // 预计算常量uniform值
-        let optimized = shaderSource;
-        
-        Object.keys(uniforms).forEach(uniformName => {
-            const value = uniforms[uniformName];
-            if (typeof value === 'number') {
-                const regex = new RegExp(`uniform\\s+float\\s+${uniformName};`, 'g');
-                optimized = optimized.replace(regex, `const float ${uniformName} = ${value};`);
-            }
-        });
-        
-        return optimized;
-    }
+// 高质量 PBR 着色器
+const highQualityMaterial = new THREE.MeshStandardMaterial({
+  metalness: 0.5,
+  roughness: 0.5,
+  envMap: environmentTexture,
+  envMapIntensity: 1.0
+});
+
+// 性能优化版着色器
+const optimizedMaterial = new THREE.MeshLambertMaterial({
+  color: 0xffffff
+});
+
+// 根据性能需求动态切换
+function adjustMaterialQuality(performanceLevel) {
+  if (performanceLevel === 'high') {
+    mesh.material = highQualityMaterial;
+  } else {
+    mesh.material = optimizedMaterial;
+  }
 }
 ```
 
-### 着色器变体系统
+### 着色器预处理
+
 ```javascript
-class ShaderVariantSystem {
-    constructor() {
-        this.variants = new Map();
-        this.featureFlags = new Set();
-    }
-    
-    registerFeature(featureName, condition) {
-        this.featureFlags.add(featureName);
-    }
-    
-    createVariant(baseShader, features) {
-        const variantKey = this.generateVariantKey(features);
-        
-        if (this.variants.has(variantKey)) {
-            return this.variants.get(variantKey);
-        }
-        
-        const variantSource = this.applyFeatures(baseShader, features);
-        const variant = this.compileVariant(variantSource);
-        
-        this.variants.set(variantKey, variant);
-        return variant;
-    }
-    
-    generateVariantKey(features) {
-        return Object.keys(features)
-            .sort()
-            .map(key => `${key}:${features[key]}`)
-            .join('|');
-    }
-    
-    applyFeatures(shaderSource, features) {
-        let processed = shaderSource;
-        
-        // 处理条件编译
-        Object.keys(features).forEach(feature => {
-            const value = features[feature];
-            const definePattern = new RegExp(`#ifdef\\s+${feature}\\s*([^#]*)#endif`, 'g');
-            
-            if (value) {
-                // 启用特性
-                processed = processed.replace(definePattern, '$1');
-            } else {
-                // 禁用特性
-                processed = processed.replace(definePattern, '');
-            }
-        });
-        
-        // 添加特性定义
-        const defines = Object.keys(features)
-            .filter(feature => features[feature])
-            .map(feature => `#define ${feature}`)
-            .join('\n');
-        
-        return `#version 300 es\n${defines}\n${processed}`;
-    }
-    
-    getOptimalVariant(performanceProfile, availableFeatures) {
-        // 根据性能配置选择最佳变体
-        const features = { ...availableFeatures };
-        
-        if (performanceProfile === 'low') {
-            features.SHADOWS = false;
-            features.REFLECTIONS = false;
-            features.POST_PROCESSING = false;
-        } else if (performanceProfile === 'medium') {
-            features.SHADOWS = true;
-            features.REFLECTIONS = false;
-            features.POST_PROCESSING = true;
-        } else {
-            features.SHADOWS = true;
-            features.REFLECTIONS = true;
-            features.POST_PROCESSING = true;
-        }
-        
-        return this.createVariant(this.baseShader, features);
-    }
+// 预编译着色器
+class ShaderPrecompiler {
+  constructor() {
+    this.shaderCache = new Map();
+  }
+  
+  precompileShaders(materials) {
+    materials.forEach(material => {
+      // 强制编译着色器
+      material.needsUpdate = true;
+      
+      // 缓存编译结果
+      const shaderKey = this.getShaderKey(material);
+      this.shaderCache.set(shaderKey, material.program);
+    });
+  }
+  
+  getShaderKey(material) {
+    return `${material.type}_${material.id}`;
+  }
 }
 ```
 
-## 内存管理
+## 内存管理优化
 
-### 资源池系统
+### 资源生命周期管理
+
 ```javascript
-class ResourcePool {
-    constructor() {
-        this.geometryPool = new Map();
-        this.texturePool = new Map();
-        this.materialPool = new Map();
-        this.maxPoolSize = 100;
-    }
+class ResourceManager {
+  constructor() {
+    this.geometries = new Set();
+    this.textures = new Set();
+    this.materials = new Set();
+  }
+  
+  trackGeometry(geometry) {
+    this.geometries.add(geometry);
+    return geometry;
+  }
+  
+  trackTexture(texture) {
+    this.textures.add(texture);
+    return texture;
+  }
+  
+  disposeUnusedResources() {
+    // 清理未使用的几何体
+    this.geometries.forEach(geometry => {
+      if (geometry.userData.refCount === 0) {
+        geometry.dispose();
+        this.geometries.delete(geometry);
+      }
+    });
     
-    acquireGeometry(key, createCallback) {
-        if (this.geometryPool.has(key)) {
-            const geometry = this.geometryPool.get(key);
-            this.geometryPool.delete(key);
-            return geometry;
-        }
-        
-        return createCallback();
+    // 清理未使用的纹理
+    this.textures.forEach(texture => {
+      if (texture.userData.refCount === 0) {
+        texture.dispose();
+        this.textures.delete(texture);
+      }
+    });
+  }
+  
+  // 引用计数管理
+  addReference(resource) {
+    if (!resource.userData.refCount) {
+      resource.userData.refCount = 0;
     }
-    
-    releaseGeometry(key, geometry) {
-        if (this.geometryPool.size < this.maxPoolSize) {
-            this.geometryPool.set(key, geometry);
-        } else {
-            // 池已满，销毁几何体
-            geometry.dispose();
-        }
+    resource.userData.refCount++;
+  }
+  
+  removeReference(resource) {
+    if (resource.userData.refCount) {
+      resource.userData.refCount--;
     }
-    
-    acquireTexture(key, createCallback) {
-        if (this.texturePool.has(key)) {
-            const texture = this.texturePool.get(key);
-            this.texturePool.delete(key);
-            return texture;
-        }
-        
-        return createCallback();
-    }
-    
-    releaseTexture(key, texture) {
-        if (this.texturePool.size < this.maxPoolSize) {
-            this.texturePool.set(key, texture);
-        } else {
-            texture.dispose();
-        }
-    }
-    
-    cleanupUnusedResources(frameCount = 60) {
-        // 清理长时间未使用的资源
-        const now = Date.now();
-        const cleanupThreshold = 60000; // 1分钟
-        
-        this.cleanupPool(this.geometryPool, cleanupThreshold);
-        this.cleanupPool(this.texturePool, cleanupThreshold);
-        this.cleanupPool(this.materialPool, cleanupThreshold);
-    }
-    
-    cleanupPool(pool, threshold) {
-        for (const [key, resource] of pool) {
-            if (Date.now() - resource.lastUsed > threshold) {
-                resource.dispose();
-                pool.delete(key);
-            }
-        }
-    }
+  }
 }
 ```
 
-### 垃圾回收优化
+### 对象池模式
+
 ```javascript
-class MemoryManager {
-    constructor() {
-        this.allocations = new Map();
-        this.memoryBudget = 256 * 1024 * 1024; // 256MB
-        this.currentUsage = 0;
+class ObjectPool {
+  constructor(createFn, resetFn, initialSize = 10) {
+    this.createFn = createFn;
+    this.resetFn = resetFn;
+    this.pool = [];
+    this.used = new Set();
+    
+    // 预创建对象
+    for (let i = 0; i < initialSize; i++) {
+      this.pool.push(this.createFn());
+    }
+  }
+  
+  acquire() {
+    let obj;
+    if (this.pool.length > 0) {
+      obj = this.pool.pop();
+    } else {
+      obj = this.createFn();
     }
     
-    trackAllocation(key, size, object) {
-        this.allocations.set(key, {
-            size: size,
-            object: object,
-            timestamp: Date.now(),
-            accessCount: 0
-        });
+    this.used.add(obj);
+    return obj;
+  }
+  
+  release(obj) {
+    if (this.used.has(obj)) {
+      this.resetFn(obj);
+      this.used.delete(obj);
+      this.pool.push(obj);
+    }
+  }
+  
+  releaseAll() {
+    this.used.forEach(obj => {
+      this.resetFn(obj);
+      this.pool.push(obj);
+    });
+    this.used.clear();
+  }
+}
+
+// 使用对象池管理临时几何体
+const geometryPool = new ObjectPool(
+  () => new THREE.BoxGeometry(1, 1, 1),
+  (geometry) => {
+    // 重置几何体状态
+    geometry.position.set(0, 0, 0);
+    geometry.rotation.set(0, 0, 0);
+    geometry.scale.set(1, 1, 1);
+  }
+);
+```
+
+## 渲染管线优化
+
+### 多线程渲染
+
+使用 Web Workers 分担计算任务：
+
+```javascript
+// 主线程
+const geometryWorker = new Worker('geometry-worker.js');
+
+geometryWorker.onmessage = (event) => {
+  const { geometryData, id } = event.data;
+  const geometry = createGeometryFromData(geometryData);
+  scene.add(new THREE.Mesh(geometry, material));
+};
+
+function generateComplexGeometry() {
+  geometryWorker.postMessage({
+    type: 'generateGeometry',
+    config: { segments: 64 },
+    id: 'geometry-1'
+  });
+}
+
+// Worker 线程 (geometry-worker.js)
+self.onmessage = (event) => {
+  if (event.data.type === 'generateGeometry') {
+    const geometryData = generateGeometryData(event.data.config);
+    self.postMessage({
+      geometryData,
+      id: event.data.id
+    });
+  }
+};
+```
+
+### 渐进式加载
+
+```javascript
+class ProgressiveLoader {
+  constructor() {
+    this.priorityQueue = [];
+    this.loading = false;
+  }
+  
+  addToQueue(resource, priority) {
+    this.priorityQueue.push({ resource, priority });
+    this.priorityQueue.sort((a, b) => b.priority - a.priority);
+    
+    if (!this.loading) {
+      this.processQueue();
+    }
+  }
+  
+  async processQueue() {
+    this.loading = true;
+    
+    while (this.priorityQueue.length > 0) {
+      const { resource } = this.priorityQueue.shift();
+      
+      try {
+        await this.loadResource(resource);
         
-        this.currentUsage += size;
-        
-        // 检查内存预算
-        if (this.currentUsage > this.memoryBudget) {
-            this.cleanup();
+        // 每加载完一个资源检查帧率
+        if (this.shouldYieldToMainThread()) {
+          await new Promise(resolve => setTimeout(resolve, 0));
         }
+      } catch (error) {
+        console.error('Failed to load resource:', error);
+      }
     }
     
-    recordAccess(key) {
-        const allocation = this.allocations.get(key);
-        if (allocation) {
-            allocation.accessCount++;
-            allocation.timestamp = Date.now();
-        }
-    }
-    
-    cleanup() {
-        // 按访问频率和时间排序
-        const sortedAllocations = Array.from(this.allocations.entries())
-            .sort((a, b) => {
-                const aScore = this.calculateCleanupScore(a[1]);
-                const bScore = this.calculateCleanupScore(b[1]);
-                return aScore - bScore;
-            });
-        
-        let freedMemory = 0;
-        const targetFree = this.currentUsage * 0.3; // 释放30%的内存
-        
-        for (const [key, allocation] of sortedAllocations) {
-            if (freedMemory >= targetFree) break;
-            
-            // 释放资源
-            if (allocation.object.dispose) {
-                allocation.object.dispose();
-            }
-            
-            this.allocations.delete(key);
-            freedMemory += allocation.size;
-            this.currentUsage -= allocation.size;
-        }
-    }
-    
-    calculateCleanupScore(allocation) {
-        const timeScore = (Date.now() - allocation.timestamp) / 1000; // 秒
-        const accessScore = 1 / (allocation.accessCount + 1); // 访问次数越少，分数越高
-        const sizeScore = allocation.size / 1024 / 1024; // MB
-        
-        return timeScore * accessScore * sizeScore;
-    }
-    
-    getMemoryStats() {
-        return {
-            currentUsage: this.currentUsage,
-            budget: this.memoryBudget,
-            allocationCount: this.allocations.size,
-            usagePercentage: (this.currentUsage / this.memoryBudget) * 100
-        };
-    }
+    this.loading = false;
+  }
+  
+  shouldYieldToMainThread() {
+    // 检查帧率，如果低于阈值则让出主线程
+    return this.getCurrentFPS() < 50;
+  }
+  
+  getCurrentFPS() {
+    // 计算当前帧率
+    return 60; // 简化实现
+  }
 }
 ```
 
-## 高级优化技术
+## 性能监控与自适应
 
-### 视锥体剔除优化
+### 实时性能监控
+
 ```javascript
-class AdvancedCullingSystem {
-    constructor(camera) {
-        this.camera = camera;
-        this.frustum = new THREE.Frustum();
-        this.occlusionQueries = new Map();
-        this.visibleObjects = new Set();
+class PerformanceMonitor {
+  constructor() {
+    this.frameTimes = [];
+    this.memoryUsage = [];
+    this.metrics = {
+      fps: 0,
+      frameTime: 0,
+      memory: 0,
+      drawCalls: 0
+    };
+    
+    this.lastTime = performance.now();
+    this.frameCount = 0;
+  }
+  
+  update() {
+    const currentTime = performance.now();
+    const delta = currentTime - this.lastTime;
+    this.lastTime = currentTime;
+    
+    // 计算帧率
+    this.frameTimes.push(delta);
+    if (this.frameTimes.length > 60) {
+      this.frameTimes.shift();
     }
     
-    updateFrustum() {
-        this.frustum.setFromProjectionMatrix(
-            new THREE.Matrix4().multiplyMatrices(
-                this.camera.projectionMatrix,
-                this.camera.matrixWorldInverse
-            )
-        );
+    const averageFrameTime = this.frameTimes.reduce((a, b) => a + b) / this.frameTimes.length;
+    this.metrics.fps = 1000 / averageFrameTime;
+    this.metrics.frameTime = averageFrameTime;
+    
+    // 监控内存使用
+    if (performance.memory) {
+      this.metrics.memory = performance.memory.usedJSHeapSize;
     }
     
-    isInFrustum(object) {
-        const boundingBox = new THREE.Box3().setFromObject(object);
-        return this.frustum.intersectsBox(boundingBox);
-    }
-    
-    // 层次视锥体剔除
-    hierarchicalCulling(scene) {
-        this.visibleObjects.clear();
-        this.traverseScene(scene, (object) => {
-            if (this.isInFrustum(object)) {
-                this.visibleObjects.add(object);
-                return true; // 继续遍历子节点
-            }
-            return false; // 跳过子节点
-        });
-    }
-    
-    traverseScene(object, callback, depth = 0) {
-        const shouldContinue = callback(object);
-        
-        if (shouldContinue && object.children) {
-            object.children.forEach(child => {
-                this.traverseScene(child, callback, depth + 1);
-            });
-        }
-    }
-    
-    // 遮挡剔除
-    setupOcclusionQuery(object) {
-        const query = this.gl.createQuery();
-        this.occlusionQueries.set(object, query);
-        
-        // 使用简化边界框进行遮挡查询
-        const boundingBox = new THREE.Box3().setFromObject(object);
-        const simpleGeometry = this.createBoundingBoxGeometry(boundingBox);
-        
-        this.gl.beginQuery(this.gl.ANY_SAMPLES_PASSED, query);
-        this.renderBoundingBox(simpleGeometry);
-        this.gl.endQuery(this.gl.ANY_SAMPLES_PASSED);
-        
-        return query;
-    }
-    
-    checkOcclusion(object) {
-        const query = this.occlusionQueries.get(object);
-        if (!query) return true;
-        
-        const available = this.gl.getQueryParameter(query, this.gl.QUERY_RESULT_AVAILABLE);
-        if (available) {
-            const passed = this.gl.getQueryParameter(query, this.gl.QUERY_RESULT);
-            this.occlusionQueries.delete(object);
-            return passed;
-        }
-        
-        return true; // 默认可见
-    }
+    this.frameCount++;
+  }
+  
+  shouldReduceQuality() {
+    return this.metrics.fps < 50 || 
+           this.metrics.frameTime > 20 ||
+           (this.metrics.memory > 500 * 1024 * 1024); // 500MB
+  }
+  
+  getQualityLevel() {
+    if (this.metrics.fps > 55) return 'high';
+    if (this.metrics.fps > 45) return 'medium';
+    return 'low';
+  }
 }
 ```
 
-### 动态分辨率缩放
+### 自适应渲染质量
+
 ```javascript
-class DynamicResolutionScaling {
-    constructor(renderer, targetFrameTime = 16.67) { // 60FPS
-        this.renderer = renderer;
-        this.targetFrameTime = targetFrameTime;
-        this.currentScale = 1.0;
-        this.minScale = 0.5;
-        this.maxScale = 1.0;
-        this.frameTimes = [];
+class AdaptiveRenderer {
+  constructor(renderer, scene) {
+    this.renderer = renderer;
+    this.scene = scene;
+    this.performanceMonitor = new PerformanceMonitor();
+    this.qualitySettings = {
+      high: { pixelRatio: 2, shadows: true, antialias: true },
+      medium: { pixelRatio: 1.5, shadows: true, antialias: false },
+      low: { pixelRatio: 1, shadows: false, antialias: false }
+    };
+    
+    this.currentQuality = 'high';
+  }
+  
+  update() {
+    this.performanceMonitor.update();
+    const newQuality = this.performanceMonitor.getQualityLevel();
+    
+    if (newQuality !== this.currentQuality) {
+      this.applyQualitySettings(newQuality);
+      this.currentQuality = newQuality;
+    }
+  }
+  
+  applyQualitySettings(quality) {
+    const settings = this.qualitySettings[quality];
+    
+    // 应用渲染设置
+    this.renderer.setPixelRatio(settings.pixelRatio);
+    this.renderer.shadowMap.enabled = settings.shadows;
+    
+    // 更新场景质量
+    this.updateSceneQuality(quality);
+  }
+  
+  updateSceneQuality(quality) {
+    this.scene.traverse(child => {
+      if (child.isMesh) {
+        // 根据质量调整材质
+        this.adjustMaterialForQuality(child.material, quality);
+        
+        // 启用/禁用细节层级
+        if (child.lod) {
+          child.lod.autoUpdate = quality === 'high';
+        }
+      }
+    });
+  }
+  
+  adjustMaterialForQuality(material, quality) {
+    if (Array.isArray(material)) {
+      material.forEach(mat => this.adjustSingleMaterial(mat, quality));
+    } else {
+      this.adjustSingleMaterial(material, quality);
+    }
+  }
+  
+  adjustSingleMaterial(material, quality) {
+    switch (quality) {
+      case 'high':
+        if (material instanceof THREE.MeshLambertMaterial) {
+          // 升级到更高质量的材质
+          const newMaterial = new THREE.MeshStandardMaterial({
+            color: material.color,
+            map: material.map
+          });
+          material.dispose();
+          return newMaterial;
+        }
+        break;
+        
+      case 'low':
+        if (material instanceof THREE.MeshStandardMaterial) {
+          // 降级到性能更好的材质
+          const newMaterial = new THREE.MeshLambertMaterial({
+            color: material.color,
+            map: material.map
+          });
+          material.dispose();
+          return newMaterial;
+        }
+        break;
     }
     
-    update(frameTime) {
-        this.frameTimes.push(frameTime);
-        if
+    return material;
+  }
+}
+```
+
+## 浏览器特定优化
+
+### 利用现代浏览器特性
+
+```javascript
+class BrowserOptimizations {
+  constructor() {
+    this.checkBrowserFeatures();
+  }
+  
+  checkBrowserFeatures() {
+    this.features = {
+      webGL2: this.checkWebGL2(),
+      compressedTextures: this.checkCompressedTextures(),
+      parallelShaderCompile: this.checkParallelShaderCompile(),
+      hardwareAcceleration: this.checkHardwareAcceleration()
+    };
+  }
+  
+  applyOptimizations(renderer) {
+    const gl = renderer.getContext();
+    
+    // 启用并行着色器编译
+    if (this.features.parallelShaderCompile) {
+      gl.getExtension('KHR_parallel_shader_compile');
+    }
+    
+    // 使用高性能渲染模式
+    if (this.features.hardwareAcceleration) {
+      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
+    } else {
+      renderer.setPixelRatio(1);
+    }
+  }
+  
+  checkWebGL2() {
+    const canvas = document.createElement('canvas');
+    return !!(canvas.getContext('webgl2') || canvas.getContext('experimental-webgl2'));
+  }
+  
+  checkCompressedTextures() {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl');
+    return !!(gl.getExtension('WEBGL_compressed_texture_astc') ||
+              gl.getExtension('WEBGL_compressed_texture_s3tc'));
+  }
+  
+  checkParallelShaderCompile() {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl');
+    return !!gl.getExtension('KHR_parallel_shader_compile');
+  }
+  
+  checkHardwareAcceleration() {
+    // 检测硬件加速支持
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl');
+    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+    if (debugInfo) {
+      const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+      return renderer.indexOf('GPU') !== -1 || 
+             renderer.indexOf('Graphics') !== -1;
+    }
+    return true; // 假设支持硬件加速
+  }
+}
+```

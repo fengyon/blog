@@ -1,351 +1,162 @@
 # 3D 图形学基础
 
-## 三维坐标系
+3D 图形学是计算机科学中研究如何在二维屏幕上创建和渲染三维对象的领域。它广泛应用于游戏、虚拟现实、建筑设计和 Web 交互中。在 Web 环境中，3D 图形通过 WebGL 和高级库 (如 Three.js) 实现，使开发者能够构建跨平台的沉浸式体验。本文将介绍 3D 图形学的基础概念，着重于核心特点和技术细节，并通过纯文本示意图帮助理解。
 
-3D 图形学使用三维坐标系描述物体位置：
+## 3D 坐标系统
+
+3D 图形学的基础是三维坐标系统，通常使用右手坐标系或左手坐标系定义空间。在右手坐标系中，X 轴向右、Y 轴向上、Z 轴向外 (指向观察者)，而左手坐标系则相反，Z 轴向内 (远离观察者)。Web 环境常用右手坐标系。
+
+特点：
+- 允许精确定位对象在空间中的位置。
+- 支持向量运算，如点乘和叉乘，用于计算角度和方向。
+
+示意图 (右手坐标系)：
 ```
-      y
+      Y
       |
       |
-      +--- x
+      +--- X
      /
     /
-   z
+   Z
 ```
+这里，X、Y、Z 轴相互垂直，定义了一个三维空间。
 
-右手坐标系规则：
-- x 轴：右方向
-- y 轴：上方向
-- z 轴：向前方向
+## 基本几何元素
 
-## 顶点与图元
+3D 图形由基本几何元素构成，包括顶点、边和面。顶点是空间中的点，边连接顶点，面由多个顶点组成 (通常为三角形或四边形)。三角形是渲染中最常用的面，因为它能确保平面性和高效计算。
 
-### 顶点定义
-顶点包含位置、颜色、法线等属性：
-```javascript
-// WebGL顶点数据示例
-const vertices = new Float32Array([
-  // x,   y,   z,   r,   g,   b
-   0.0, 0.5, 0.0, 1.0, 0.0, 0.0,  // 红色顶点
-  -0.5,-0.5, 0.0, 0.0, 1.0, 0.0,  // 绿色顶点
-   0.5,-0.5, 0.0, 0.0, 0.0, 1.0   // 蓝色顶点
-]);
+特点：
+- 三角形网格是 3D 模型的标准表示，易于变换和渲染。
+- 顶点数据通常存储为数组，包含位置、法线等信息。
+
+示意图 (一个简单的三角形面)：
 ```
-
-### 图元类型
-基本图元包括：
-- 点：单个顶点
-- 线：两个顶点连线
-- 三角形：三个顶点构成的面片
+  顶点 A
+    /\
+   /  \
+  /    \
+顶点 B---顶点 C
 ```
-点：    *  
-线：    *---*
-三角形： *
-        /\
-       /  \
-      *----*
-```
+这个三角形由三个顶点 (A、B、C) 和三条边组成，形成一个面。
 
-## 变换系统
+## 变换
 
-### 模型变换
-物体从模型空间到世界空间的变换：
-```javascript
-// 模型矩阵计算
-function createModelMatrix(translation, rotation, scale) {
-  const modelMatrix = mat4.create();
-  mat4.translate(modelMatrix, modelMatrix, translation);
-  mat4.rotateX(modelMatrix, modelMatrix, rotation[0]);
-  mat4.rotateY(modelMatrix, modelMatrix, rotation[1]);
-  mat4.rotateZ(modelMatrix, modelMatrix, rotation[2]);
-  mat4.scale(modelMatrix, modelMatrix, scale);
-  return modelMatrix;
-}
-```
+变换是将 3D 对象从一个位置、方向或大小移动到另一个的过程，包括平移、旋转和缩放。这些操作通过矩阵乘法实现，使用 4x4 齐次坐标矩阵来统一处理。
 
-### 视图变换
-从世界空间到相机空间的变换：
-```
-世界坐标系       相机坐标系
-    y              z
-    |             /
-    |            /
-    +--- x      *--- x
-   /            |
-  /             y
- z
-```
+特点：
+- 矩阵变换高效且可组合，例如先旋转后平移。
+- 在 Web 3D 中，变换通过模型矩阵应用于对象，实现动态场景。
 
-### 投影变换
-
-#### 正交投影
-平行投影，无透视效果：
+示意图 (平移变换)：
 ```
-近裁剪面    远裁剪面
-  |          |
-  |  物体    |
-  |  大小    |
-  |  不变    |
-  |          |
+初始位置：    平移后：
+   O           O
+  /|\         /|\
+   |           |
+   |           |
 ```
+这里，对象从原点移动到新位置，箭头表示移动方向。
 
-#### 透视投影
-模拟人眼视觉效果，近大远小：
+旋转和缩放类似，例如旋转绕 Z 轴：
 ```
-   视锥体
-    /|
-   / |
-  /  |
- /   |
+旋转前：    旋转后：
+  []         []
+  ||         \\
 ```
+对象绕轴转动，改变方向。
 
-```javascript
-// 透视投影矩阵
-const projectionMatrix = mat4.create();
-mat4.perspective(
-  projectionMatrix,
-  45 * Math.PI / 180, // 视野角度
-  canvas.width / canvas.height, // 宽高比
-  0.1,  // 近平面
-  100.0 // 远平面
-);
+## 投影
+
+投影是将 3D 场景映射到 2D 屏幕的过程，主要有两种类型：透视投影和正交投影。透视投影模拟人眼视角，远处物体变小；正交投影保持物体大小不变，常用于工程绘图。
+
+特点：
+- 透视投影提供深度感，适合真实感渲染。
+- 正交投影用于精确测量，无远近缩放。
+
+示意图 (透视投影)：
 ```
-
-## 渲染管线
-
-### 图形管线流程
+  眼睛（视点）
+    \
+     \   3D 对象
+      \ /
+       \
+        \
+         2D 屏幕（图像）
 ```
-顶点数据 → 顶点着色器 → 图元装配 → 光栅化 → 片段着色器 → 帧缓冲区
+从视点出发，光线穿过对象投射到屏幕上，形成近大远小的效果。
+
+正交投影示意图：
 ```
-
-### 顶点着色器
-处理每个顶点的变换：
-```glsl
-// GLSL顶点着色器
-attribute vec3 aPosition;
-attribute vec3 aColor;
-
-uniform mat4 uModelViewMatrix;
-uniform mat4 uProjectionMatrix;
-
-varying vec3 vColor;
-
-void main() {
-  gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aPosition, 1.0);
-  vColor = aColor;
-}
+  3D 对象
+    | |
+    | |
+    | |
+    ---
+    2D 屏幕（平行投影）
 ```
+所有投影线平行，对象大小不变。
 
-### 片段着色器
-计算每个像素的颜色：
-```glsl
-// GLSL片段着色器
-precision mediump float;
+## 光照和着色
 
-varying vec3 vColor;
+光照模拟光线与物体交互，影响颜色和明暗。常见模型包括环境光、漫反射和镜面反射。着色是计算每个像素颜色的过程，如平面着色或 Gouraud 着色。
 
-void main() {
-  gl_FragColor = vec4(vColor, 1.0);
-}
-```
+特点：
+- 漫反射依赖光线方向与表面法线的夹角。
+- 镜面反射产生高光，增强真实感。
 
-## 光照模型
+示意图 (漫反射)：
+```
+  光源
+    \
+     \   表面法线
+      \ /
+       O（物体表面）
+```
+光线照射表面，法线方向决定明暗程度。
 
-### 冯氏光照模型
-包含环境光、漫反射、镜面反射三个分量：
+着色示例 (Gouraud 着色)：
 ```
-最终颜色 = 环境光 + 漫反射 + 镜面反射
+顶点颜色：    插值后表面：
+  A(红)        A---B
+   /\          |   |
+  /  \         |   |
+ B(绿)--C(蓝)  C---D
 ```
-
-#### 环境光
-模拟间接光照：
-```
-环境光强度 = 环境光颜色 × 材质环境系数
-```
-
-#### 漫反射
-Lambert 余弦定律：
-```
-漫反射强度 = 光颜色 × 材质漫反射系数 × max(0, dot(N, L))
-```
-其中：
-- N：表面法线
-- L：光源方向
-
-#### 镜面反射
-Phong 模型：
-```
-镜面反射强度 = 光颜色 × 材质镜面系数 × pow(max(0, dot(R, V)), 光泽度)
-```
-其中：
-- R：反射光方向
-- V：视线方向
-
-```glsl
-// 光照计算GLSL实现
-vec3 calculateLight(Light light, vec3 normal, vec3 fragPos, vec3 viewDir) {
-  // 环境光
-  vec3 ambient = light.ambient * material.ambient;
-  
-  // 漫反射
-  vec3 lightDir = normalize(light.position - fragPos);
-  float diff = max(dot(normal, lightDir), 0.0);
-  vec3 diffuse = light.diffuse * (diff * material.diffuse);
-  
-  // 镜面反射
-  vec3 reflectDir = reflect(-lightDir, normal);
-  float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-  vec3 specular = light.specular * (spec * material.specular);
-  
-  return ambient + diffuse + specular;
-}
-```
+颜色在顶点间平滑过渡。
 
 ## 纹理映射
 
-### 纹理坐标系统
-2D 纹理使用 UV 坐标：
-```
-(0,1)---(1,1)
-  |       |
-  |       |
-  |       |
-(0,0)---(1,0)
-```
+纹理映射是将 2D 图像 (纹理) 包裹到 3D 模型表面的技术，增加细节而不增加几何复杂度。它涉及 UV 坐标映射，将纹理像素 (texel) 对应到模型顶点。
 
-### 纹理过滤
+特点：
+- 提高渲染效率，避免复杂建模。
+- 支持多种效果，如凹凸映射和环境映射。
 
-#### 最近邻过滤
-取最近的纹素，产生块状效果：
+示意图 (纹理应用到立方体)：
 ```
-纹理坐标 → 找到最近纹素 → 输出颜色
+立方体网格：    纹理映射后：
+  +-----+        +-----+
+  |     |        |#####|
+  |     |   =>   |#####|
+  +-----+        +-----+
 ```
+2D 纹理被拉伸到立方体表面，填充图案。
 
-#### 双线性过滤
-四个相邻纹素的加权平均：
-```
-A---B
-|   |
-|   |
-C---D
-权重基于相对位置插值
-```
+## Web 3D 实现
 
-```javascript
-// WebGL纹理设置
-const texture = gl.createTexture();
-gl.bindTexture(gl.TEXTURE_2D, texture);
-gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-```
+在 Web 环境中，3D 图形主要通过 WebGL (基于 OpenGL ES) 实现，它提供低级 API 直接操作 GPU。高级库如 Three.js 简化了开发，封装了场景、相机和渲染器。
 
-## 深度测试
+特点：
+- WebGL 支持硬件加速，实现高性能渲染。
+- Three.js 提供声明式 API，易于创建复杂场景。
 
-### Z-Buffer 算法
-每个像素存储深度值，解决遮挡问题：
+示意图 (WebGL 渲染管线简化)：
 ```
-深度缓冲区初始化：所有像素深度 = 最大值
+顶点数据 -> 顶点着色器 -> 图元组装 -> 光栅化 -> 片段着色器 -> 帧缓冲
+```
+数据流经多个阶段，最终输出到屏幕。
 
-对于每个三角形：
-  对于每个覆盖的像素：
-    计算该像素深度值
-    如果深度值 < 缓冲区深度值：
-      更新颜色缓冲区
-      更新深度缓冲区
-```
+## 总结
 
-## 着色技术
-
-### 平面着色
-每个多边形使用单一颜色：
-```
-三角形：恒定颜色
-    /\
-   /  \
-  /    \
- /______\
-```
-
-### Gouraud 着色
-顶点颜色插值：
-```
-顶点计算光照 → 三角形内颜色插值
-    /\
-   /  \
-  /    \
- /______\
-颜色平滑过渡
-```
-
-### Phong 着色
-顶点法线插值，每个像素计算光照：
-```
-顶点法线插值 → 每个像素独立计算光照
-    /\
-   /  \
-  /    \
- /______\
-高光效果更精确
-```
-
-## 几何处理
-
-### 背面剔除
-基于法线与视线方向剔除背面三角形：
-```
-法线N，视线V
-如果 dot(N, V) > 0：正面可见
-如果 dot(N, V) < 0：背面剔除
-```
-
-### 视锥体裁剪
-剔除视锥体外部的几何体：
-```
-视锥体六个平面：
-  左、右、上、下、近、远
-顶点与平面方程测试：
-  Ax + By + Cz + D > 0：外部
-  Ax + By + Cz + D ≤ 0：内部
-```
-
-## 现代图形 API
-
-### WebGL 渲染循环
-```javascript
-function render() {
-  // 清除缓冲区
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  
-  // 更新变换
-  const modelViewMatrix = updateModelViewMatrix();
-  
-  // 设置着色器 uniform
-  gl.uniformMatrix4fv(uModelViewMatrix, false, modelViewMatrix);
-  
-  // 绘制
-  gl.drawArrays(gl.TRIANGLES, 0, vertexCount);
-  
-  // 下一帧
-  requestAnimationFrame(render);
-}
-```
-
-### 缓冲区管理
-```javascript
-// 创建顶点缓冲区
-const vertexBuffer = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-
-// 设置顶点属性指针
-gl.vertexAttribPointer(
-  aPosition,
-  3,        // 每个顶点的分量数
-  gl.FLOAT, // 数据类型
-  false,    // 是否归一化
-  24,       // 步长 (6个float × 4字节)
-  0         // 偏移量
-);
-gl.enableVertexAttribArray(aPosition);
-```
+通过理解这些基础概念，开发者可以在 Web 上构建交互式 3D 应用。3D 图形学的核心在于数学和优化，结合 Web 技术，它开启了丰富的视觉体验。

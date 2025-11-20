@@ -1,454 +1,489 @@
-# Web GPU 计算
+# WebGPU 计算
 
-## 概述
+WebGPU 计算是现代 Web 图形编程的革命性特性，它将 GPU 的强大并行计算能力引入 Web 平台。与传统的图形渲染不同，计算管线专注于通用目的计算，能够在数千个线程上并行执行复杂算法，为机器学习、科学计算、物理模拟等领域开辟了新的可能性。
 
-WebGPU 计算管线是通用 GPU 计算在 Web 平台上的实现，它突破了传统图形渲染的限制，让开发者能够利用 GPU 的大规模并行架构进行通用目的计算。与图形渲染管线不同，计算管线专注于数据并行处理，不涉及图元装配、光栅化等图形特定阶段。
+## 计算管线概述
 
+WebGPU 计算管线是一种专门用于通用并行计算的管线类型，它不涉及图形渲染的任何阶段，而是直接在 GPU 上执行计算任务。计算管线使用计算着色器，这些着色器在三维网格的工作组中并行执行。
+
+**计算管线架构**：
 ```
-计算管线架构：
-[CPU 发起计算] → [计算管线] → [工作组执行] → [结果回读]
-     ↓               ↓           ↓           ↓
- [数据准备]      [着色器]    [并行处理]   [数据获取]
+计算管线创建 → 资源绑定 → 工作组调度 → 并行执行 → 结果获取
+     ↓            ↓          ↓           ↓         ↓
+ 着色器模块     缓冲区绑定  线程组织      GPU计算   数据读取
 ```
 
-## 计算管线基础
+与传统图形管线不同，计算管线没有固定的阶段流程，而是完全由开发者控制的计算内核。
 
-### 计算管线创建
+## 计算着色器基础
 
-计算管线由计算着色器和管线布局组成：
+计算着色器是计算管线的核心，使用 WGSL 编写，通过 `@compute` 属性标识。每个计算着色器定义了一个在多个线程上并行执行的计算内核。
+
+### 基本计算着色器结构
+
+```wgsl
+// 简单的向量加法计算着色器
+@group(0) @binding(0) var<storage, read> input_a: array<f32>;
+@group(0) @binding(1) var<storage, read> input_b: array<f32>;
+@group(0) @binding(2) var<storage, read_write> output: array<f32>;
+
+@compute @workgroup_size(64)
+fn main(
+    @builtin(global_invocation_id) global_id: vec3<u32>
+) {
+    let index = global_id.x;
+    
+    // 边界检查
+    if (index < arrayLength(&output)) {
+        output[index] = input_a[index] + input_b[index];
+    }
+}
+```
+
+### 内置变量
+
+计算着色器可以使用多种内置变量访问执行上下文：
+```
+global_invocation_id: 全局调用ID (三维)
+local_invocation_id:  工作组内调用ID  
+workgroup_id:         工作组ID
+num_workgroups:       调度的工作组数量
+```
+
+## 工作组与执行模型
+
+WebGPU 计算使用分层执行模型，将计算任务分解为工作组，每个工作组包含多个调用。
+
+### 执行层次结构
+
+**执行模型示意图**：
+```
+计算网格 (Compute Grid)
+├── 工作组 X 维度
+│   ├── 工作组 (0,0,0) → 64个调用
+│   ├── 工作组 (1,0,0) → 64个调用
+│   └── ...
+├── 工作组 Y 维度
+└── 工作组 Z 维度
+```
+
+每个工作组内部的调用可以共享内存和同步，而不同工作组之间完全独立。
+
+### 工作组大小优化
+
+工作组大小对性能有重大影响，需要根据硬件特性优化：
+
+```wgsl
+// 优化的工作组大小示例
+@compute @workgroup_size(64, 1, 1)  // 1D工作组，适合向量操作
+fn compute_1d() { /* ... */ }
+
+@compute @workgroup_size(8, 8, 1)   // 2D工作组，适合图像处理  
+fn compute_2d() { /* ... */ }
+
+@compute @workgroup_size(4, 4, 4)   // 3D工作组，适合体积计算
+fn compute_3d() { /* ... */ }
+```
+
+## 存储资源绑定
+
+计算着色器通过存储缓冲区与存储纹理与外部数据交互，支持高效的读写操作。
+
+### 存储缓冲区
+
+存储缓冲区提供对结构化数据的高效访问：
 
 ```javascript
+// 创建存储缓冲区
+const storageBuffer = device.createBuffer({
+    size: bufferSize,
+    usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
+    mappedAtCreation: true
+});
+
+// 在绑定组布局中定义存储缓冲区
+const bindGroupLayout = device.createBindGroupLayout({
+    entries: [
+        {
+            binding: 0,
+            visibility: GPUShaderStage.COMPUTE,
+            buffer: {
+                type: "read-only-storage"
+            }
+        },
+        {
+            binding: 1, 
+            visibility: GPUShaderStage.COMPUTE,
+            buffer: {
+                type: "storage"
+            }
+        }
+    ]
+});
+```
+
+### 存储纹理
+
+存储纹理允许计算着色器直接读写纹理数据：
+
+```wgsl
+@group(0) @binding(0) var output_image: texture_storage_2d<rgba8unorm, write>;
+
+@compute @workgroup_size(8, 8)
+fn image_processing(@builtin(global_invocation_id) global_id: vec3<u32>) {
+    let coord = vec2<i32>(global_id.xy);
+    
+    // 直接写入纹理
+    textureStore(output_image, coord, vec4<f32>(1.0, 0.0, 0.0, 1.0));
+}
+```
+
+## 计算管道创建
+
+计算管道的创建比渲染管道更简单，只需要计算着色器模块和管线布局。
+
+### 管道设置
+
+```javascript
+// 创建计算管道
 const computePipeline = device.createComputePipeline({
     layout: pipelineLayout,
     compute: {
         module: computeShaderModule,
-        entryPoint: 'main',
-        constants: {} // 编译时常量
+        entryPoint: 'main'
     }
 });
+
+// 创建管线布局
+const pipelineLayout = device.createPipelineLayout({
+    bindGroupLayouts: [bindGroupLayout]
+});
+
+// 创建绑定组
+const bindGroup = device.createBindGroup({
+    layout: bindGroupLayout,
+    entries: [
+        {
+            binding: 0,
+            resource: { buffer: inputBuffer }
+        },
+        {
+            binding: 1,
+            resource: { buffer: outputBuffer }
+        }
+    ]
+});
 ```
 
-### 计算着色器结构
+## 计算通道编码
 
-WGSL 计算着色器使用特殊的 compute 阶段和工作组配置：
+计算通道负责记录和执行计算命令，通过命令编码器管理。
 
-```wgsl
-@compute @workgroup_size(64)
-fn main(
-    @builtin(global_invocation_id) global_id: vec3<u32>,
-    @builtin(local_invocation_id) local_id: vec3<u32>,
-    @builtin(workgroup_id) group_id: vec3<u32>
-) {
-    // 计算逻辑
-}
-```
-
-## 执行模型与层级
-
-### 工作组架构
-
-WebGPU 计算采用三级并行层次结构：
-
-```
-执行层次：
-[调度网格] → [工作组] → [子组] → [调用]
-    ↓          ↓         ↓       ↓
- [全局]      [共享内存] [SIMD] [单个线程]
-```
-
-### 工作组配置
-
-工作组大小影响性能和资源使用：
-
-```wgsl
-// 一维工作组
-@workgroup_size(64)
-
-// 二维工作组  
-@workgroup_size(8, 8)
-
-// 三维工作组
-@workgroup_size(4, 4, 4)
-```
-
-```
-工作组调度：
-全局网格: [64, 64, 1]   → 4096 个调用
-工作组:   [8, 8, 1]     → 64 个调用/工作组
-调度:    [8, 8, 1]      → 64 个工作组
-```
-
-## 内存模型
-
-### 存储类
-
-WebGPU 计算支持多种存储类型：
-
-```
-存储类层次：
-<storage, read_write>   -- 可读写存储缓冲区
-<storage, read>         -- 只读存储缓冲区  
-<uniform>               -- Uniform 缓冲区
-<workgroup>             -- 工作组共享内存
-<private>               -- 线程私有内存
-```
-
-### 缓冲区类型
+### 计算通道设置
 
 ```javascript
-// 存储缓冲区 - 通用数据存储
-const storageBuffer = device.createBuffer({
-    size: bufferSize,
-    usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
-});
+// 开始计算通道
+const computePass = commandEncoder.beginComputePass();
 
-// Uniform 缓冲区 - 常量数据
-const uniformBuffer = device.createBuffer({
-    size: 256,
-    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-});
+// 设置管道和资源
+computePass.setPipeline(computePipeline);
+computePass.setBindGroup(0, bindGroup);
+
+// 调度计算工作组
+const workgroupCountX = Math.ceil(dataSize / 64);
+computePass.dispatchWorkgroups(workgroupCountX, 1, 1);
+
+// 结束计算通道
+computePass.end();
 ```
 
-### 工作组共享内存
+### 工作组调度
 
-工作组内线程间共享的高速内存：
+工作组调度决定了计算任务的并行程度：
+
+```javascript
+// 1D 调度 - 适合向量操作
+computePass.dispatchWorkgroups(
+    Math.ceil(arrayLength / 64),  // X 维度
+    1,                            // Y 维度  
+    1                             // Z 维度
+);
+
+// 2D 调度 - 适合图像处理
+computePass.dispatchWorkgroups(
+    Math.ceil(imageWidth / 8),    // X 维度
+    Math.ceil(imageHeight / 8),   // Y 维度
+    1                             // Z 维度
+);
+
+// 3D 调度 - 适合体积计算
+computePass.dispatchWorkgroups(
+    Math.ceil(volumeX / 4),       // X 维度
+    Math.ceil(volumeY / 4),       // Y 维度
+    Math.ceil(volumeZ / 4)        // Z 维度
+);
+```
+
+## 共享内存与同步
+
+工作组内的调用可以通过共享内存进行高效通信，并使用屏障进行同步。
+
+### 工作组共享内存
 
 ```wgsl
 var<workgroup> shared_data: array<f32, 64>;
 
 @compute @workgroup_size(64)
-fn main() {
-    let local_id = local_invocation_id.x;
-    shared_data[local_id] = 0.0;
+fn parallel_reduction(@builtin(local_invocation_id) local_id: vec3<u32>) {
+    let local_index = local_id.x;
     
-    workgroupBarrier(); // 内存同步
+    // 将数据加载到共享内存
+    shared_data[local_index] = input_data[global_index];
     
-    // 所有线程现在都能看到其他线程写入的数据
-}
-```
-
-## 计算模式与算法
-
-### 数据并行模式
-
-#### Map 操作
-```wgsl
-@compute @workgroup_size(64)
-fn map_compute(
-    @builtin(global_invocation_id) id: vec3<u32>
-) {
-    let idx = id.x;
-    if (idx < arrayLength(&input)) {
-        output[idx] = input[idx] * 2.0 + 1.0;
-    }
-}
-```
-
-#### Reduce 操作
-```wgsl
-var<workgroup> partial_sums: array<f32, 64>;
-
-@compute @workgroup_size(64)
-fn reduce_compute(
-    @builtin(global_invocation_id) global_id: vec3<u32>,
-    @builtin(local_invocation_id) local_id: vec3<u32>
-) {
-    let idx = global_id.x;
-    let local_idx = local_id.x;
-    
-    // 第一阶段：工作组内归约
-    partial_sums[local_idx] = input[idx];
+    // 同步工作组内所有调用
     workgroupBarrier();
     
-    // 树状归约
-    var offset = 32u;
-    while (offset > 0u) {
-        if (local_idx < offset) {
-            partial_sums[local_idx] += partial_sums[local_idx + offset];
-        }
-        workgroupBarrier();
-        offset = offset / 2u;
+    // 现在可以安全地读取其他调用写入的共享数据
+    if (local_index < 32) {
+        shared_data[local_index] += shared_data[local_index + 32];
     }
     
-    // 工作组0号线程写入结果
-    if (local_idx == 0u) {
-        output[workgroup_id.x] = partial_sums[0];
-    }
-}
-```
-
-### 扫描算法
-
-```wgsl
-// 并行前缀和
-var<workgroup> scan_data: array<f32, 128>;
-
-@compute @workgroup_size(128)
-fn scan_compute(
-    @builtin(local_invocation_id) local_id: vec3<u32>
-) {
-    let idx = local_id.x;
-    
-    // 上行扫描
-    var stride = 1u;
-    while (stride <= 64u) {
-        workgroupBarrier();
-        if (idx >= stride) {
-            scan_data[idx] += scan_data[idx - stride];
-        }
-        stride = stride * 2u;
-    }
-    
-    // 下行扫描
-    if (idx == 0) {
-        scan_data[127] = 0.0;
-    }
-    
-    stride = 64u;
-    while (stride > 0u) {
-        workgroupBarrier();
-        if (idx < stride) {
-            let temp = scan_data[idx];
-            scan_data[idx] = scan_data[idx + stride];
-            scan_data[idx + stride] = temp + scan_data[idx + stride];
-        }
-        stride = stride / 2u;
-    }
-}
-```
-
-## 同步与通信
-
-### 内存屏障
-
-控制内存访问顺序和可见性：
-
-```wgsl
-@compute @workgroup_size(64)
-fn synchronized_compute() {
-    // 写入存储缓冲区
-    output_data[local_id.x] = computed_value;
-    
-    // 确保所有写入在后续读取前完成
-    storageBarrier();
-    
-    // 现在可以安全读取其他线程写入的数据
-    let other_value = output_data[(local_id.x + 1) % 64];
-}
-```
-
-### 工作组同步
-
-```wgsl
-@compute @workgroup_size(64)
-fn workgroup_sync_example() {
-    // 所有线程到达此点
     workgroupBarrier();
     
-    // 仅工作组内内存同步
-    workgroupBarrier();
-    
-    // 存储缓冲区同步（更重，但跨工作组）
-    storageBarrier();
+    // 继续归约操作...
 }
 ```
-
-## 实际应用案例
-
-### 图像处理
-
-```wgsl
-@group(0) @binding(0) var input_image: texture_2d<f32>;
-@group(0) @binding(1) var output_image: texture_storage_2d<rgba8unorm, write>;
-
-@compute @workgroup_size(8, 8)
-fn image_blur(
-    @builtin(global_invocation_id) id: vec3<u32>
-) {
-    let coord = vec2<i32>(id.xy);
-    var sum = vec4<f32>(0.0);
-    
-    // 3x3 高斯模糊
-    for (var i = -1; i <= 1; i++) {
-        for (var j = -1; j <= 1; j++) {
-            let sample_coord = vec2<i32>(coord.x + i, coord.y + j);
-            let weight = gaussian_weights[i + 1][j + 1];
-            sum += textureLoad(input_image, sample_coord, 0) * weight;
-        }
-    }
-    
-    textureStore(output_image, coord, sum);
-}
-```
-
-### 物理模拟
-
-```wgsl
-struct Particle {
-    position: vec3<f32>,
-    velocity: vec3<f32>,
-    force: vec3<f32>,
-    mass: f32
-}
-
-@group(0) @binding(0) var<storage, read_write> particles: array<Particle>;
-
-@compute @workgroup_size(64)
-fn nbody_simulation(
-    @builtin(global_invocation_id) id: vec3<u32>
-) {
-    let idx = id.x;
-    var force = vec3<f32>(0.0);
-    
-    // N-body 力计算
-    for (var i = 0u; i < arrayLength(&particles); i++) {
-        if (i == idx) {
-            continue;
-        }
-        
-        let delta = particles[i].position - particles[idx].position;
-        let distance = length(delta);
-        let dir = normalize(delta);
-        
-        // 引力计算
-        force += G * particles[i].mass * particles[idx].mass * 
-                dir / (distance * distance + softening);
-    }
-    
-    particles[idx].force = force;
-}
-
-@compute @workgroup_size(64)  
-fn integrate_particles(
-    @builtin(global_invocation_id) id: vec3<u32>
-) {
-    let idx = id.x;
-    let dt = 0.016; // 时间步长
-    
-    // 积分运动方程
-    let acceleration = particles[idx].force / particles[idx].mass;
-    particles[idx].velocity += acceleration * dt;
-    particles[idx].position += particles[idx].velocity * dt;
-    particles[idx].force = vec3<f32>(0.0);
-}
-```
-
-## 性能优化
-
-### 内存访问模式
-
-优化内存访问对性能至关重要：
-
-```
-内存访问模式：
-合并访问: [线程0→地址0] [线程1→地址1] [线程2→地址2] → 高效
-分散访问: [线程0→地址100] [线程1→地址50] [线程2→地址200] → 低效
-```
-
-### 占用率优化
-
-平衡工作组大小和资源使用：
-
-```wgsl
-// 优化工作组大小考虑因素：
-// - 可用寄存器数量
-// - 共享内存使用量  
-// - GPU 计算单元数量
-// - 内存带宽限制
-```
-
-### 计算优化模式
-
-```wgsl
-// 使用子组操作（如果支持）
-let subgroup_value = subgroupAdd(local_value);
-
-// 向量化操作
-let vec4_data = vec4<f32>(data[idx], data[idx+1], data[idx+2], data[idx+3]);
-let result = vec4_data * weights;
-
-// 循环展开
-for (var i = 0u; i < 4u; i++) {
-    // 手动展开循环以减少控制流开销
-    process_element(i);
-}
-```
-
-## 高级计算特性
 
 ### 原子操作
+
+WebGPU 支持原子操作，用于无锁的并行算法：
 
 ```wgsl
 @group(0) @binding(0) var<storage, read_write> atomic_counter: atomic<u32>;
 
 @compute @workgroup_size(64)
-fn atomic_example() {
+fn atomic_example(@builtin(global_invocation_id) global_id: vec3<u32>) {
     // 原子增加
-    let old_value = atomicAdd(&atomic_counter, 1u);
+    atomicAdd(&atomic_counter, 1);
     
     // 原子比较交换
-    var expected = 0u;
-    while (!atomicCompareExchangeWeak(&atomic_counter, &expected, old_value + 1u)) {
-        // 重试直到成功
+    var old_value = atomicLoad(&atomic_counter);
+    while (!atomicCompareExchangeWeak(&atomic_counter, old_value, old_value + 1)) {
+        old_value = atomicLoad(&atomic_counter);
     }
 }
 ```
 
-### 子组操作
+## 实用计算模式
+
+### 归约操作
+
+归约是将大量数据聚合为单个值的常见模式：
 
 ```wgsl
 @compute @workgroup_size(64)
-fn subgroup_operations() {
-    let local_value = f32(local_invocation_id.x);
+fn reduction(@builtin(local_invocation_id) local_id: vec3<u32>,
+             @builtin(workgroup_id) workgroup_id: vec3<u32>) {
+    let local_index = local_id.x;
+    let workgroup_size = 64u;
+    let global_index = workgroup_id.x * workgroup_size + local_index;
     
-    // 子组内归约
-    let subgroup_sum = subgroupAdd(local_value);
-    let subgroup_max = subgroupMax(local_value);
-    let subgroup_min = subgroupMin(local_value);
+    // 加载数据到共享内存
+    if (global_index < data_length) {
+        shared_data[local_index] = input_data[global_index];
+    } else {
+        shared_data[local_index] = 0.0;
+    }
     
-    // 子组内广播
-    let broadcast_value = subgroupBroadcast(local_value, 0u);
+    workgroupBarrier();
     
-    // 子组内洗牌
-    let shuffled = subgroupShuffle(local_value, (local_invocation_id.x + 1u) % 4u);
+    // 并行归约
+    var offset = workgroup_size / 2;
+    while (offset > 0) {
+        if (local_index < offset) {
+            shared_data[local_index] += shared_data[local_index + offset];
+        }
+        workgroupBarrier();
+        offset = offset / 2;
+    }
+    
+    // 工作组结果
+    if (local_index == 0) {
+        partial_sums[workgroup_id.x] = shared_data[0];
+    }
 }
 ```
 
-## 调试与分析
+### 扫描操作
 
-### 计算管线调试
+扫描 (前缀和) 是许多并行算法的基础：
 
 ```wgsl
-// 使用调试输出
-@group(0) @binding(0) var<storage, read_write> debug_buffer: array<u32>;
-
 @compute @workgroup_size(64)
-fn debug_compute() {
-    debug_buffer[global_invocation_id.x] = some_value;
+fn prefix_sum(@builtin(local_invocation_id) local_id: vec3<u32>) {
+    let local_index = local_id.x;
     
-    // 插入调试标记
-    debug_printf("Thread %d computed value: %f", global_invocation_id.x, some_value);
+    // 加载数据
+    shared_data[local_index] = input_data[global_index];
+    workgroupBarrier();
+    
+    // 工作组内前缀和
+    var stride = 1;
+    while (stride < 64) {
+        if (local_index >= stride) {
+            shared_data[local_index] += shared_data[local_index - stride];
+        }
+        workgroupBarrier();
+        stride *= 2;
+    }
+    
+    // 保存结果
+    output_data[global_index] = shared_data[local_index];
 }
 ```
 
-### 性能分析
+## 性能优化技术
 
-通过时间戳查询测量计算性能：
+### 内存访问模式
+
+优化内存访问模式对性能至关重要：
+
+**合并访问模式**：
+```
+优化前 (随机访问):   优化后 (连续访问):
+[3,7,1,9,2,8,...]   [0,1,2,3,4,5,...]
+   ↓                    ↓
+缓存失效             缓存命中
+```
+
+### 占用率优化
+
+保持足够的线程占用率以隐藏内存延迟：
+
+```wgsl
+// 低占用率 - 工作组太大
+@compute @workgroup_size(256)  // 可能超出硬件限制
+fn low_occupancy() { }
+
+// 高占用率 - 适当的工作组大小  
+@compute @workgroup_size(64)   // 适合大多数硬件
+fn high_occupancy() { }
+```
+
+### 双缓冲技术
+
+使用双缓冲区避免读写冲突：
 
 ```javascript
+// 创建双缓冲区
+const bufferA = device.createBuffer({ /* ... */ });
+const bufferB = device.createBuffer({ /* ... */ });
+
+// 交替使用缓冲区
+let readBuffer = bufferA;
+let writeBuffer = bufferB;
+
+// 每帧交换
+[readBuffer, writeBuffer] = [writeBuffer, readBuffer];
+```
+
+## 实际应用案例
+
+### 物理模拟
+
+计算着色器非常适合物理模拟：
+
+```wgsl
+@compute @workgroup_size(64)
+fn physics_update(@builtin(global_invocation_id) global_id: vec3<u32>) {
+    let particle_index = global_id.x;
+    
+    if (particle_index < num_particles) {
+        // 读取粒子状态
+        var position = positions[particle_index];
+        var velocity = velocities[particle_index];
+        
+        // 应用物理规则
+        velocity += gravity * delta_time;
+        position += velocity * delta_time;
+        
+        // 碰撞检测
+        if (position.y < 0.0) {
+            position.y = 0.0;
+            velocity.y = -velocity.y * damping;
+        }
+        
+        // 更新粒子状态
+        positions[particle_index] = position;
+        velocities[particle_index] = velocity;
+    }
+}
+```
+
+### 图像处理
+
+并行处理图像像素：
+
+```wgsl
+@compute @workgroup_size(8, 8)
+fn image_filter(@builtin(global_invocation_id) global_id: vec3<u32>) {
+    let coord = vec2<i32>(global_id.xy);
+    
+    // 应用卷积滤波器
+    var sum = vec3<f32>(0.0);
+    for (var y = -1; y <= 1; y++) {
+        for (var x = -1; x <= 1; x++) {
+            let sample_coord = coord + vec2<i32>(x, y);
+            let sample_color = textureLoad(input_image, sample_coord, 0).rgb;
+            let kernel_value = kernel[y + 1][x + 1];
+            sum += sample_color * kernel_value;
+        }
+    }
+    
+    // 写入结果
+    textureStore(output_image, coord, vec4<f32>(sum, 1.0));
+}
+```
+
+## 调试与性能分析
+
+### 调试技术
+
+计算着色器的调试需要特殊技术：
+
+```wgsl
+// 调试输出技术
+@group(0) @binding(0) var<storage, read_write> debug_buffer: array<f32>;
+
+@compute @workgroup_size(64)
+fn debug_example(@builtin(global_invocation_id) global_id: vec3<u32>) {
+    let index = global_id.x;
+    
+    // 写入调试信息
+    debug_buffer[index] = some_computation_result;
+    
+    // 条件调试输出
+    if (some_condition) {
+        debug_buffer[0] = 1.0;  // 标记特殊条件
+    }
+}
+```
+
+### 性能测量
+
+使用时间戳查询测量计算性能：
+
+```javascript
+// 创建查询集
 const querySet = device.createQuerySet({
     type: 'timestamp',
     count: 2
 });
 
-// 在计算通道开始和结束处写入时间戳
-const computePass = commandEncoder.beginComputePass({
-    timestampWrites: {
-        querySet: querySet,
-        beginningOfPassWriteIndex: 0,
-        endOfPassWriteIndex: 1
-    }
-});
+// 在计算通道中插入时间戳
+computePass.writeTimestamp(querySet, 0); // 开始时间
+// ... 计算命令 ...
+computePass.writeTimestamp(querySet, 1); // 结束时间
 ```
 
-WebGPU 计算管线为 Web 平台带来了前所未有的通用计算能力，使得复杂的科学计算、机器学习推理、实时物理模拟等应用能够在浏览器中高效运行，开启了 Web 高性能计算的新时代。
+WebGPU 计算为 Web 平台带来了前所未有的并行计算能力，使得在浏览器中运行复杂的科学计算、机器学习和实时模拟成为现实。通过合理的工作组设计、内存访问优化和算法并行化，开发者可以充分利用现代 GPU 的强大算力。

@@ -76,7 +76,7 @@ const AsyncComplexComponent = defineAsyncComponent({
 
 ## 完整示例
 
-### 1。基础使用示例
+### 基础使用示例
 
 ```vue
 <template>
@@ -112,7 +112,7 @@ const AsyncUserProfile = defineAsyncComponent(() =>
 </style>
 ```
 
-### 2。带加载状态的异步组件
+### 带加载状态的异步组件
 
 ```vue
 <template>
@@ -148,7 +148,7 @@ const AsyncDashboardWidgets = defineAsyncComponent({
 </script>
 ```
 
-### 3。条件加载的异步组件
+### 条件加载的异步组件
 
 ```vue
 <template>
@@ -198,7 +198,7 @@ const getTabComponent = (tabId) => tabComponents[tabId]
 </script>
 ```
 
-### 4。错误处理示例
+### 错误处理示例
 
 ```vue
 <template>

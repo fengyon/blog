@@ -1,6 +1,6 @@
 # Git 安装与配置
 
-## 1。Git 安装
+## Git 安装
 
 ### Windows 系统安装
 
@@ -43,7 +43,7 @@ sudo yum install git
 sudo dnf install git
 ```
 
-## 2。基础配置
+## 基础配置
 
 ### 用户信息配置
 
@@ -75,7 +75,7 @@ git config --global core.autocrlf true        # Windows
 git config --global core.autocrlf input       # Linux/macOS
 ```
 
-## 3。高级配置
+## 高级配置
 
 ### 别名配置
 
@@ -120,7 +120,7 @@ node_modules/
 git config --global core.excludesfile ~/.gitignore_global
 ```
 
-## 4。SSH 密钥配置
+## SSH 密钥配置
 
 ### 生成 SSH 密钥
 
@@ -151,7 +151,7 @@ cat ~/.ssh/id_ed25519.pub
 # 将公钥内容添加到 GitHub/GitLab 的 SSH Keys 设置中
 ```
 
-## 5。仓库特定配置
+## 仓库特定配置
 
 ### 项目级配置
 
@@ -190,7 +190,7 @@ Host github-work
 git clone git@github-personal:username/repo.git
 ```
 
-## 6。验证配置
+## 验证配置
 
 ### 检查配置
 
@@ -220,7 +220,7 @@ git commit -m "Initial commit"
 git log --oneline
 ```
 
-## 7。故障排除
+## 故障排除
 
 ### 常见问题解决
 

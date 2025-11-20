@@ -73,7 +73,7 @@ function effect(fn) {
 
 ## 实际使用示例
 
-### 1。基本响应式数据
+### 基本响应式数据
 
 ```vue
 <template>
@@ -108,7 +108,7 @@ console.log(state.message)
 </script>
 ```
 
-### 2。计算属性
+### 计算属性
 
 ```vue
 <template>
@@ -137,7 +137,7 @@ const addQuantity = () => {
 </script>
 ```
 
-### 3。监听器
+### 监听器
 
 ```vue
 <template>
@@ -166,7 +166,7 @@ watchEffect(() => {
 </script>
 ```
 
-### 4。复杂对象响应式
+### 复杂对象响应式
 
 ```vue
 <template>

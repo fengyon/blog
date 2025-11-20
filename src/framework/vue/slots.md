@@ -4,7 +4,7 @@
 
 Vue 中的插槽是一种内容分发机制，允许父组件向子组件传递模板内容。它提供了更灵活的组件组合方式，让组件能够接收并渲染外部传入的任意内容。
 
-## 1。默认插槽 (Default Slot)
+## 默认插槽 (Default Slot)
 
 ### 概念
 
@@ -53,7 +53,7 @@ import ChildComponent from './ChildComponent.vue'
 </script>
 ```
 
-## 2。具名插槽 (Named Slots)
+## 具名插槽 (Named Slots)
 
 ### 概念
 
@@ -158,7 +158,7 @@ import LayoutComponent from './LayoutComponent.vue'
 </script>
 ```
 
-## 3。作用域插槽 (Scoped Slots)
+## 作用域插槽 (Scoped Slots)
 
 ### 概念
 
@@ -260,7 +260,7 @@ import DataList from './DataList.vue'
 </style>
 ```
 
-## 4。高级用法和技巧
+## 高级用法和技巧
 
 ### 动态插槽名
 

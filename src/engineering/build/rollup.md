@@ -1,12 +1,12 @@
-# Webpack
+# Rollup
 
-Webpack 是一个现代 JavaScript 应用程序的静态模块打包器。它诞生于 2012 年，由 Tobias Koppers 创建，现已成为前端工程化领域最核心的构建工具之一，支撑着现代 Web 应用的开发和部署流程。
+Rollup 是一个 JavaScript 模块打包工具，可以将多个小的代码片段编译为完整的库和应用。与 Webpack 等传统打包工具不同，Rollup 充分利用 ES6 模块特性，专注于 JavaScript 库的打包，以输出更简洁、更高效的代码。
 
 ## 核心概念
 
-### 模块打包
+### 模块打包器
 
-Webpack 将项目中的各种资源 (JS、CSS、图片等) 视为模块，通过依赖关系构建依赖图，最终打包成浏览器可执行的静态文件。
+Rollup 将项目中分散的模块根据依赖关系打包成单个或多个整合文件。
 
 ```
 源文件结构:
@@ -15,295 +15,246 @@ Webpack 将项目中的各种资源 (JS、CSS、图片等) 视为模块，通过
       JS文件         CSS文件
        |              |
     [依赖模块C]    [图片资源]
+
+打包过程:
+[入口分析] -> [依赖解析] -> [Tree Shaking] -> [代码合并] -> [输出文件]
+      |            |             |               |           |
+  确定起点      收集所有依赖   消除未引用代码    整合模块    生成bundle
 ```
 
-### 依赖图
+### ES6 模块优先
 
-Webpack 从入口文件开始，递归构建模块依赖图。
-
-```
-依赖图构建:
-entry.js -> 分析import/require -> moduleA.js -> moduleB.js
-       |                      |              |
-   形成依赖树             继续分析依赖      叶子模块
-       |                      |              |
-   [完整依赖图] <- [递归分析完成] <- [无更多依赖]
-```
-
-## 架构设计
-
-### 核心组成
-
-Webpack 由多个核心组件协同工作。
+Rollup 使用 JavaScript 的 ES6 模块标准，而不是以前的 CommonJS 和 AMD 等特殊解决方案。
 
 ```
-Webpack 架构:
-[入口配置] -> [模块解析] -> [加载器处理] -> [插件优化] -> [输出文件]
-      |            |            |            |           |
-  指定起点      查找依赖      转换非JS      增强功能     生成bundle
+模块系统对比:
+CommonJS:  const utils = require('utils');  // 导入整个对象
+ES6:      import { ajax } from 'utils';    // 只导入所需函数
+                |
+              更精确的依赖控制
 ```
 
-### 编译流程
+## 主要特性
 
-Webpack 的编译过程遵循明确的阶段划分。
+### Tree Shaking
 
-```
-编译阶段:
-初始化 -> 编译 -> 模块构建 ->  chunk生成 -> 优化 -> 输出
-   |        |        |          |         |       |
-配置准备  分析依赖  加载器转换  代码分块  插件处理  文件写入
-```
-
-## 关键特性
-
-### 加载器 (Loaders)
-
-Webpack 使用加载器转换非 JavaScript 模块。
+Rollup 静态分析代码中的 import，排除任何未实际使用的代码。
 
 ```
-加载器工作流程:
-[源文件] -> [加载器链] -> [转换后资源]
-    |            |            |
- .scss文件   sass-loader   .css文件
-              css-loader
-              style-loader
+Tree Shaking 效果:
+源代码:
+  export function square(x) { return x*x; }
+  export function cube(x) { return x*x*x; }   // 未使用
+
+打包后:
+  function square(x) { return x*x; }          // 只保留使用的函数
 ```
 
-### 插件系统 (Plugins)
+### 输出格式灵活
 
-插件提供自定义 Webpack 构建流程的能力。
+Rollup 支持多种输出格式，适应不同环境需求。
 
 ```
-插件作用点:
-[编译生命周期] -> [钩子函数] -> [自定义逻辑]
-        |             |            |
-  不同阶段事件      监听事件     修改编译过程
+格式选择:
+- esm:   ES 模块，现代浏览器中可用
+- cjs:   CommonJS，适用于 Node.js
+- iife:  自执行函数，适合 <script> 标签
+- umd:   通用模块定义，兼容 AMD、CJS 和浏览器
+- amd:   异步模块定义，用于 RequireJS
+- system: SystemJS 加载器格式
+```
+
+## 基本使用
+
+### 安装与命令行使用
+
+```bash
+# 安装 Rollup
+npm install --global rollup
+
+# 命令行打包
+rollup src/index.js --format iife --file dist/bundle.js
+```
+
+### 配置文件
+
+创建 `rollup.config.js` 定义打包选项。
+
+```javascript
+// rollup.config.js
+export default {
+  input: 'src/index.js', // 入口文件
+  output: {
+    file: 'dist/bundle.js', // 输出文件
+    format: 'iife', // 输出格式
+  },
+}
+```
+
+使用配置文件打包：
+
+```bash
+rollup -c  # 使用配置文件
+```
+
+## 进阶功能
+
+### 插件系统
+
+Rollup 通过插件扩展功能，处理不同类型资源和转换代码。
+
+常用插件：
+
+- `rollup-plugin-node-resolve`：加载 npm 模块
+- `rollup-plugin-commonjs`：将 CommonJS 模块转换为 ES6
+- `rollup-plugin-json`：允许从 JSON 文件读取数据
+- `rollup-plugin-terser`：代码压缩
+
+```javascript
+// 配置插件
+import resolve from 'rollup-plugin-node-resolve'
+import commonjs from 'rollup-plugin-commonjs'
+
+export default {
+  input: 'src/index.js',
+  output: { file: 'dist/bundle.js', format: 'iife' },
+  plugins: [resolve(), commonjs()],
+}
 ```
 
 ### 代码分割
 
-Webpack 支持将代码拆分成多个 bundle，实现按需加载。
-
-```
-代码分割策略:
-[入口点分割] -> [动态导入] -> [公共代码提取]
-      |              |            |
- 多入口文件      import()语法     splitChunks
-```
-
-## 配置体系
-
-### 基础配置结构
-
-Webpack 通过配置文件定义构建行为。
+Rollup 支持动态导入，实现代码分割。
 
 ```javascript
-// webpack.config.js 基础结构
-module.exports = {
-  entry: './src/index.js',      // 入口起点
-  output: {                     // 输出配置
-    path: path.resolve(__dirname, 'dist'),
-    filename: 'bundle.js'
+// 动态导入
+import('./logger').then(({ log }) => {
+  log('code splitting~')
+})
+
+// 配置支持代码分割
+export default {
+  input: 'src/index.js',
+  output: {
+    dir: 'dist', // 必须指定目录
+    format: 'amd', // iife 不支持代码分割
   },
-  module: {                    // 模块规则
-    rules: [
-      // 加载器配置
-    ]
-  },
-  plugins: [                   // 插件列表
-    // 插件实例
-  ],
-  mode: 'production'           // 模式配置
 }
 ```
 
-### 环境差异化配置
+### 多入口打包
 
-支持开发和生产环境的不同配置。
+处理多个入口文件，自动提取公共模块。
+
+```javascript
+// 多入口配置
+export default {
+  // 数组形式
+  input: ['src/index.js', 'src/album.js'],
+  // 或对象形式
+  input: {
+    index: 'src/index.js',
+    album: 'src/album.js',
+  },
+  output: {
+    dir: 'dist',
+    format: 'amd',
+  },
+}
+```
+
+## 输出优化
+
+### 多产物输出
+
+同一份代码打包成不同格式，提高兼容性。
+
+```javascript
+// 多产物配置
+const buildOptions = {
+  input: ['src/index.js'],
+  output: [
+    { dir: 'dist/es', format: 'esm' }, // ES 模块
+    { dir: 'dist/cjs', format: 'cjs' }, // CommonJS
+  ],
+}
+```
+
+### 输出定制化
+
+精细控制输出文件的命名和组织。
+
+```javascript
+output: {
+  dir: 'dist',
+  // 使用占位符
+  entryFileNames: '[name].js',           // 入口文件名
+  chunkFileNames: 'chunk-[hash].js',     // 代码分割块名
+  assetFileNames: 'assets/[name]-[hash][extname]' // 资源文件名
+}
+```
+
+## 与 Webpack 对比
+
+### 优势与局限
 
 ```
-配置策略:
-[公共配置] -> [环境特定配置] -> [合并配置]
-     |              |             |
- 基础设置      development    最终配置
-             production
+Rollup 优势:
+[输出简洁] -> [Tree Shaking] -> [配置简单] -> [性能优越]
+     |            |               |            |
+  代码可读     自动消除死代码    学习成本低    打包速度快
+
+Rollup 局限:
+[生态较小] -> [HMR 支持弱] -> [复杂场景支持] -> [加载非ESM]
+     |            |               |            |
+ 插件较少     无内置热更新     应用开发受限   需要额外插件
 ```
 
-## 工作流程详解
-
-### 完整构建过程
-
-Webpack 从源文件到输出文件的完整处理流程。
+### 适用场景
 
 ```
-详细构建流程:
-[入口文件] 
+工具选择策略:
+
+开发应用程序 -> Webpack
     |
-    v
-[创建依赖图]
+  功能全面、生态丰富、支持各种资源
+
+开发框架/库 -> Rollup
     |
-    v
-[模块解析]
-    |
-    v
-[加载器转换]
-    |
-    v
-[AST分析]
-    |
-    v
-[依赖收集]
-    |
-    v
-[Chunk生成]
-    |
-    v
-[优化处理]
-    |
-    v
-[资源发射]
-    |
-    v
-[输出文件]
+  输出简洁、Tree Shaking、性能优异
 ```
 
-### 模块解析策略
+## 实际应用
 
-Webpack 如何查找和解析模块。
+### 现代前端工具链中的角色
 
-```
-模块解析:
-[请求路径] -> [解析算法] -> [定位文件]
-      |            |           |
- import './a'   相对路径     ./a.js
- import 'b'     模块路径     node_modules/b/index.js
-```
-
-## 生态系统
-
-### 核心加载器
-
-常用加载器及其作用。
+Rollup 在现代前端生态中扮演重要角色，特别是作为 Vite 的构建基石。
 
 ```
-加载器分类:
-- 编译型: babel-loader, ts-loader
-- 样式型: css-loader, sass-loader, style-loader  
-- 文件型: file-loader, url-loader
-- 其他: html-loader, vue-loader
+构建工具定位:
+[源代码] -> [Rollup 打包] -> [优化输出] -> [生产环境]
+     |            |              |           |
+   ES6 模块     依赖分析      Tree Shaking   各类格式
 ```
 
-### 核心插件
+### 开发工作流
 
-常用插件及其功能。
+完整的 Rollup 开发环境配置：
 
-```
-插件分类:
-- 优化类: TerserPlugin, CssMinimizerPlugin
-- 功能类: HtmlWebpackPlugin, CleanWebpackPlugin
-- 环境类: DefinePlugin, EnvironmentPlugin
-- 开发类: HotModuleReplacementPlugin
-```
+```javascript
+// 完整配置示例
+import resolve from 'rollup-plugin-node-resolve'
+import commonjs from 'rollup-plugin-commonjs'
+import { terser } from 'rollup-plugin-terser'
 
-## 性能优化
-
-### 构建性能
-
-优化 Webpack 构建速度的策略。
-
-```
-构建优化:
-[缓存] -> [并行处理] -> [减少范围] -> [硬件加速]
-   |          |           |           |
- 缓存结果   多核编译     指定模块    更快的硬件
-```
-
-### 输出优化
-
-优化最终打包文件的策略。
-
-```
-输出优化:
-[代码分割] -> [Tree Shaking] -> [压缩] -> [缓存优化]
-     |            |             |          |
- 按需加载     消除死代码      减小体积   长效缓存
-```
-
-## 开发体验
-
-### 开发服务器
-
-Webpack Dev Server 提供开发期热更新功能。
-
-```
-开发服务器:
-[文件监听] -> [编译内存] -> [热模块替换] -> [浏览器更新]
-     |           |            |             |
- 检测变化     不写入磁盘     局部更新       自动刷新
-```
-
-### 开发工具链
-
-Webpack 相关的开发辅助工具。
-
-```
-开发工具:
-webpack-dev-server   开发服务器
-webpack-bundle-analyzer 包分析器
-webpack-merge       配置合并
-speed-measure-webpack-plugin 速度分析
-```
-
-## 现代演进
-
-### Webpack 5 新特性
-
-Webpack 5 引入的重要改进。
-
-```
-Webpack 5 特性:
-[模块联邦] -> [持久缓存] -> [资源模块] -> [Tree Shaking增强]
-     |           |           |             |
- 微前端支持     构建加速   内置资源处理     更精确的死代码消除
-```
-
-### 与其他工具对比
-
-Webpack 在现代构建工具生态中的定位。
-
-```
-构建工具对比:
-Webpack:   [功能全面] -> [生态丰富] -> [配置灵活] -> [成熟稳定]
-            |            |            |            |
-         全能选手     大量插件     高度可配置     企业级应用
-
-Vite:      [开发快速] -> [ESM原生] -> [简单配置] -> [新兴趋势]
-            |            |            |            |
-         极速HMR     按需编译     开箱即用     逐渐普及
-```
-
-## 适用场景
-
-### 理想使用场景
-
-Webpack 在以下场景中表现最佳。
-
-```
-推荐场景:
-- 复杂单页应用
-- 需要高度自定义构建流程
-- 企业级项目
-- 多页面应用
-- 已有大型项目迁移
-```
-
-### 配置复杂度权衡
-
-Webpack 配置的灵活性带来的复杂度问题。
-
-```
-配置复杂度:
-简单项目: [基础配置] -> 快速上手
-中等项目: [常用加载器/插件] -> 适度配置
-复杂项目: [自定义配置] -> 学习曲线较陡峭
+export default {
+  input: 'src/index.js',
+  output: [
+    { file: 'dist/bundle.esm.js', format: 'esm' },
+    { file: 'dist/bundle.cjs.js', format: 'cjs' },
+    { file: 'dist/bundle.umd.js', format: 'umd', name: 'MyLibrary' },
+  ],
+  plugins: [resolve(), commonjs(), terser()],
+  watch: { include: 'src/**' }, // 监听文件变化
+}
 ```

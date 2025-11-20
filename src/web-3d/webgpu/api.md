@@ -1,454 +1,560 @@
-# Web GPU 计算
+# WebGPU API
 
-## 概述
+WebGPU API 是一种全新的 Web 图形 API，作为 WebGL 的继承者，它完全从头开始设计，更接近 Vulkan、Metal 和 Direct3D 等现代图形 API。与主要基于 OpenGL 的 WebGL 不同，WebGPU 提供了更底层、更高效的 GPU 控制方式，不仅支持图形渲染，还首次在 Web 环境中引入了通用 GPU 计算能力。
 
-WebGPU 计算管线是通用 GPU 计算在 Web 平台上的实现，它突破了传统图形渲染的限制，让开发者能够利用 GPU 的大规模并行架构进行通用目的计算。与图形渲染管线不同，计算管线专注于数据并行处理，不涉及图元装配、光栅化等图形特定阶段。
+## 概述与设计理念
 
-```
-计算管线架构：
-[CPU 发起计算] → [计算管线] → [工作组执行] → [结果回读]
-     ↓               ↓           ↓           ↓
- [数据准备]      [着色器]    [并行处理]   [数据获取]
-```
+WebGPU 是一个低层级 API，虽然需要程序员完成更多工作，但提供了更强大的功能和更高的效率。其设计借鉴了现代图形 API 的最佳实践，包括显式的资源管理、预编译的管线状态和高效的绑定模型。
 
-## 计算管线基础
+**设计特点**：
+- **显式控制**：相比 WebGL 的隐式状态管理，WebGPU 要求开发者显式定义所有资源和状态
+- **跨平台一致性**：基于 Vulkan、Metal 和 Direct3D 12 等现代图形 API 的共同特性设计
+- **安全优先**：在提供高性能的同时，确保 Web 环境的安全性
+- **计算与图形统一**：首次在 Web 平台同时提供图形渲染和通用计算能力
 
-### 计算管线创建
+## 环境架构与初始化
 
-计算管线由计算着色器和管线布局组成：
+WebGPU 应用程序环境包含两个主要部分：JavaScript 端和 GPU 端。JavaScript 端在 CPU 上执行，而 WebGPU 的计算和渲染操作则在 GPU 上执行。这两种处理器拥有各自专用的内存，但也通过一些共享内存来进行数据交换和消息传递。
+
+### 初始化流程
 
 ```javascript
+// 初始化 WebGPU
+async function initWebGPU() {
+    if (!navigator.gpu) {
+        throw Error("WebGPU 不支持");
+    }
+    
+    // 获取适配器
+    let adapter = await navigator.gpu.requestAdapter();
+    if (!adapter) {
+        throw Error("无法获取 WebGPU 适配器");
+    }
+    
+    // 获取设备
+    let device = await adapter.requestDevice();
+    
+    // 配置画布
+    let canvas = document.getElementById("webgpuCanvas");
+    let context = canvas.getContext("webgpu");
+    context.configure({
+        device: device,
+        format: navigator.gpu.getPreferredCanvasFormat(),
+        alphaMode: "premultiplied"
+    });
+    
+    return { device, context, canvas };
+}
+```
+
+### 架构示意图
+
+```
+JavaScript应用 (CPU端)
+        ↓
+    WebGPU API
+        ↓
+  适配器 → 设备
+        ↓
+  命令编码与资源管理
+        ↓
+  管道与着色器
+        ↓
+  GPU执行 (GPU端)
+```
+
+## 核心对象模型
+
+### 适配器与设备
+
+适配器 (Adapter) 代表物理 GPU 硬件的抽象，而设备 (Device) 则是开发者与 GPU 功能交互的主要接口。
+
+**对象关系**：
+```
+GPUAdapter → GPUDevice → 各种GPU资源
+     ↓           ↓          ↓
+ 硬件抽象     逻辑连接   缓冲区/纹理/管道
+```
+
+### 画布配置
+
+```javascript
+// 获取和配置画布
+const canvas = document.getElementById('webgpu-canvas');
+const context = canvas.getContext('webgpu');
+
+// 配置画布上下文
+const canvasFormat = navigator.gpu.getPreferredCanvasFormat();
+context.configure({
+    device: device,
+    format: canvasFormat,
+    alphaMode: 'premultiplied',
+    usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
+});
+```
+
+## 资源管理系统
+
+### 缓冲区
+
+缓冲区是 GPU 内存中的灵活内存块，可用于存储各种数据。
+
+```javascript
+// 创建顶点缓冲区
+const vertexBuffer = device.createBuffer({
+    size: vertices.byteLength,
+    usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+    mappedAtCreation: true
+});
+
+// 填充数据
+new Float32Array(vertexBuffer.getMappedRange()).set(vertices);
+vertexBuffer.unmap();
+
+// 创建统一缓冲区
+const uniformBuffer = device.createBuffer({
+    size: 64, // 矩阵大小
+    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+});
+
+// 创建存储缓冲区（用于计算着色器）
+const storageBuffer = device.createBuffer({
+    size: 1024,
+    usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
+});
+```
+
+### 纹理与采样器
+
+纹理表示图像数据，支持多种维度和格式。
+
+```javascript
+// 创建纹理
+const texture = device.createTexture({
+    size: [512, 512, 1],
+    format: 'rgba8unorm',
+    usage: GPUTextureUsage.TEXTURE_BINDING | 
+           GPUTextureUsage.COPY_DST | 
+           GPUTextureUsage.RENDER_ATTACHMENT
+});
+
+// 从图像加载纹理数据
+const image = await fetch('texture.png')
+    .then(response => response.blob())
+    .then(blob => createImageBitmap(blob));
+
+device.queue.copyExternalImageToTexture(
+    { source: image },
+    { texture: texture },
+    [image.width, image.height]
+);
+
+// 创建采样器
+const sampler = device.createSampler({
+    magFilter: 'linear',
+    minFilter: 'linear',
+    addressModeU: 'repeat',
+    addressModeV: 'repeat'
+});
+```
+
+## 着色器系统
+
+WebGPU 使用 WGSL (WebGPU Shading Language) 作为其着色器语言。
+
+### 着色器模块创建
+
+```javascript
+// 创建着色器模块
+const shaderModule = device.createShaderModule({
+    code: `
+        struct VertexInput {
+            @location(0) position: vec3<f32>,
+            @location(1) color: vec3<f32>,
+        };
+
+        struct VertexOutput {
+            @builtin(position) position: vec4<f32>,
+            @location(0) color: vec3<f32>,
+        };
+
+        @vertex
+        fn vs_main(input: VertexInput) -> VertexOutput {
+            var output: VertexOutput;
+            output.position = vec4<f32>(input.position, 1.0);
+            output.color = input.color;
+            return output;
+        }
+
+        @fragment
+        fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
+            return vec4<f32>(input.color, 1.0);
+        }
+    `
+});
+```
+
+### 计算着色器
+
+```javascript
+// 计算着色器模块
+const computeShaderModule = device.createShaderModule({
+    code: `
+        @group(0) @binding(0) var<storage, read> input: array<f32>;
+        @group(0) @binding(1) var<storage, read_write> output: array<f32>;
+
+        @compute @workgroup_size(64)
+        fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
+            let index = global_id.x;
+            if (index < arrayLength(&output)) {
+                output[index] = input[index] * 2.0;
+            }
+        }
+    `
+});
+```
+
+## 绑定组与管线布局
+
+### 绑定组布局
+
+```javascript
+// 创建绑定组布局
+const bindGroupLayout = device.createBindGroupLayout({
+    entries: [
+        {
+            binding: 0,
+            visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+            buffer: { type: 'uniform' }
+        },
+        {
+            binding: 1,
+            visibility: GPUShaderStage.FRAGMENT,
+            texture: { sampleType: 'float' }
+        },
+        {
+            binding: 2,
+            visibility: GPUShaderStage.FRAGMENT,
+            sampler: { type: 'filtering' }
+        },
+        {
+            binding: 3,
+            visibility: GPUShaderStage.COMPUTE,
+            buffer: { type: 'read-only-storage' }
+        },
+        {
+            binding: 4,
+            visibility: GPUShaderStage.COMPUTE,
+            buffer: { type: 'storage' }
+        }
+    ]
+});
+
+// 创建管线布局
+const pipelineLayout = device.createPipelineLayout({
+    bindGroupLayouts: [bindGroupLayout]
+});
+```
+
+### 绑定组创建
+
+```javascript
+// 创建绑定组
+const bindGroup = device.createBindGroup({
+    layout: bindGroupLayout,
+    entries: [
+        {
+            binding: 0,
+            resource: { buffer: uniformBuffer }
+        },
+        {
+            binding: 1,
+            resource: texture.createView()
+        },
+        {
+            binding: 2,
+            resource: sampler
+        },
+        {
+            binding: 3,
+            resource: { buffer: inputBuffer }
+        },
+        {
+            binding: 4,
+            resource: { buffer: outputBuffer }
+        }
+    ]
+});
+```
+
+## 管道创建与配置
+
+### 渲染管道
+
+```javascript
+// 创建渲染管道
+const renderPipeline = device.createRenderPipeline({
+    layout: pipelineLayout,
+    vertex: {
+        module: shaderModule,
+        entryPoint: 'vs_main',
+        buffers: [
+            {
+                arrayStride: 24, // 6个float * 4字节
+                attributes: [
+                    {
+                        format: 'float32x3',
+                        offset: 0,
+                        shaderLocation: 0
+                    },
+                    {
+                        format: 'float32x3',
+                        offset: 12,
+                        shaderLocation: 1
+                    }
+                ]
+            }
+        ]
+    },
+    fragment: {
+        module: shaderModule,
+        entryPoint: 'fs_main',
+        targets: [
+            {
+                format: canvasFormat
+            }
+        ]
+    },
+    primitive: {
+        topology: 'triangle-list',
+        cullMode: 'back'
+    },
+    depthStencil: {
+        format: 'depth24plus-stencil8',
+        depthWriteEnabled: true,
+        depthCompare: 'less'
+    }
+});
+```
+
+### 计算管道
+
+```javascript
+// 创建计算管道
 const computePipeline = device.createComputePipeline({
     layout: pipelineLayout,
     compute: {
         module: computeShaderModule,
-        entryPoint: 'main',
-        constants: {} // 编译时常量
+        entryPoint: 'cs_main'
     }
 });
 ```
 
-### 计算着色器结构
+## 命令编码与执行
 
-WGSL 计算着色器使用特殊的 compute 阶段和工作组配置：
-
-```wgsl
-@compute @workgroup_size(64)
-fn main(
-    @builtin(global_invocation_id) global_id: vec3<u32>,
-    @builtin(local_invocation_id) local_id: vec3<u32>,
-    @builtin(workgroup_id) group_id: vec3<u32>
-) {
-    // 计算逻辑
-}
-```
-
-## 执行模型与层级
-
-### 工作组架构
-
-WebGPU 计算采用三级并行层次结构：
-
-```
-执行层次：
-[调度网格] → [工作组] → [子组] → [调用]
-    ↓          ↓         ↓       ↓
- [全局]      [共享内存] [SIMD] [单个线程]
-```
-
-### 工作组配置
-
-工作组大小影响性能和资源使用：
-
-```wgsl
-// 一维工作组
-@workgroup_size(64)
-
-// 二维工作组  
-@workgroup_size(8, 8)
-
-// 三维工作组
-@workgroup_size(4, 4, 4)
-```
-
-```
-工作组调度：
-全局网格: [64, 64, 1]   → 4096 个调用
-工作组:   [8, 8, 1]     → 64 个调用/工作组
-调度:    [8, 8, 1]      → 64 个工作组
-```
-
-## 内存模型
-
-### 存储类
-
-WebGPU 计算支持多种存储类型：
-
-```
-存储类层次：
-<storage, read_write>   -- 可读写存储缓冲区
-<storage, read>         -- 只读存储缓冲区  
-<uniform>               -- Uniform 缓冲区
-<workgroup>             -- 工作组共享内存
-<private>               -- 线程私有内存
-```
-
-### 缓冲区类型
+### 渲染通道编码
 
 ```javascript
-// 存储缓冲区 - 通用数据存储
-const storageBuffer = device.createBuffer({
-    size: bufferSize,
-    usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
+// 创建命令编码器
+const commandEncoder = device.createCommandEncoder();
+
+// 开始渲染通道
+const renderPass = commandEncoder.beginRenderPass({
+    colorAttachments: [
+        {
+            view: context.getCurrentTexture().createView(),
+            loadOp: 'clear',
+            storeOp: 'store',
+            clearValue: [0.1, 0.2, 0.3, 1.0]
+        }
+    ],
+    depthStencilAttachment: {
+        view: depthTexture.createView(),
+        depthLoadOp: 'clear',
+        depthStoreOp: 'store',
+        depthClearValue: 1.0
+    }
 });
 
-// Uniform 缓冲区 - 常量数据
-const uniformBuffer = device.createBuffer({
-    size: 256,
-    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-});
+// 设置管道和绘制
+renderPass.setPipeline(renderPipeline);
+renderPass.setVertexBuffer(0, vertexBuffer);
+renderPass.setBindGroup(0, bindGroup);
+renderPass.draw(3, 1, 0, 0); // 3个顶点，1个实例
+
+// 结束渲染通道
+renderPass.end();
 ```
 
-### 工作组共享内存
-
-工作组内线程间共享的高速内存：
-
-```wgsl
-var<workgroup> shared_data: array<f32, 64>;
-
-@compute @workgroup_size(64)
-fn main() {
-    let local_id = local_invocation_id.x;
-    shared_data[local_id] = 0.0;
-    
-    workgroupBarrier(); // 内存同步
-    
-    // 所有线程现在都能看到其他线程写入的数据
-}
-```
-
-## 计算模式与算法
-
-### 数据并行模式
-
-#### Map 操作
-```wgsl
-@compute @workgroup_size(64)
-fn map_compute(
-    @builtin(global_invocation_id) id: vec3<u32>
-) {
-    let idx = id.x;
-    if (idx < arrayLength(&input)) {
-        output[idx] = input[idx] * 2.0 + 1.0;
-    }
-}
-```
-
-#### Reduce 操作
-```wgsl
-var<workgroup> partial_sums: array<f32, 64>;
-
-@compute @workgroup_size(64)
-fn reduce_compute(
-    @builtin(global_invocation_id) global_id: vec3<u32>,
-    @builtin(local_invocation_id) local_id: vec3<u32>
-) {
-    let idx = global_id.x;
-    let local_idx = local_id.x;
-    
-    // 第一阶段：工作组内归约
-    partial_sums[local_idx] = input[idx];
-    workgroupBarrier();
-    
-    // 树状归约
-    var offset = 32u;
-    while (offset > 0u) {
-        if (local_idx < offset) {
-            partial_sums[local_idx] += partial_sums[local_idx + offset];
-        }
-        workgroupBarrier();
-        offset = offset / 2u;
-    }
-    
-    // 工作组0号线程写入结果
-    if (local_idx == 0u) {
-        output[workgroup_id.x] = partial_sums[0];
-    }
-}
-```
-
-### 扫描算法
-
-```wgsl
-// 并行前缀和
-var<workgroup> scan_data: array<f32, 128>;
-
-@compute @workgroup_size(128)
-fn scan_compute(
-    @builtin(local_invocation_id) local_id: vec3<u32>
-) {
-    let idx = local_id.x;
-    
-    // 上行扫描
-    var stride = 1u;
-    while (stride <= 64u) {
-        workgroupBarrier();
-        if (idx >= stride) {
-            scan_data[idx] += scan_data[idx - stride];
-        }
-        stride = stride * 2u;
-    }
-    
-    // 下行扫描
-    if (idx == 0) {
-        scan_data[127] = 0.0;
-    }
-    
-    stride = 64u;
-    while (stride > 0u) {
-        workgroupBarrier();
-        if (idx < stride) {
-            let temp = scan_data[idx];
-            scan_data[idx] = scan_data[idx + stride];
-            scan_data[idx + stride] = temp + scan_data[idx + stride];
-        }
-        stride = stride / 2u;
-    }
-}
-```
-
-## 同步与通信
-
-### 内存屏障
-
-控制内存访问顺序和可见性：
-
-```wgsl
-@compute @workgroup_size(64)
-fn synchronized_compute() {
-    // 写入存储缓冲区
-    output_data[local_id.x] = computed_value;
-    
-    // 确保所有写入在后续读取前完成
-    storageBarrier();
-    
-    // 现在可以安全读取其他线程写入的数据
-    let other_value = output_data[(local_id.x + 1) % 64];
-}
-```
-
-### 工作组同步
-
-```wgsl
-@compute @workgroup_size(64)
-fn workgroup_sync_example() {
-    // 所有线程到达此点
-    workgroupBarrier();
-    
-    // 仅工作组内内存同步
-    workgroupBarrier();
-    
-    // 存储缓冲区同步（更重，但跨工作组）
-    storageBarrier();
-}
-```
-
-## 实际应用案例
-
-### 图像处理
-
-```wgsl
-@group(0) @binding(0) var input_image: texture_2d<f32>;
-@group(0) @binding(1) var output_image: texture_storage_2d<rgba8unorm, write>;
-
-@compute @workgroup_size(8, 8)
-fn image_blur(
-    @builtin(global_invocation_id) id: vec3<u32>
-) {
-    let coord = vec2<i32>(id.xy);
-    var sum = vec4<f32>(0.0);
-    
-    // 3x3 高斯模糊
-    for (var i = -1; i <= 1; i++) {
-        for (var j = -1; j <= 1; j++) {
-            let sample_coord = vec2<i32>(coord.x + i, coord.y + j);
-            let weight = gaussian_weights[i + 1][j + 1];
-            sum += textureLoad(input_image, sample_coord, 0) * weight;
-        }
-    }
-    
-    textureStore(output_image, coord, sum);
-}
-```
-
-### 物理模拟
-
-```wgsl
-struct Particle {
-    position: vec3<f32>,
-    velocity: vec3<f32>,
-    force: vec3<f32>,
-    mass: f32
-}
-
-@group(0) @binding(0) var<storage, read_write> particles: array<Particle>;
-
-@compute @workgroup_size(64)
-fn nbody_simulation(
-    @builtin(global_invocation_id) id: vec3<u32>
-) {
-    let idx = id.x;
-    var force = vec3<f32>(0.0);
-    
-    // N-body 力计算
-    for (var i = 0u; i < arrayLength(&particles); i++) {
-        if (i == idx) {
-            continue;
-        }
-        
-        let delta = particles[i].position - particles[idx].position;
-        let distance = length(delta);
-        let dir = normalize(delta);
-        
-        // 引力计算
-        force += G * particles[i].mass * particles[idx].mass * 
-                dir / (distance * distance + softening);
-    }
-    
-    particles[idx].force = force;
-}
-
-@compute @workgroup_size(64)  
-fn integrate_particles(
-    @builtin(global_invocation_id) id: vec3<u32>
-) {
-    let idx = id.x;
-    let dt = 0.016; // 时间步长
-    
-    // 积分运动方程
-    let acceleration = particles[idx].force / particles[idx].mass;
-    particles[idx].velocity += acceleration * dt;
-    particles[idx].position += particles[idx].velocity * dt;
-    particles[idx].force = vec3<f32>(0.0);
-}
-```
-
-## 性能优化
-
-### 内存访问模式
-
-优化内存访问对性能至关重要：
-
-```
-内存访问模式：
-合并访问: [线程0→地址0] [线程1→地址1] [线程2→地址2] → 高效
-分散访问: [线程0→地址100] [线程1→地址50] [线程2→地址200] → 低效
-```
-
-### 占用率优化
-
-平衡工作组大小和资源使用：
-
-```wgsl
-// 优化工作组大小考虑因素：
-// - 可用寄存器数量
-// - 共享内存使用量  
-// - GPU 计算单元数量
-// - 内存带宽限制
-```
-
-### 计算优化模式
-
-```wgsl
-// 使用子组操作（如果支持）
-let subgroup_value = subgroupAdd(local_value);
-
-// 向量化操作
-let vec4_data = vec4<f32>(data[idx], data[idx+1], data[idx+2], data[idx+3]);
-let result = vec4_data * weights;
-
-// 循环展开
-for (var i = 0u; i < 4u; i++) {
-    // 手动展开循环以减少控制流开销
-    process_element(i);
-}
-```
-
-## 高级计算特性
-
-### 原子操作
-
-```wgsl
-@group(0) @binding(0) var<storage, read_write> atomic_counter: atomic<u32>;
-
-@compute @workgroup_size(64)
-fn atomic_example() {
-    // 原子增加
-    let old_value = atomicAdd(&atomic_counter, 1u);
-    
-    // 原子比较交换
-    var expected = 0u;
-    while (!atomicCompareExchangeWeak(&atomic_counter, &expected, old_value + 1u)) {
-        // 重试直到成功
-    }
-}
-```
-
-### 子组操作
-
-```wgsl
-@compute @workgroup_size(64)
-fn subgroup_operations() {
-    let local_value = f32(local_invocation_id.x);
-    
-    // 子组内归约
-    let subgroup_sum = subgroupAdd(local_value);
-    let subgroup_max = subgroupMax(local_value);
-    let subgroup_min = subgroupMin(local_value);
-    
-    // 子组内广播
-    let broadcast_value = subgroupBroadcast(local_value, 0u);
-    
-    // 子组内洗牌
-    let shuffled = subgroupShuffle(local_value, (local_invocation_id.x + 1u) % 4u);
-}
-```
-
-## 调试与分析
-
-### 计算管线调试
-
-```wgsl
-// 使用调试输出
-@group(0) @binding(0) var<storage, read_write> debug_buffer: array<u32>;
-
-@compute @workgroup_size(64)
-fn debug_compute() {
-    debug_buffer[global_invocation_id.x] = some_value;
-    
-    // 插入调试标记
-    debug_printf("Thread %d computed value: %f", global_invocation_id.x, some_value);
-}
-```
-
-### 性能分析
-
-通过时间戳查询测量计算性能：
+### 计算通道编码
 
 ```javascript
-const querySet = device.createQuerySet({
-    type: 'timestamp',
-    count: 2
+// 开始计算通道
+const computePass = commandEncoder.beginComputePass();
+
+// 设置计算管道和资源
+computePass.setPipeline(computePipeline);
+computePass.setBindGroup(0, bindGroup);
+computePass.dispatchWorkgroups(Math.ceil(elementCount / 64), 1, 1);
+
+// 结束计算通道
+computePass.end();
+```
+
+### 命令提交
+
+```javascript
+// 完成编码并提交
+const commandBuffer = commandEncoder.finish();
+device.queue.submit([commandBuffer]);
+```
+
+## 高级特性与扩展
+
+### 扩展支持
+
+WebGPU 支持多种扩展，用于访问特定硬件功能。
+
+```javascript
+// 检查扩展支持
+const adapter = await navigator.gpu.requestAdapter();
+const features = adapter.features;
+
+// 请求特定扩展
+const device = await adapter.requestDevice({
+    requiredFeatures: ['shader-f16', 'timestamp-query']
 });
 
-// 在计算通道开始和结束处写入时间戳
-const computePass = commandEncoder.beginComputePass({
-    timestampWrites: {
-        querySet: querySet,
-        beginningOfPassWriteIndex: 0,
-        endOfPassWriteIndex: 1
+// 使用半精度浮点数扩展
+if (features.has('shader-f16')) {
+    // 使用半精度着色器
+}
+```
+
+### 异步操作与映射
+
+```javascript
+// 异步映射缓冲区读取
+async function readBuffer(device, buffer) {
+    await device.queue.onSubmittedWorkDone();
+    
+    const readbackBuffer = device.createBuffer({
+        size: buffer.size,
+        usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
+    });
+    
+    const commandEncoder = device.createCommandEncoder();
+    commandEncoder.copyBufferToBuffer(buffer, 0, readbackBuffer, 0, buffer.size);
+    device.queue.submit([commandEncoder.finish()]);
+    
+    await readbackBuffer.mapAsync(GPUMapMode.READ);
+    const data = new Float32Array(readbackBuffer.getMappedRange());
+    const result = new Float32Array(data);
+    readbackBuffer.unmap();
+    
+    return result;
+}
+```
+
+## 错误处理与调试
+
+### 错误回调
+
+```javascript
+// 设置未捕获的错误处理
+device.pushErrorScope('validation');
+device.pushErrorScope('out-of-memory');
+device.pushErrorScope('internal');
+
+// 绘制操作...
+
+// 弹出错误范围
+device.popErrorScope().then(error => {
+    if (error) {
+        console.error('捕获到GPU错误:', error);
     }
 });
 ```
 
-WebGPU 计算管线为 Web 平台带来了前所未有的通用计算能力，使得复杂的科学计算、机器学习推理、实时物理模拟等应用能够在浏览器中高效运行，开启了 Web 高性能计算的新时代。
+### 调试标签
+
+```javascript
+// 为对象添加调试标签
+const buffer = device.createBuffer({
+    label: '顶点缓冲区',
+    size: 1024,
+    usage: GPUBufferUsage.VERTEX
+});
+
+const commandEncoder = device.createCommandEncoder({ label: '主命令编码器' });
+commandEncoder.pushDebugGroup('渲染三角形');
+// 渲染命令...
+commandEncoder.popDebugGroup();
+```
+
+## 性能最佳实践
+
+### 资源管理
+
+```javascript
+// 资源池管理
+class ResourcePool {
+    constructor(device) {
+        this.device = device;
+        this.buffers = new Set();
+        this.textures = new Set();
+    }
+    
+    createBuffer(descriptor) {
+        const buffer = this.device.createBuffer(descriptor);
+        this.buffers.add(buffer);
+        return buffer;
+    }
+    
+    destroyBuffer(buffer) {
+        if (this.buffers.has(buffer)) {
+            buffer.destroy();
+            this.buffers.delete(buffer);
+        }
+    }
+    
+    // 类似的纹理管理方法...
+}
+
+// 使用资源池
+const resourcePool = new ResourcePool(device);
+const tempBuffer = resourcePool.createBuffer({
+    size: 1024,
+    usage: GPUBufferUsage.UNIFORM,
+    mappedAtCreation: true
+});
+```
+
+### 管线状态重用
+
+```javascript
+// 管线缓存
+class PipelineCache {
+    constructor(device) {
+        this.device = device;
+        this.renderPipelines = new Map();
+        this.computePipelines = new Map();
+    }
+    
+    getRenderPipeline(key, descriptor) {
+        if (!this.renderPipelines.has(key)) {
+            this.renderPipelines.set(key, this.device.createRenderPipeline(descriptor));
+        }
+        return this.renderPipelines.get(key);
+    }
+    
+    getComputePipeline(key, descriptor) {
+        if (!this.computePipelines.has(key)) {
+            this.computePipelines.set(key, this.device.createComputePipeline(descriptor));
+        }
+        return this.computePipelines.get(key);
+    }
+}
+```
+
+WebGPU API 通过其现代化的设计、显式的资源控制和高效的命令执行机制，为 Web 平台带来了前所未有的图形和计算性能。虽然学习曲线相对陡峭，但其清晰的架构和强大的能力使其成为下一代 Web 图形和计算应用的理想选择。
