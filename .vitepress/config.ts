@@ -416,7 +416,6 @@ export const sidebar: ThemeConfig['sidebar'] = {
         { text: 'ArrayBuffer', link: '/basic/es6/arraybuffer' },
         { text: '最新提案', link: '/basic/es6/proposals' },
         { text: 'SIMD', link: '/basic/es6/simd' },
-        { text: '参考链接', link: '/basic/es6/reference' },
         { text: '装饰器', link: '/basic/es6/decorator' },
       ],
     },
