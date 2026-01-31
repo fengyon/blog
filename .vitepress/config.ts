@@ -1806,14 +1806,6 @@ export default defineConfigWithTheme<ThemeConfig>({
         content: 'https://hookall.pages.dev/logo.svg',
       },
     ],
-    isProd && [
-      'script',
-      {
-        defer: '',
-        src: 'https://static.cloudflareinsights.com/beacon.min.js',
-        'data-cf-beacon': '{"token": "e8fc654435194636b86a9910ac4e1335"}',
-      },
-    ],
     isProd && inlineScript('clarity-analytics.js'),
   ].filter(Boolean) as HeadConfig[],
 
